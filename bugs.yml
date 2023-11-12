@@ -1,0 +1,142 @@
+1  - : add process info to kivy app, like (ram usage ...)
+2  - : cursor goes to the beginning on update
+3  - : on close tab also close the kv app thread
+4  - : the editor is not multiline
+5  * : run kv app in the same window as text editor
+6  - : in inspector implement search
+7  - : create a small widget like tooltip that represents search and follows cursor around the windows
+8  - : add cancel button to exit dialog
+9: implement char unicode styling factor in editor
+10 - : on close app the dialog keep showing even if no tab open
+11 - : using regex and os walk, go throw a kivy lib and collect all properties
+12 - : on property key changed it adds new property, so when item entered delete the old prop
+13 - : implement remove properties and imports
+14 - : add and remove classes
+15 - : import are not editable
+16 - : change tab doesnt update inspector
+17 * : non-ascii chars like arabic ruin the lexer
+18 - : wierd behaviour when adding nested classes
+19 - : combo has dark menu background
+20 - : search not itmplemented yet
+21 - : lexer digit doesnt accept (, + - / * . % ] } [ { ^)
+22 * : add [move-up] and [move-down] to inspector
+23 * : add measure to kivy window
+24 * : change the monitor bars when it reaches the critical loading
+25 - : multi-processing has same id
+26 * : try to set normal editor selection transparent and use paint instead from terminal **********
+27 - : add autocompelete to kivy
+28 - : implement settings editor as tab
+29 * : add console as dock widget
+30 - : add docks view setter
+31 * : comments are ignored
+32 * : parse exception and highlight errors in lines
+33 * : kivy parser does not load events
+34 - : edit imports and set and add \s*
+35 - : some properties actually are classes (Color)
+36 - : custom classes are not loaded
+37: remember last element when update
+38 * : get icons for properties (string, number ...)
+39 - : make autocmpeltion as plugin that could be added later
+40 - : find a method to implement plugins
+41: multiline doesnt apply on lexer
+42 - : add in main window plugins tabs
+43 * : make plugin builder that it takes a package and build it to qrc
+44 - : scroll file dialog path bar
+45 - : impelement custom check in file-dialog
+46 * : editor has multi-selection on-open
+47 * : catch thread output into widget
+48 - : try to move editor actions to main actions
+49 - : extend probelms to be tabbed (output, problems)
+50 - : terminal closable but tab no
+51 - : add opened process and main close it on exit
+52 * : try to access xterm exe and use it alone
+53 - : check if terminal provider exists if not prompt user
+54 - : move runnig apps to lexers
+55 * : before load lang-support plugin, check (run, FILES)
+56 - : add python path to settings
+57 - : make app scene scrollable
+58 * : custom icon on file dialog .kv
+59 * : add phone template to kivy depend on reso
+60 - : add editor to the lexer like (comment ...)
+61 * : need a way to make plugins have settings
+62 * : file dialog has bug, when user click open twice
+63 - : when close embed tab it doesnt close the process
+64 - : add pip list as plugin
+65 * : add comment button
+66 * : xterm has no copy and paste
+67 - : on run check if terminal dock is not visible set it to
+68 - : add on kivy app exit
+69 - : try qss border double
+70 - : add save to settings editor, check before exit if settings are saved
+71 * : add "go-to" to file dialog
+72 - : add drag and drop to text-editor
+73 * : add dependency installer as setting
+74 * : later at the end add pip packages info and pop-up (optional)
+75 - : get appropriate icons
+76 * : need method to make the application more expandable and more secure
+77: use sqlite instead of qrc
+78 - : use animation on pupups (file_dialog)
+79: create seperate instaler (xterm, python, kvcreator) in c++
+80 - : bug when click exit and cancel and click close editor
+81 - : get icons for classes (root, layouts, items ...)
+82 - : on close import are not cleared
+83: on stringify the double tab props are ruined
+84 - : add kivy required version to lexer
+85 - : string still highlighted inside of kivy comment
+86 - : evaluate props (str, int, bool ...)
+87 - : add underline under errors as feature
+88 - : make some editor features as settings, if user activate it show msg that it will it coast more resources
+89 - : add to settings env settings that will be set when run (autocomplete, load icons, embed window)
+90 - : make inspector editable when the window is embed
+91 - : when error occur in kivy inner app, it closes also editor
+92 - : problem loading text file, remove custom_check
+93 - : update unknown object icon, because it makes tree like custom classes goes under root
+94 - : next to project tree add run-time files (tmp)
+95 - : on edit app it loads over the previous one
+96 - : auto indent when going to new line
+97 * : on run kivy app cloe the text editor
+98 - : it open new tab when I run python app
+99 - : check if the editor opens the same file twice, if it is navigate to it tab
+00 - : when adding item outside of root, insert it as class <>
+01 - : make themes as plugin and create bluish MacOs theme
+02 - : add replace function in find action
+03 * : give settings tabs icons
+04 - : in file dialog stylesheet resets style of msg dialog msg
+05: on open file dialog it gliches with embed window
+06 - : try to access vs code icons and use it in project-tree
+07: create seperate script to restart app
+08: see if it is possible replace bar with icons
+09 - : use icons in dialogs (error, warning, info)
+110 - : when selection and request 'find' load selected text
+111: add jedi intellisense to python
+112: make editor can view images (svg, png ...)
+113 - : fix settings ui (general)
+114 - : add to settings editor font size
+115 * : create super_lang_support.py lexer to support wide range of languages
+116 - : on error add pointer to margins
+117: add .buildozer lexer and file type
+118 - : add main.on every where
+119 - : try to paint over lexer instead of regular selection
+120: using on build settings add external settings
+121 - : override text manipulation in editor and save selected text pos
+122 - : kivy is not monkai, make one single editor theme and other will use it
+123 - : selection using arrows not valid in backward
+124 - : use indicator in Editor.select
+125 - : dialogs is ugly fix it
+126 - : add C, Y and N to dialog
+127 - : functions to add to handler -> goto,
+128 - : custom ctrl+z
+129 - : try to replace default scroller with top level one
+130: when click Shift then go back it deosnt select
+131: add warnings to tabs
+132 - : edit qss of listwidget of file_dialog
+133 * : mimetype in tabs
+134: scrollers arent taking there places
+135: implement renaming in ptree
+136: add ability to create new project
+137: dialog has bugs
+138: create custom lexer for console problems
+139: check qtpyeditor for autocomp
+140: there is a problem in ptree (reopening the same file)
+141: use tokenize method to style kivy and console
+142: add kivy item icons in inspector add-item

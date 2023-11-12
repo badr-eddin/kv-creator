@@ -1,0 +1,4 @@
+************************************************************************************
+re.compile(r"\s+|\w+|\W") <- tokenize text in order to use it in qscintilla lexer
+token_list = [ (token, len(bytearray(token, "utf-8"))) for token in p.findall(text)]
+************************************************************************************
