@@ -126,8 +126,7 @@ class PCreator(QWidget):
         self.open_project(root)
 
     def open_project(self, path):
-        with open(self.main.proc, "w") as file:
-            file.write(path.as_posix())
+        self.main.save_project_path(path)
 
         self.main.showMaximized()
         self.main.load_project(path)

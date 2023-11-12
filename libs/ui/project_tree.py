@@ -12,7 +12,7 @@ class MAction(QAction):
         self.on_click = on_click
         self.args = args
 
-        self.triggered.connect(self.__clicked)
+        self.triggered.connect(self.__clicked)  # Type: ignore
 
     def __clicked(self):
         if self.on_click:
@@ -93,13 +93,12 @@ class Menu(QMenu):
             data = []
 
             for item in self.parent.files_tree.selectedItems() or []:
-                data.append(item)
-                data.append(self.parent.map.get(id(item)))
+                data.append([item, self.parent.map.get(id(item))])
 
             return data
 
         item = self.parent.files_tree.currentItem()
-        return [item, self.parent.map.get(id(item))]
+        return [[item, self.parent.map.get(id(item))]]
 
     def new_folder(self, obj):
         debug("creating new folder ...")
@@ -111,13 +110,22 @@ class Menu(QMenu):
 
     def rename_item(self, obj):
         item = self.get_item_s(obj.get("multi"))
-        typ = "folder" if os.path.isdir(item[1]) else "file"
+        typ = "folder" if os.path.isdir(item[0][1]) else "file"
         debug(f"renaming {typ} ...")
-
+        self.parent.rename(item)
 
     def delete_items(self, obj):
         items = self.get_item_s(obj.get("multi"))
-        debug("deleting items")
+        debug("deleting items ...")
+
+        items = [item[0] for item in items]
+
+        self.parent.delete(items)
+
+    def open_file(self, obj):
+        debug("opening file ...")
+        item = self.get_item_s(obj.get("multi"))
+        self.parent.open_file(item[0][0])
 
 
 class PTree(QDockWidget):
@@ -126,6 +134,8 @@ class PTree(QDockWidget):
 
     FOLDER = 4
     FILE = 8
+    _RENAME = 3
+    _MAKE = 6
 
     def __init__(self, parent, main):
         super(PTree, self).__init__(parent)
@@ -162,6 +172,7 @@ class PTree(QDockWidget):
         self.widget.remove_item.clicked.connect(self.__delete_item)
         self.files_tree.customContextMenuRequested.connect(self._open_item_context_menu)
         self.files_tree.itemChanged.connect(self._item_changed)
+        self.files_tree.currentItemChanged.connect(self._current_item_changed)
 
     def _open_item_context_menu(self, item):
         self.menu.build()
@@ -180,11 +191,11 @@ class PTree(QDockWidget):
     def load_files_at(self, path=None, shf=False):
         self.root_path = path or self.root_path
         path = self.root_path
+
         if os.path.isdir(path):
             self.main.on("project_tree_load", {"path": path})
             self.files_tree.clear()
             self.map.clear()
-            self.widget.show_hf.setChecked(shf)
             self.root = QTreeWidgetItem()
             self.root.setText(0, os.path.basename(path))
             self.root.setIcon(0, QFileIconProvider().icon(QFileInfo(path)))
@@ -218,6 +229,9 @@ class PTree(QDockWidget):
             if os.path.isdir(full):
                 self._recursive_loading(full, item, shf)
 
+    def open_file(self, item):
+        self._item_double_clicked(item)
+
     def _item_double_clicked(self, item):
         path = self.map.get(id(item))
         if not path:
@@ -231,29 +245,52 @@ class PTree(QDockWidget):
     def _item_changed(self, item):
         if (self.item_going_to_change or {}).get(id(item)):
             parent, typ = self.item_going_to_change.get(id(item))
-            if typ == self.FILE:
-                self.__create_file(item.text(0), self.map.get(id(parent)))
+            action = self.item_going_to_change.get("action")
+
+            if action == self._MAKE:
+                if typ == self.FILE:
+                    self.__create_file(item.text(0), self.map.get(id(parent)))
+                else:
+                    self.__create_folder(item.text(0), self.map.get(id(parent)))
             else:
-                self.__create_folder(item.text(0), self.map.get(id(parent)))
+                pre_item, old = self.item_going_to_change.get(id(item))
+                new = os.path.join(os.path.split(old)[0], pre_item.text(0))
+                os.rename(old, new)
+
+                if old == self.root_path:
+                    self.root_path = new
+
+                    self.main.save_project_path(new)
+
+                self.load_files_at()
+
+            self.item_going_to_change = None
+
+    def _current_item_changed(self):
+        if self.item_going_to_change:
+            self.files_tree.closePersistentEditor(self.item_going_to_change.get("item"), 0)
+            self.item_going_to_change = None
 
     def make(self, typ):
         if typ in [self.FILE, self.FOLDER]:
             parent: QTreeWidgetItem = self.files_tree.currentItem()
             if parent:
+                self.files_tree.expandItem(parent)
                 item = QTreeWidgetItem()
                 item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
                 parent.addChild(item)
                 self.files_tree.openPersistentEditor(item, 0)
 
-                self.item_going_to_change = {id(item): [parent, typ]}
+                self.item_going_to_change = {id(item): [parent, typ], "action": self._MAKE, "item": item}
             else:
                 debug("select parent folder first !")
 
-    def rename(self, item=None):
-        item = item or self.files_tree.currentItem()
-
+    def rename(self, item_s=None):
+        item, path = item_s[0][0] or self.files_tree.currentItem(), item_s[0][1]
         if not item:
             return
+
+        self.item_going_to_change = {id(item): [item, path], "action": self._RENAME, "item": item}
 
         self.files_tree.openPersistentEditor(item, 0)
 
@@ -287,8 +324,11 @@ class PTree(QDockWidget):
         else:
             self.main.buttons.get_obj("msg.pop")(f"couldn't create '{inp.text()}', unexpected error occur !")
 
-    def __delete_item(self):
-        items = self.files_tree.selectedItems()
+    def delete(self, items):
+        self.__delete_item(items)
+
+    def __delete_item(self, items=None):
+        items = items or self.files_tree.selectedItems()
 
         for item in items:
             path = self.map.get(id(item))
@@ -296,6 +336,10 @@ class PTree(QDockWidget):
                 continue
 
             if os.path.exists(path):
+                if path == self.root_path:
+                    self.main.buttons.get_obj("msg.pop")("cannot delete project root folder !")
+                    return
+
                 if os.path.isdir(path):
                     if os.listdir(path):
                         inform = self.main.buttons.get_obj("inform")

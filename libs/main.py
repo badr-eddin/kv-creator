@@ -369,6 +369,10 @@ class Creator(QMainWindow):
         if self.menu:
             self.menu.exec(self.cursor().pos())
 
+    def save_project_path(self, path):
+        with open(self.proc, "w") as file:
+            file.write(path.as_posix() if isinstance(path, pathlib.Path) else str(path))
+
     def _co_clicked(self, checked, dock: QDockWidget):
         _ = self
         dock.setVisible(checked)
