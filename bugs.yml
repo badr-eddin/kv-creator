@@ -133,12 +133,13 @@
 133 * : mimetype in tabs
 134 - : scrollers arent taking there places
 135 - : implement renaming in ptree
-136: add ability to create new project
-137: dialog has bugs
+136 - : add ability to create new project as menu action
+137 - : dialog has bugs
 138: create custom lexer for console problems
 139 * : check qtpyeditor for autocomp
 140 - : there is a problem in ptree (reopening the same file)
 141: use tokenize method to style  console
 142 * : add kivy item icons in inspector add-item
 143: add on("context_menu_asked") to editor and create plugin for it
-145: add is_root to ptree context menu and add close project
+145 - : add is_root to ptree context menu and add close project
+146: add git plugin next to settings

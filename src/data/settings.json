@@ -1252,6 +1252,12 @@
                 "multi": false,
                 "icon": "img/style/close.png",
                 "check": "is_root"
+            },
+            "new project": {
+                "callback": "new_project",
+                "multi": false,
+                "icon": "img/editors/actions/add-folder.png",
+                "check": "is_root"
             }
         }
     },
