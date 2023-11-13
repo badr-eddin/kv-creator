@@ -85,6 +85,10 @@ class Menu(QMenu):
                 ps += int(os.path.isfile(k))
         return ps == len(items)
 
+    def is_root(self, item_s):
+        path = self.parent.map.get(id(item_s))
+        return path == self.parent.root_path
+
     def is_single_selection(self, _):
         return len(self.parent.files_tree.selectedItems()) == 1
 

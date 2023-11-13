@@ -43,6 +43,7 @@ class FileDialog(QWidget):
         std = std or main.std
         self.std = std
         self.main = main
+        self.animate = False
         self.pop_anim = QPropertyAnimation(self, b"pos")
         self.widget = std.loadUi(std.import_("plugins/ui/file-dialog.ui"))
         self.creating = False
@@ -111,18 +112,23 @@ class FileDialog(QWidget):
 
     def closeEvent(self, a0):
         if not self._close:
-            self.pop_anim.setEndValue(QPoint(self.x, self.y-self.p_fac))
-            self.pop_anim.setDuration(200)
-            self.pop_anim.start()
-            QTimer().singleShot(1000, self.close)
             self._close = True
-            a0.ignore()
+
+            if self.animate:
+                self.pop_anim.setEndValue(QPoint(self.x, self.y-self.p_fac))
+                self.pop_anim.setDuration(200)
+                self.pop_anim.start()
+                QTimer().singleShot(1000, self.close)
+                a0.ignore()
+            else:
+                self.close()
         else:
             super(FileDialog, self).closeEvent(a0)
             self._close = False
 
     # **********************************************
     def encapsulate(self, path):
+        path = path.as_posix() if isinstance(path, pathlib.Path) else path
         encapsulate = self._data.get("encapsulate")
         if encapsulate:
             path = encapsulate(path)
@@ -130,7 +136,7 @@ class FileDialog(QWidget):
 
     def custom_check(self, path):
         if self._data.get("custom_check"):
-            v = self._data.get("custom_check")(path.as_posix() if type(path) is pathlib.Path else path)
+            v = self._data.get("custom_check")(self.encapsulate(path))
             return path if v else None
         return path
 
@@ -179,14 +185,18 @@ class FileDialog(QWidget):
                         msg = self.main.buttons.get_obj("msg")
                         msg.pop("invalid file name !", 5000)
         else:
-            items = self.files_list.selectedItems()
+            items = self.files_list.selectedItems() or ["$"]
             paths = []
             for item in items:
-                path = os.path.join(self.current_path, item.text())
+                if item != "$":
+                    path = os.path.join(self.current_path, item.text())
+                else:
+                    path = self.current_path
                 if os.path.isdir(path):
-                    k = 1
-                    self.navigate_to(path)
-                    break
+                    if self._data.get("target") == self.Targets.Files:
+                        k = 1
+                        self.navigate_to(path)
+                        break
                 try:
                     path = self.encapsulate(path)
                 except Exception as e:
@@ -322,9 +332,13 @@ class FileDialog(QWidget):
     def show_up(self):
         self.show()
         self.raise_()
-        self.pop_anim.setEndValue(QPoint(self.x, self.y))
-        self.pop_anim.setDuration(200)
-        self.pop_anim.start()
+
+        if self.animate:
+            self.pop_anim.setEndValue(QPoint(self.x, self.y))
+            self.pop_anim.setDuration(200 if self.animate else 0)
+            self.pop_anim.start()
+        else:
+            self.move(QPoint(self.x, self.y))
 
     def create_folder(self):
         if self.creating:

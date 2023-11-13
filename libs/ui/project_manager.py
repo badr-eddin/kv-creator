@@ -118,7 +118,7 @@ class PCreator(QWidget):
         if root.parent.exists() and not root.exists():
             os.mkdir(root)
 
-        kvc = os.path.join(root, ".kvc")
+        kvc = os.path.join(root, settings.pull("#prefs/kvc"))
 
         with open(kvc, "w") as file:
             file.write(toml.dumps(data))
@@ -139,7 +139,7 @@ class PCreator(QWidget):
             self.dialog = self.dialog(main=self.main, std=self.main.std)
             self.dialog.setParent(None)
             self.dialog.open_save_file(
-                # callback=self.open_project,
+                callback=self.open_project,
                 selection=self.dialog.Selection.Single,
                 encapsulate=pathlib.Path,
                 mode=self.dialog.Mode.Open,
@@ -147,8 +147,19 @@ class PCreator(QWidget):
                 custom_check=self._isit_kvc_project
             )
 
-    def _isit_kvc_project(self, path):
-        print("---->", path)
+    def _isit_kvc_project(self, path: pathlib.Path):
+        _ = self
+
+        if not path.is_dir():
+            return False
+
+        k = settings.pull("#prefs/kvc")
+        x = k in os.listdir(path)
+
+        if not x:
+            debug(f"not kivy project, open valid project or create new one ! probably '{k}' is missing .", _c="w")
+
+        return x
 
     def _get_perms(self):
         li: QTreeWidget = self.widget.perms

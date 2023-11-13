@@ -1,3 +1,4 @@
+import keyword
 import os.path
 import re
 import string
@@ -76,6 +77,15 @@ if __name__ == "__main__":
 """
 
 
+class _settings:
+    string = False
+    comment = False
+
+    class FLAGS:
+        dead = None
+        kill = 2
+
+
 class KivyLexer(QsciLexerCustom):
     styles = {
         'default': 0,
@@ -98,6 +108,8 @@ class KivyLexer(QsciLexerCustom):
         std = std or main.std
         self.std = std
         self.main = main
+        self.factor = 0
+        self.settings = _settings
         self.parent = parent
         self.aliases = []
         self.errors = []
@@ -145,9 +157,9 @@ class KivyLexer(QsciLexerCustom):
 
     def _style_classes_and_props(self, text):
         classes_pattern = re.compile(r"^\s*(?P<class>\w+)\s*:\s*(?=\s*$)",
-                                     flags=re.MULTILINE)
+                                     flags=re.MULTILINE | re.UNICODE)
         props_pattern = re.compile(r"^\s*(?P<property>\w+)\s*:(?P<value>.+?)(?=\s*(?:\w+\s*:\s*|$))",
-                                   flags=re.MULTILINE)
+                                   flags=re.MULTILINE | re.UNICODE)
 
         self._style_it("property", "prop", self.props, props_pattern, text)
         self._style_it("class", "class", self.classes, classes_pattern, text)
@@ -156,7 +168,7 @@ class KivyLexer(QsciLexerCustom):
         aliases_pattern = re.compile(
             r"^#:(?P<import>import)\s+(?P<alias>\w+)\s+(?P<src>[.\w'\"]+)\s*$|"
             r"^#:(?P<set>set)\s+(?P<var>\w+)\s+(?P<value>['\"]*(.*?)['\"]*)\s*$",
-            re.MULTILINE)
+            re.MULTILINE | re.UNICODE)
 
         aliases = []
         iterator = aliases_pattern.finditer(text)
@@ -187,7 +199,7 @@ class KivyLexer(QsciLexerCustom):
 
     def _style_digits(self, text):
         digit_pattern = re.compile(r"(?<![a-zA-Z0-9_.])(?P<float>[+-]?(\d+\.\d*|\.\d+))(?![a-zA-Z0-9_])|"
-                                   r"(?<![a-zA-Z0-9_.])(?P<int>[+-]?\d+)(?![a-zA-Z0-9_])", re.MULTILINE)
+                                   r"(?<![a-zA-Z0-9_.])(?P<int>[+-]?\d+)(?![a-zA-Z0-9_])", re.MULTILINE | re.UNICODE)
         for dgt in digit_pattern.finditer(text):
             group = "int" if dgt.group("int") else "float"
             self.startStyling(dgt.start(group))
@@ -195,7 +207,7 @@ class KivyLexer(QsciLexerCustom):
 
     def _style_comments_and_imports(self, text):
         # Comments
-        comments_pattern = re.compile(r"#\s*.*?$", re.MULTILINE)
+        comments_pattern = re.compile(r"#\s*.*?$", re.MULTILINE | re.UNICODE)
         for cmt in comments_pattern.finditer(text):
             self.startStyling(cmt.start())
             self.setStyling(len(cmt.group(0)), self.styles.get("comment"))
@@ -204,7 +216,7 @@ class KivyLexer(QsciLexerCustom):
         ims_pattern = re.compile(
             r"\s*#\s*:\s*(?P<import>import)\s+(?P<alias>\w+)\s+(?P<src>[.\w'\"]+)\s*$|"
             r"\s*#\s*:\s*(?P<set>set)\s+(?P<var>\w+)\s+(?P<value>['\"]*(.*?)['\"]*)\s*$",
-            re.MULTILINE)
+            re.MULTILINE | re.UNICODE)
 
         for cmt in ims_pattern.finditer(text):
             group = "import" if cmt.group("import") else "set"
@@ -233,12 +245,12 @@ class KivyLexer(QsciLexerCustom):
                     self.setStyling(len(value), self.styles.get("keywords"))
 
                 else:
-                    if re.match(r"'.*?'\s*$|\".*?\"\s*$", value, re.MULTILINE):
+                    if re.match(r"'.*?'\s*$|\".*?\"\s*$", value, re.MULTILINE | re.UNICODE):
                         self.setStyling(len(value or ""), self.styles.get("string"))
                     else:
                         self.setStyling(len(value or ""), self.styles.get("error"))
 
-        kvv_pattern = re.compile(r"\s*#\s*:\s*(?P<kivy>kivy)\s+(?P<version>.*)$", re.MULTILINE)
+        kvv_pattern = re.compile(r"\s*#\s*:\s*(?P<kivy>kivy)\s+(?P<version>.*)$", re.MULTILINE | re.UNICODE)
 
         for v in kvv_pattern.finditer(text):
             self.startStyling(v.start("kivy"))
@@ -255,7 +267,7 @@ class KivyLexer(QsciLexerCustom):
         self.editor().update()
 
     def _style_quote(self, text):
-        line_pattern = re.compile(r'^\s*\w+\s*:\s*.*?(?=\n|$)', re.MULTILINE)
+        line_pattern = re.compile(r'^\s*\w+\s*:\s*.*?(?=\n|$)', re.MULTILINE | re.UNICODE)
         line_matches = line_pattern.finditer(text)
 
         for line_match in line_matches:
@@ -279,11 +291,12 @@ class KivyLexer(QsciLexerCustom):
     def description(self, *_):
         return "KivyLexer"
 
-    def styleText(self, start=0, end=0):
+    def styleText(self, start, end):
         path = getattr(self.editor(), "path")
+        self.startStyling(start)
+
         if not path or str(path).endswith(".kv"):
             text = self.editor().text()
-
             self._style_keywords(text)
 
             self._style_digits(text)

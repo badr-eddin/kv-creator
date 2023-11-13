@@ -71,10 +71,13 @@ class scroller(QScrollBar):
         self.__timer.singleShot(200, self._setup)
 
     def _setup(self):
+        self.target.resizeEvent = lambda _: self._restore()
+
         self.valueChanged.connect(self._on_scroll)
         self.target.verticalScrollBar().valueChanged.connect(self._tar_scroll)
         self.target.verticalScrollBar().rangeChanged.connect(self._range_fy)
         self.__timer.singleShot(20, self._restore)
+        self.__timer.singleShot(2000, self._restore)
         self.main.on_resize(self._restore)
 
     def _range_fy(self):
@@ -94,3 +97,7 @@ class scroller(QScrollBar):
 
     def _tar_scroll(self, value):
         self.setValue(value)
+
+
+def resize_event(tar: QWidget, callback):
+    tar.resizeEvent = lambda _: callback()

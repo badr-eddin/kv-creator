@@ -2,3 +2,37 @@
 re.compile(r"\s+|\w+|\W") <- tokenize text in order to use it in qscintilla lexer
 token_list = [ (token, len(bytearray(token, "utf-8"))) for token in p.findall(text)]
 ************************************************************************************
+[start:end]
+
+            splitter = re.compile(r"(\{\.|\.\}|\#|\'\'\'|\"\"\"|\n|\s+|\w+|\W)")
+            tokens = [(token, len(token)) for token in splitter.findall(text)]
+
+            for token, length in tokens:
+                if not length:
+                    continue
+
+                if token in ('"', "'"):
+                    if self.settings.string == token:
+                        self.settings.string = self.settings.FLAGS.kill
+                    else:
+                        self.settings.string = token
+
+                if token == "#":
+                    self.settings.comment = True
+
+                if token == "\n":
+                    self.settings.comment = False
+
+                if self.settings.string:
+                    if self.settings.string == self.settings.FLAGS.kill:
+                        self.settings.string = self.settings.FLAGS.dead
+
+                    self.setStyling(length, self.styles.get("string"))
+
+                else:
+                    self.setStyling(length, self.styles.get("default"))
+
+                # if self.settings.comment:
+                #     self.setStyling(length, self.styles.get("comment"))
+
+************************************************************************************
