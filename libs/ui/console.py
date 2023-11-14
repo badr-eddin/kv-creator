@@ -1,6 +1,6 @@
 import re
 import xdo
-
+from PyQt6.Qsci import QsciScintilla, QsciLexerCustom
 from ..utils import *
 
 
@@ -11,50 +11,62 @@ class Console(QDockWidget):
     def __init__(self, parent, main):
         super(Console, self).__init__(parent)
         self.main = main
-        self.lines = []
+        self.lines = {}
+        self.icons = {
+            "warning": QIcon(import_("img/dialog/warning.png")),
+            "refactor": QIcon(import_("img/dialog/warning.png")),
+            "convention": QIcon(import_("img/dialog/warning.png")),
+            "fatal": QIcon(import_("img/dialog/error.png")),
+            "error": QIcon(import_("img/dialog/error.png")),
+        }
         self.terminals = []
         self.widget = loadUi(import_("ui/problems.ui"))
-        self.problems: QTextBrowser = self.widget.problems
         self.tabs: QTabWidget = self.widget.tabs
+        self.problems: QTreeWidget = self.widget.problems
         self.setVisible(False)
 
     def initialize(self, _p=None):
         self.main.dock_it(self, "ba")
-        self.setWindowTitle("Problems And Output")
+        self.setWindowTitle("Problems And Outputs")
         self.setWidget(self.widget)
-        self.problems.setStyleSheet("background: transparent; border: none; font-size: 15px;")
-        self.problems.cursorPositionChanged.connect(self._cursor_moved)  # Type: ignore
+        self.problems.itemDoubleClicked.connect(self._item_double_clicked)
 
-    def _cursor_moved(self):
-        pos = self.problems.textCursor().position()
-        text = self.problems.toPlainText()
+    def report(self, messages: [str]):
+        self.done()
 
-        for k in re.finditer(r"line\s+(?P<line>\d+)\s*", text):
-            if pos+1 in range(k.start(), k.end()):
-                current = self.main.buttons.get_obj("editor.widget").currentWidget()
-                if hasattr(current, "editor"):
-                    line = int(k.group("line"))-1
-                    current.setCursorPosition(line, 0)
-                    current.setFocus()
-                    # current.setSelection(line, 0, line, len(current.text().splitlines()[line]))
+        for message in messages:
+            if message.get("type") not in self.icons:
+                continue
 
-    def _style(self, c, o="first"):
-        s = "QTabBar::tab:%s{color: %s;}" % (o, c)
-        self.widget.tabs.setStyleSheet(s)
+            item = QTreeWidgetItem()
 
-    def report(self, msg: str):
-        msg = f"<span style='color:#FF3333'>{msg}</span>"
-        k = re.findall(r"line\s+\d+\s*", msg)
-        if k:
-            msg = msg.replace(k[0], f"<a style='text-decoration:underline'>{k[0]}</a>")
+            item.setText(0, message.get("message"))
+            item.setIcon(0, self.icons.get(message.get("type")) or QIcon())
 
-        self.problems.setText(msg.replace("\n", "<br>"))
-        self._style("#FF3333")
-        self.main.on("report_error", {"msg": msg})
+            self.lines.update({id(item): message})
+            self.problems.addTopLevelItem(item)
+
+        self.main.on("report_error", {"msg": messages})
+
+    def _item_double_clicked(self, item):
+        msg = self.lines.get(id(item))
+        if not msg:
+            return
+
+        editor = self.main.buttons.get_obj("editor.widget").currentWidget()
+
+        if not isinstance(editor, QsciScintilla):
+            return
+
+        line = msg.get("line") - 1
+        index = msg.get("column")
+
+        editor.setFocus()
+        editor.setCursorPosition(max(line or 0, 0), index or 0)
 
     def done(self):
-        self.problems.setText("<span style='color:#33FF33'>CLEAN</span>")
-        self._style("white")
+        self.lines.clear()
+        self.problems.clear()
 
     def add_terminal(self, title=None, **kwargs):
         title = title if isinstance(title, str) else "Terminal"

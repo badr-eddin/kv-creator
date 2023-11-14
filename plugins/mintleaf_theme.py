@@ -85,17 +85,17 @@ QPushButton:pressed {
     color: "$MAIN";
 }
 QComboBox{
-	border: none;
-	padding: 0px 4px;
+    border: none;
+    padding: 0px 4px;
     background: "$WIDGET-2";
-	border-radius: 2px;
-	padding-right: 10px;
+    border-radius: 2px;
+    padding-right: 10px;
 }
 QComboBox:hover{
-	padding: 0px 4px;
-	border-radius: 2px;
-	border: none;
-	background: "$WIDGET-2-H";
+    padding: 0px 4px;
+    border-radius: 2px;
+    border: none;
+    background: "$WIDGET-2-H";
 }
 QMenu {
     background: "$WIDGET-1";
@@ -104,33 +104,33 @@ QComboBox::indicator:checked,
 QComboBox::indicator:checked:editable,
 QMenu::indicator:checked,
 QComboBox::indicator:checked:editable{
-	width: 16px;
+    width: 16px;
     height: 16px;
     padding-left: 5px;
-	image: url($/img/style/check-icon.svg);
+    image: url($/img/style/check-icon.svg);
 }
 QComboBox::drop-down,
 QComboBox::drop-down:editable{
-	border: none;
-	padding-right: 0px;
+    border: none;
+    padding-right: 0px;
     padding-right: 10px;
 }
 QComboBox::down-arrow,
 QComboBox::down-arrow:editable{
-	image: url($/img/style/arrow-down.svg);
-	width: 16px;
+    image: url($/img/style/arrow-down.svg);
+    width: 16px;
     height: 16px;
 }
 QComboBox::down-arrow:disabled,
 QComboBox::down-arrow:disabled:editable{
-	image: url($/img/style/arrow-down.svg);
+    image: url($/img/style/arrow-down.svg);
 }
 QCompleter::item:selected,
 QComboBox::item:selected,
 QComboBox::item:selected:editable{
-	border: none;
-	background: "$MAIN";
-	color: black;
+    border: none;
+    background: "$MAIN";
+    color: black;
 }
 QComboBox::item{
     min-height: 25px;
@@ -269,9 +269,9 @@ QToolTip {
 QProgressBar {
     background: "$BACKGROUND";
     border-radius: 2px;
-	padding: 1px;
-	min-width: 50px;
-	text-align: center;
+    padding: 1px;
+    min-width: 50px;
+    text-align: center;
 }
 QProgressBar::chunk{
     width: 10px;
@@ -281,18 +281,18 @@ QScrollBar:horizontal {
     border: none;
     background: transparent;
     height: 13px;
-	border-radius: 2px;
+    border-radius: 2px;
     padding: 1px;
 }
 QScrollBar::handle:horizontal {
     background: "$BACKGROUND";
-	border-radius: 2px;
-	width: 20px;
+    border-radius: 2px;
+    width: 20px;
 }
 QScrollBar::handle:horizontal:hover {
     background: #333;
-	border-radius: 2px;
-	width: 20px;
+    border-radius: 2px;
+    width: 20px;
 }
 QScrollBar::add-line:horizontal {
     border: none;
@@ -310,9 +310,9 @@ QScrollBar:vertical {
     border: none;
     background: transparent;
     width: 13px;
-	border-radius: 2px;
-	padding: 1px;
-	padding-left: 3px;
+    border-radius: 2px;
+    padding: 1px;
+    padding-left: 3px;
 }
 QScrollBar::handle:vertical {
     background: #333;
@@ -338,17 +338,19 @@ QProgressBar::chunk {
     height: 20px;
 }
 QsciScintilla > QListWidget {
-    background: #080808;
-    border: 1px solid "$BACKGROUND";
+    background: "$BACKGROUND";
+    border: 1px solid #252525;
     border-radius: 1px;
     font-size: 14px;
-    padding: none;
+    min-width: 300px;
+    padding: 0px 5px;
+    margin: 0;
 }
 QsciScintilla > QListWidget::item{
-    border: none;
+    border: 1px solid transparent;
     background: transparent;
-    min-width: 300px;
     color: "$FOREGROUND";
+    margin: 0;
 }
 QsciScintilla QListWidget QScrollBar:vertical{
     width: 0px;
@@ -356,46 +358,10 @@ QsciScintilla QListWidget QScrollBar:vertical{
 QsciScintilla > QListWidget::item:selected{
     border: none;
     outline: none;
-    background: rgba(255, 255, 255, 150);
-    color: black;
+    background: rgba(255, 255, 255, 20);
 }
-QMenuBar {
-	background-color: #151a1e;
-}
-QMenuBar::item {
-	color: #d3dae3;
-  	spacing: 3px;
-  	padding: 1px 4px;
-	background-color: #151a1e;
-}
-QMenuBar::item:selected {
-  	background-color: #252a2e;
-	color: #FFFFFF;
-}
-#container{
-    border: 1px solid #191c1f;
-}
-QMenu{
-	background: #101010;
-	border: 1px solid #333;
-	margin: 0px;
-	padding: 1px;
-}
-QMenu::separator{
-	margin: 0px 0;
-	height: 1px;
-	background: #333;
-}
-QMenu::item{
-	padding: 4px;
-}
-QMenu::item:selected{
-	background: "$MAIN";
-}
-QMenu::icon{
-	padding-left: 10px;
-	width: 14px;
-	height: 14px;
+QsciScintilla > QListWidget:focus{
+    outline: none;
 }
 QScrollArea {
     background: transparent;
@@ -405,12 +371,12 @@ QWidget[type="container"]{
     background: #020202;
 }
 QSpinBox::up-button, QDateTimeEdit::up-button, QDoubleSpinBox::up-button  {
-	padding: 0px;
-	background: transparent;
+    padding: 0px;
+    background: transparent;
 }
 QSpinBox::down-button, QDateTimeEdit::down-button, QDoubleSpinBox::down-button {
-	padding: 0px;
-	background: transparent;
+    padding: 0px;
+    background: transparent;
 }
 QSpinBox::down-arrow, QDateTimeEdit::down-arrow, QDoubleSpinBox::down-arrow {
     image: url($/img/style/arrow-down.svg);
@@ -427,44 +393,44 @@ QSpinBox::up-arrow, QDateTimeEdit::up-arrow, QDoubleSpinBox::up-arrow {
 QAbstractSpinBox,
 QDoubleSpinBox,
 QDateTimeEdit{
-	border: none;
-	padding: 0px 4px;
-	background-color: "109";
-	border-radius: 2px;
-	padding-right: 10px;
+    border: none;
+    padding: 0px 4px;
+    background-color: "109";
+    border-radius: 2px;
+    padding-right: 10px;
 }
 
 QAbstractSpinBox:hover,
 QDoubleSpinBox:hover{
-	padding: 0px 4px;
-	border-radius: 2px;
-	border: none;
-	background: "$WIDGET-2-H";
+    padding: 0px 4px;
+    border-radius: 2px;
+    border: none;
+    background: "$WIDGET-2-H";
 }
 QAbstractSpinBox,
 QDoubleSpinBox,
 QDateTimeEdit{
-	border: none;
-	padding: 0px 4px;
+    border: none;
+    padding: 0px 4px;
     background: "$WIDGET-2";
-	border-radius: 2px;
-	padding-right: 10px;
+    border-radius: 2px;
+    padding-right: 10px;
 }
 
 QAbstractSpinBox:hover,
 QDoubleSpinBox:hover{
-	padding: 0px 4px;
-	border-radius: 2px;
-	border: none;
-	background: "$WIDGET-2-H";
+    padding: 0px 4px;
+    border-radius: 2px;
+    border: none;
+    background: "$WIDGET-2-H";
 }
 
 QAbstractSpinBox:focus,
 QDoubleSpinBox:focus
 {
-	border: 0px solid "$MAIN";
-	border-radius: 2px;
-	padding: 0px 4px;
+    border: 0px solid "$MAIN";
+    border-radius: 2px;
+    padding: 0px 4px;
 }
 QWidget[type="view"]::item{
     background: transparent;
@@ -497,6 +463,7 @@ class MintLeaf:
         "$MAIN": colors.get("primary_c"),
         "$WIDGET-1": colors.get("head_c"),
         "$BACKGROUND": colors.get("background_c"),
+        "$BORDER": colors.get("border_c"),
         "$WIDGET-2": "#0D1117",
         "$WIDGET-2-H": "#13181E",
         "$FONT": "Ubuntu Mono",
@@ -504,7 +471,7 @@ class MintLeaf:
         "$FOREGROUND": "#FFFFFF",
         "$SELECTION-COLOR": "#000000"
     }
-    
+
     name = "Mint Leaf"
 
     def load(self):

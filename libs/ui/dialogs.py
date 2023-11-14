@@ -149,7 +149,7 @@ class InformUser(Dialog):
 
         self.setParent(dis.parent() if dis else None)
 
-        self.eno.setEnabled(False)
+        # self.eno.setEnabled(False)
         if self.sts_icons.get(sts):
             self.widget.icon.setIcon(self.sts_icons.get(sts))
         else:

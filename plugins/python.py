@@ -1,22 +1,119 @@
-import keyword
+import json
 import os
 import pathlib
 import re
 import sys
 import tempfile
-
-from PyQt6.QtGui import QAction
-from PyQt6.QtWidgets import QMenu
-from flake8.api import legacy
+from io import StringIO
 
 from PyQt6.Qsci import QsciLexerPython, QsciAPIs, QsciScintilla as _Qsci
+from PyQt6.QtCore import QThread
 from jedi import Script
+from pylint import lint
+
+
+class _PythonAutoCompleter(QThread):
+    def __init__(self, file_path, api):
+        super(_PythonAutoCompleter, self).__init__(None)
+        self.file_path = file_path
+        self.script = None
+        self.api: QsciAPIs = api
+        self.completions = None
+
+        self.line = 0
+        self.index = 0
+        self.text = ""
+
+    def run(self):
+        try:
+            self.script = Script(self.text, path=self.file_path)
+            self.completions = self.script.complete(self.line, self.index)
+            self.load_autocomplete(self.completions)
+        except Exception as err:
+            _ = err
+
+        self.finished.emit()
+
+    def load_autocomplete(self, completions):
+        self.api.clear()
+        [self.api.add(i.name) for i in completions]
+        self.api.prepare()
+
+    def get_completions(self, line: int, index: int, text: str):
+        self.line = line
+        self.index = index
+        self.text = text
+        self.start()
+
+
+class _PythonAnalyzer(QThread):
+    def __init__(self, code, path, main):
+        super(_PythonAnalyzer, self).__init__(None)
+        self.text = ""
+        self.main = main
+        self.path = pathlib.Path("")
+        self.__callback = None
+
+        self.save(code, path)
+
+    def save(self, text, path):
+        tmp = pathlib.Path(os.path.join(os.getenv("tmp"), os.path.basename(path)))
+        if tmp.exists():
+            os.remove(tmp)
+
+        self.path = tmp
+        self.text = text
+
+        with open(tmp, "w") as f:
+            f.write(text)
+
+    def run(self):
+        try:
+            if self.path.exists():
+
+                # override stdout in order to catch the output
+                stdout = sys.stdout
+                sys.stdout = StringIO()
+
+                lint.Run([self.path.as_posix(), '--output-format', "json"], exit=False)
+                inspections = sys.stdout.getvalue()
+                sys.stdout.close()
+                sys.stdout = stdout
+
+                inspections = json.loads(inspections)
+
+                if self.__callback:
+                    self.__callback(inspections)
+
+                self.parse_and_report(inspections)
+                self.finished.emit()
+        except Exception as e:
+            self.main.std.debug(f"analyze: {e}")
+
+    def parse_and_report(self, jss):
+        self.main.buttons.get_obj("console.report")(jss)
+
+    def set_callback(self, cb):
+        if not callable(cb):
+            self.main.std.debug(f"callback ({cb}) is not callable")
+            return
+
+        self.__callback = cb
+
+    def inspect(self, code, path, cb=None):
+        self.save(code, path)
+        self.set_callback(cb)
+        self.run()
 
 
 class PythonLexer(QsciLexerPython):
     FILES = [".py"]
-    FUNCTIONS = ["on_editor_text_changed", "on_editor_tab_created", "on_tab_changed"]
+    FUNCTIONS = ["on_editor_text_changed", "on_editor_tab_created", "on_tab_changed", "on_cursor_moved",
+                 "on_asked_for_completion"]
     COMMENT = "#"
+
+    auto_completer = None
+    analyzer = None
 
     def __init__(self, parent, main, std=None):
         super(PythonLexer, self).__init__(parent)
@@ -25,6 +122,7 @@ class PythonLexer(QsciLexerPython):
         self.main = main
         self.parent = parent
         self.api = None
+        self.analyzer = _PythonAnalyzer(parent.text(), parent.path, self.main)
 
         self.setDefaultPaper(std.theme("background_c"))
         self.setDefaultColor(std.theme("foreground_c"))
@@ -57,24 +155,15 @@ class PythonLexer(QsciLexerPython):
         self.setFoldComments(True)
         self.setFoldCompact(True)
 
-    def config_auto_complete(self, words=keyword.kwlist):
-        api = QsciAPIs(self)
+    def config_auto_complete(self, *_):
+        self.api = QsciAPIs(self)
 
-        for i in words:
-            api.add(i)
-
-        for i in api.installedAPIFiles():
-            api.load(i)
-
-        api.prepare()
+        self.auto_completer = _PythonAutoCompleter(self.parent.path, self.api)
 
         self.parent.setAutoCompletionCaseSensitivity(False)
         self.parent.setAutoCompletionReplaceWord(True)
         self.parent.setAutoCompletionThreshold(1)
-        self.parent.setAutoCompletionSource(self.parent.AutoCompletionSource.AcsAll)
-        setattr(self.parent, "api", api)
-        self.api = api
-        self.parent.api = api
+        self.parent.setAutoCompletionSource(self.parent.AutoCompletionSource.AcsAPIs)
 
     def run(self, callback=None):
         path = getattr(self.editor(), "path")
@@ -108,6 +197,18 @@ class PythonLexer(QsciLexerPython):
         return "\n".join(text_s)
 
     @staticmethod
+    def on_asked_for_completion(kwargs):
+        kwargs = kwargs or {}
+        kwargs.update({"ignore_analyze": True})
+        PythonLexer.reload(kwargs)
+
+    @staticmethod
+    def on_cursor_moved(kwargs):
+        kwargs = kwargs or {}
+        kwargs.update({"ignore_analyze": True})
+        PythonLexer.reload(kwargs)
+
+    @staticmethod
     def on_tab_changed(kwargs):
         PythonLexer.reload(kwargs)
 
@@ -123,72 +224,38 @@ class PythonLexer(QsciLexerPython):
             PythonLexer.on_editor_text_changed(kwargs)
 
     @staticmethod
-    def complete(code, line, column, path):
-        ret_val = []
-        try:
-            script = Script(code, path=path)
-            completions = script.complete(line + 1, column)
-        except (RuntimeError, TypeError, AttributeError):
-            completions = []
-
-        for comp in completions:
-            ret_val.append(f"{comp.name} ({comp.description})")
-
-        return ret_val
+    def complete(code, line, column, comp: _PythonAutoCompleter | None):
+        if comp:
+            comp.get_completions(line, column, code)
 
     @staticmethod
     def on_editor_text_changed(kwargs):
+        if not kwargs:
+            return
+
         editor = kwargs.get("editor")
 
         if not editor:
             return
 
-        if not isinstance(editor.lexer(), PythonLexer):
+        self: PythonLexer = editor.lexer()
+
+        if not isinstance(self, PythonLexer):
             return
 
         analyse = editor.main.std.settings.pull("user-prefs/code-analyse")
         complete = editor.main.std.settings.pull("user-prefs/autocomplete")
-        menu: QMenu = editor.auto_m
 
-        if hasattr(editor, "api"):
-            words = PythonLexer.complete(editor.text(), *editor.getCursorPosition(), editor.path)
-            editor.api.clear()
+        if analyse and not kwargs.get("ignore_analyze"):
+            self.analyzer.inspect(editor.text(), editor.path)
 
-            for word in words:
-                editor.api.add(word)
-            editor.api.prepare()
-
-            editor.lexer().setAPIs(editor.api)
-            # editor.complete_with(words)
-
-        else:
-            menu.close()
-
-        tmp = pathlib.Path(os.path.join(os.getenv("tmp"), "pytmp.py"))
-        tmp.write_text(editor.text())
-
-        if analyse:
-            checker = legacy.get_style_guide(quiet=True)
-
-            old_stdout = sys.stdout
-
-            sys.stdout = open(os.devnull, 'w')
-
-            vio = checker.input_file(tmp.as_posix())
-
-            sys.stdout = old_stdout
-
-            if not vio.total_errors:
-                editor.main.buttons.get_obj("console.done")()
-                return
- 
-            msg = vio.get_statistics("E")
-            msg += vio.get_statistics("W")
-            msg += vio.get_statistics("F")
-            msg += vio.get_statistics("C")
-
-            msg = "\n".join(msg)
-            editor.main.buttons.get_obj("console.report")(msg)
+        if complete:
+            if hasattr(self, "auto_completer"):
+                pos = editor.getCursorPosition()
+                auto: _PythonAutoCompleter = getattr(self, "auto_completer")
+                PythonLexer.complete(
+                    editor.text(), pos[0]+1, pos[1], auto
+                )
 
 
 CLASS = PythonLexer

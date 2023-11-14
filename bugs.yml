@@ -128,18 +128,21 @@
 128 - : custom ctrl+z
 129 - : try to replace default scroller with top level one
 130: when click Shift then go back it deosnt select
-131: add warnings to tabs
+131 * : add warnings to tabs
 132 - : edit qss of listwidget of file_dialog
 133 * : mimetype in tabs
 134 - : scrollers arent taking there places
 135 - : implement renaming in ptree
 136 - : add ability to create new project as menu action
 137 - : dialog has bugs
-138: create custom lexer for console problems
+138 * : create custom lexer for console problems
 139 * : check qtpyeditor for autocomp
 140 - : there is a problem in ptree (reopening the same file)
-141: use tokenize method to style  console
+141 * : use tokenize method to style  console
 142 * : add kivy item icons in inspector add-item
 143: add on("context_menu_asked") to editor and create plugin for it
 145 - : add is_root to ptree context menu and add close project
 146: add git plugin next to settings
+147: add refactor code
+148: when close unsaved tab it doesnt remove it from regiter
+149: create custom autocompleter for kivy

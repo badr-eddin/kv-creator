@@ -96,7 +96,7 @@ class Editor(QsciScintilla):
         self.setFrameStyle(QFrame.Shape.NoFrame)
         self.auto_m.setFixedSize(QSize(400, 200))
         self.SendScintilla(self.SCI_SETHSCROLLBAR, 0)
-        self.SendScintilla(self.SCI_SETMULTIPASTE, 1)
+        self.SendScintilla(self.SCI_SETHSCROLLBAR, 0)
         self.SendScintilla(self.SC_SEL_RECTANGLE, 1, 20)
         self.setCallTipsBackgroundColor(color("background"))
         self.setCallTipsForegroundColor(color("foreground"))
@@ -289,6 +289,8 @@ class Editor(QsciScintilla):
     def cursor_move(self, _ln, _ind):
         self.cursor_pos = (_ln, _ind)
 
+        self.main.on("cursor_moved", {"editor": self, "pos": self.cursor_pos})
+
         def _config(_t, _m=8):
             return str(_t) + " " * (_m - len(str(_t)))
 
@@ -371,6 +373,9 @@ class Editor(QsciScintilla):
             pos = self.lineIndexFromPosition(abs(pos + abs(otl + len(txt))))
             self.setCursorPosition(*pos)
             return
+
+        if e.modifiers() == Qt.KeyboardModifier.ControlModifier and e.key() == Qt.Key.Key_Space:
+            self.main.on("asked_for_completion", {"editor": self})
 
         if e.key() == Qt.Key.Key_Backspace:
             if self.is_selecting:

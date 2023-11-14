@@ -316,7 +316,7 @@ class Creator(QMainWindow):
             try:
                 return func(kwargs)
             except Exception as e:
-                debug(f"main::on {e}", _c="e")
+                debug(f"main::on('{_f}') {e}", _c="e")
 
     def show_this(self, nm, sts=True):
         tar = self.buttons.get_obj(nm)

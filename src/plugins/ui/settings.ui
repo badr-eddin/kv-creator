@@ -969,7 +969,7 @@
           </size>
          </property>
          <property name="text">
-          <string>activated options increase memory usage (notice: memory usage actually depend on how many lines your code contain)</string>
+          <string>Activating features increases memory usage; note that memory usage correlates with the number of lines in your code.</string>
          </property>
          <property name="wordWrap">
           <bool>true</bool>

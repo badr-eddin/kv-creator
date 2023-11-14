@@ -1083,12 +1083,12 @@
         ]
     },
     "user-prefs": {
-        "autocomplete": true,
+        "autocomplete": false,
         "inspector-icons": true,
         "embed-kivy": true,
         "point-errors": true,
         "detect-kivy-item": false,
-        "code-analyse": false
+        "code-analyse": true
     },
     "themes": {},
     "themes-colors": {},

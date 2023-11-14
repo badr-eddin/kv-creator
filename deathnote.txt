@@ -36,3 +36,43 @@ token_list = [ (token, len(bytearray(token, "utf-8"))) for token in p.findall(te
                 #     self.setStyling(length, self.styles.get("comment"))
 
 ************************************************************************************
+
+class CodeInspectionLexer(QsciLexerCustom):
+    ERROR = 0
+    WARNING = 1
+    REFACTOR = 2
+    CONVENTION = 3
+    MESSAGE = 4
+    LINE_POSITION = 5
+
+    def __init__(self, parent, main):
+        super(CodeInspectionLexer, self).__init__(parent)
+        self.main = main
+
+        self.setColor(color("error"), self.ERROR)
+        self.setColor(color("c1"), self.WARNING)
+        self.setColor(color("comment"), self.REFACTOR)
+        self.setColor(color("c2"), self.CONVENTION)
+        self.setColor(color("c3"), self.MESSAGE)
+        self.setColor(color("c7"), self.LINE_POSITION)
+
+    def styleText(self, start: int, end: int):
+        # finding errors
+        ...
+
+    def language(self):
+        return "CodeInspection"
+
+    def description(self, sty: int):
+        return f"description of {sty}"
+
+
+class CodeInspection(QsciScintilla):
+    def __init__(self, parent, main):
+        super(CodeInspection, self).__init__(parent)
+        self.main = main
+
+        self.setReadOnly(True)
+        self.setLexer(CodeInspectionLexer(self, self.main))
+
+************************************************************************************

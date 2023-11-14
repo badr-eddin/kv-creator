@@ -2,6 +2,7 @@ import os
 import pathlib
 import re
 
+import pyautogui
 from PyQt6.QtCore import QRect, QPoint, QSize, QFileInfo, Qt, QPropertyAnimation, QTimer
 from PyQt6.QtGui import QPainter, QBrush, QIcon
 from PyQt6.QtWidgets import *
@@ -39,7 +40,7 @@ class FileDialog(QWidget):
     # **********************************************
 
     def __init__(self, main=None, std=None, **kwargs):
-        super().__init__(main)
+        super().__init__()
         std = std or main.std
         self.std = std
         self.main = main
@@ -252,10 +253,10 @@ class FileDialog(QWidget):
 
         self.widget.file_name.setText(text)
 
-    def _restore(self, m):
-        ms = m.size()
-        self.cover.resize(self.main.size())
-        self.x, self.y = self.std.restore(self, self.widget.size(), sz=(ms.width(), ms.height()))
+    def _restore(self, m=None):
+        if m:
+            self.cover.resize(self.main.size())
+        self.x, self.y = self.std.restore(self, self.widget.size(), sz=pyautogui.size())
         self.move(QPoint(self.x, self.y))
 
     def _cover(self):

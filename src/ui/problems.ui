@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>635</width>
+    <height>462</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -61,10 +61,24 @@
         <number>0</number>
        </property>
        <item row="0" column="0">
-        <widget class="QTextBrowser" name="problems">
-         <property name="frameShape">
-          <enum>QFrame::NoFrame</enum>
+        <widget class="QTreeWidget" name="problems">
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
          </property>
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="headerHidden">
+          <bool>true</bool>
+         </property>
+         <column>
+          <property name="text">
+           <string notr="true">1</string>
+          </property>
+         </column>
         </widget>
        </item>
       </layout>
