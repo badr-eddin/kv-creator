@@ -97,16 +97,13 @@ QComboBox:hover{
     border: none;
     background: "$WIDGET-2-H";
 }
-QMenu {
-    background: "$WIDGET-1";
-}
 QComboBox::indicator:checked,
 QComboBox::indicator:checked:editable,
 QMenu::indicator:checked,
 QComboBox::indicator:checked:editable{
     width: 16px;
     height: 16px;
-    padding-left: 5px;
+    padding-left: 2px;
     image: url($/img/style/check-icon.svg);
 }
 QComboBox::drop-down,
@@ -445,6 +442,21 @@ QWidget[type="popup"]{
 QWidget[type="icon-button"]:pressed{
     background: "$MAIN";
 }
+
+QMenu {
+    background: "$WIDGET-2";
+    border: 1px solid "$BORDER";
+    padding: 0px;
+}
+QMenu::item {
+    margin: 0;
+    min-height: 25px;
+    border-left: 5px solid transparent;
+}
+QMenu::item:selected {
+    background: "$MAIN";
+}
+
 """
 
 
@@ -454,7 +466,7 @@ class MintLeaf:
     colors = {
         "background_c": "#0d0d0d",
         "head_c": "#191C1F",
-        "border_c": "#191C1F",
+        "border_c": "#97B0B8",
         "shadow_c": "#000000",
         "primary_c": "#32926F"
     }

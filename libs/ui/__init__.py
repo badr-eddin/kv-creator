@@ -9,6 +9,6 @@ from .demo_kv_app import get_kivy_window_id
 from .console import Console
 from .project_manager import PCreator
 
-COMPONENTS = [InformUser, Inspector, PTree, Console, Messenger, PropertyEditor, ImportsEditor, EditorWidget,
+COMPONENTS = [InformUser, Inspector, PTree, Messenger, PropertyEditor, Console, ImportsEditor, EditorWidget,
               KivyInnerWindow, SearchTip, Bar]
 

@@ -49,6 +49,7 @@ class Creator(QMainWindow):
         self.components = {}
         self.plugins = {}
         self.__themes = {}
+        self.plugins_actions = {}
         self.env_args = args
         self.app = app
         self.proc = pathlib.Path(os.path.join(os.path.expanduser("~"), ".kvc-project"))
@@ -61,7 +62,7 @@ class Creator(QMainWindow):
         self.close_win = True
         self.close_temp = False
         self.std = std
-        self.act_hand = Handler(self)
+        # self.act_hand = Handler(self)
         self.buttons = Buttons(self)
         self.on_main_close = True
         self.menu = None
@@ -180,6 +181,7 @@ class Creator(QMainWindow):
         app.setStyleSheet(load_style(_theme))
 
     def _load_plugin(self, plugin):
+
         if plugin.TYPE == "window/callable":
             obj = plugin.CLASS
 
@@ -229,6 +231,9 @@ class Creator(QMainWindow):
                 self.editor_functions[f] = []
 
             self.editor_functions[f].append(plugin.NAME)
+
+        if hasattr(obj, "ACTIONS"):
+            self.plugins_actions.update({plugin.NAME: getattr(obj, "ACTIONS", {})})
         # *******************************
 
         self.plugins.update({plugin.NAME.lower(): obj or plugin})
@@ -299,6 +304,7 @@ class Creator(QMainWindow):
     def on(self, func, kwargs=None):
         _f = "on_" + func
         funcs = self.editor_functions.get(_f)
+
         if not funcs:
             return
 

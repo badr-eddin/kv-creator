@@ -1059,6 +1059,16 @@
             "Ctrl+Shift+C": "set_comment",
             "Ctrl+G": "goto"
         },
+        "menu": {
+            "undo": "img/editors/context-menu/undo.png",
+            "redo": "img/editors/context-menu/redo.png",
+            "find": "img/editors/context-menu/find.png",
+            "cut": "img/editors/context-menu/cut.png",
+            "copy": "img/editors/context-menu/copy.png",
+            "paste": "img/editors/context-menu/paste.png",
+            "delete": "img/editors/context-menu/delete.png",
+            "select all": "img/editors/context-menu/select-all.png"
+        },
         "font-size": 12,
         "font-name": "Fira Code Medium"
     },
@@ -1083,7 +1093,7 @@
         ]
     },
     "user-prefs": {
-        "autocomplete": false,
+        "autocomplete": true,
         "inspector-icons": true,
         "embed-kivy": true,
         "point-errors": true,

@@ -6,6 +6,7 @@ import psutil
 import pyperclip
 
 from .dialogs import AppScene
+# from .project_tree import MAction
 from ..utils import *
 
 
@@ -63,7 +64,7 @@ class Editor(QsciScintilla):
         self.main = main
         self.clip = Clipboard()
         self.tabs = tabs
-        self.auto_m = QMenu(self)
+        self.actions_menu = QMenu(self)
         self.selected = []
         self.selection_beg = [-1, -1]
         self.is_selecting = False
@@ -75,7 +76,7 @@ class Editor(QsciScintilla):
         self.minus_cur_pos = 0
         self.selection_start = None
         self.keys_functions = settings.pull(f"editor/keys")
-        self.act_hand = Handler(main)
+        self.act_hand = Handler(main, self)
         self.setTabWidth(4)
         self.load_actions()
         self.setCaretWidth(2)
@@ -85,16 +86,14 @@ class Editor(QsciScintilla):
         self.setCallTipsVisible(0)
         self.setCaretLineVisible(True)
         self.setIndentationGuides(True)
-        self.setIndentationGuidesForegroundColor(color("foreground"))
-        self.setIndentationGuidesBackgroundColor(color("foreground"))
         self.setIndentationsUseTabs(True)
         self.setMarginLineNumbers(0, True)
         self.setObjectName("editor-widget")
-        self.setCallTipsHighlightColor(color("c2"))
+        self.actions_menu.setFixedWidth(200)
         self.selection_timer.setSingleShot(True)
         self.SendScintilla(self.CARETSTYLE_LINE)
         self.setFrameStyle(QFrame.Shape.NoFrame)
-        self.auto_m.setFixedSize(QSize(400, 200))
+        self.setCallTipsHighlightColor(color("c2"))
         self.SendScintilla(self.SCI_SETHSCROLLBAR, 0)
         self.SendScintilla(self.SCI_SETHSCROLLBAR, 0)
         self.SendScintilla(self.SC_SEL_RECTANGLE, 1, 20)
@@ -107,15 +106,18 @@ class Editor(QsciScintilla):
         self.SendScintilla(self.SCI_SETMULTIPLESELECTION, True)
         self.setCaretForegroundColor(DefaultTheme.foreground_c)
         self.setSelectionBackgroundColor(DefaultTheme.background_c)
+        self.setIndentationGuidesForegroundColor(color("foreground"))
+        self.setIndentationGuidesBackgroundColor(color("foreground"))
         self.setSelectionForegroundColor(DefaultTheme.selection_bg_c)
-        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.actions_menu.setStyleSheet("QMenu::item{margin: 0 1px}")
         self.setAutoCompletionSource(self.AutoCompletionSource.AcsAll)
         self.SendScintilla(self.SCI_SETADDITIONALSELECTIONTYPING, True)
-        self.markerDefine(QPixmap(import_("img/dialog/error-sm.png")), 8)
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.context_menu_requested)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.indicatorDefine(self.IndicatorStyle.FullBoxIndicator, self.SELECTION_IND)
         self.setIndicatorForegroundColor(DefaultTheme.error_c, self.ERROR_INDICATOR)
         self.setIndicatorOutlineColor(DefaultTheme.transparent_c, self.SELECTION_IND)
+        self.indicatorDefine(self.IndicatorStyle.FullBoxIndicator, self.SELECTION_IND)
         self.setIndicatorForegroundColor(DefaultTheme.selection_bg_c, self.SELECTION_IND)
         self.indicatorDefine(QsciScintilla.IndicatorStyle.SquiggleIndicator, self.ERROR_INDICATOR)
 
@@ -271,20 +273,51 @@ class Editor(QsciScintilla):
     def point_under(self, *args):
         self.fillIndicatorRange(*args)
 
-    def complete_with(self, wit: list):
-        menu = self.auto_m
-        words = [QAction(w) for w in wit]
-        if not words:
-            menu.close()
-        else:
-            menu.clear()
-            menu.move(self.mapToParent(self.cursor().pos()))
-            menu.addActions(words)
-            menu.exec()
-
     def unpoint(self, *args):
         # QImage("green_dot.png").scaled(QSize(16, 16))
         self.clearIndicatorRange(*args)
+
+    def context_menu_requested(self):
+        actions = settings.pull("editor/menu")
+        self.actions_menu.clear()
+
+        for exa in self.main.plugins_actions:
+            if (self.main.plugins_actions.get(exa) or {}).get("@type") == "lexer":
+                if exa == getattr(self.lexer(), "NAME", "à"):
+                    actions.update(self.main.plugins_actions.get(exa) or {})
+
+        for ac in actions:
+            try:
+                if ac.startswith("@type"):
+                    continue
+
+                action = QAction(self.actions_menu)
+
+                func = str(ac).replace(" ", "_")
+                obj = self.act_hand
+                icon = QIcon(import_(actions.get(ac)))
+                text = ac
+
+                if func.startswith("$"):
+                    obj = self.lexer()
+                    func = str(actions.get(ac))
+                    func, icon = func.split("@")
+                    func = func.replace(" ", "_")
+                    text = ac[1:]
+                    icon = QIcon(import_(icon))
+
+                action.setIcon(icon)
+                action.setText(text)
+
+                if hasattr(obj, func):
+                    action.triggered.connect(getattr(obj, func))
+
+                self.actions_menu.addAction(action)
+
+            except Exception as e:
+                debug(f"editor-context:: {e}")
+
+        self.actions_menu.exec(self.cursor().pos())
 
     def cursor_move(self, _ln, _ind):
         self.cursor_pos = (_ln, _ind)

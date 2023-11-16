@@ -13,11 +13,11 @@ class Console(QDockWidget):
         self.main = main
         self.lines = {}
         self.icons = {
-            "warning": QIcon(import_("img/dialog/warning.png")),
-            "refactor": QIcon(import_("img/dialog/warning.png")),
-            "convention": QIcon(import_("img/dialog/warning.png")),
-            "fatal": QIcon(import_("img/dialog/error.png")),
-            "error": QIcon(import_("img/dialog/error.png")),
+            "warning": QIcon(import_("img/editors/console/warning.png")),
+            "refactor": QIcon(import_("img/editors/console/refactor.png")),
+            "convention": QIcon(import_("img/editors/console/convention.png")),
+            "fatal": QIcon(import_("img/editors/console/fatal.png")),
+            "error": QIcon(import_("img/editors/console/error.png")),
         }
         self.terminals = []
         self.widget = loadUi(import_("ui/problems.ui"))
@@ -33,20 +33,31 @@ class Console(QDockWidget):
 
     def report(self, messages: [str]):
         self.done()
-
         for message in messages:
             if message.get("type") not in self.icons:
                 continue
 
+            parent = None
+            if message.get("obj"):
+                parent = QTreeWidgetItem()
+                parent.setText(0, f"{message.get('obj')}")
+                parent.setIcon(0, QIcon(import_("img/editors/console/object.png")))
+
             item = QTreeWidgetItem()
 
-            item.setText(0, message.get("message"))
+            item.setText(0, message.get("message") + " :" + str(message.get('line')))
             item.setIcon(0, self.icons.get(message.get("type")) or QIcon())
 
             self.lines.update({id(item): message})
-            self.problems.addTopLevelItem(item)
+
+            if parent:
+                parent.addChild(item)
+                self.problems.addTopLevelItem(parent)
+            else:
+                self.problems.addTopLevelItem(item)
 
         self.main.on("report_error", {"msg": messages})
+        self.problems.expandAll()
 
     def _item_double_clicked(self, item):
         msg = self.lines.get(id(item))

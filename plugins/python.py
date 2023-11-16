@@ -6,6 +6,7 @@ import sys
 import tempfile
 from io import StringIO
 
+import autopep8
 from PyQt6.Qsci import QsciLexerPython, QsciAPIs, QsciScintilla as _Qsci
 from PyQt6.QtCore import QThread
 from jedi import Script
@@ -110,6 +111,12 @@ class PythonLexer(QsciLexerPython):
     FILES = [".py"]
     FUNCTIONS = ["on_editor_text_changed", "on_editor_tab_created", "on_tab_changed", "on_cursor_moved",
                  "on_asked_for_completion"]
+    ACTIONS = {
+        "@type": "lexer",
+        "$refactor": "refactor_code@img/editors/context-menu/find.png",
+        "$comment": "comment@img/editors/context-menu/find.png",
+        "$run": "run@img/editors/context-menu/find.png"
+    }
     COMMENT = "#"
 
     auto_completer = None
@@ -182,9 +189,10 @@ class PythonLexer(QsciLexerPython):
 
         proc = run(os.path.basename(path), command=[python, path], wait=True)
 
-    def comment(self, text, lines):
+    def comment(self, text="", lines=None):
         text_s = text.splitlines(False)
         pattern = re.compile(rf"^(?P<indentation>\s*)({self.COMMENT}\s)(?P<line>\s*.*?)$")
+
         for i in lines:
             match = pattern.match(text_s[i])
             if match:
@@ -195,6 +203,12 @@ class PythonLexer(QsciLexerPython):
                 text_s[i] = self.COMMENT + " " + text_s[i]
 
         return "\n".join(text_s)
+
+    def refactor_code(self):
+        code = self.parent.text()
+
+        self.parent.clear()
+        self.parent.setText(autopep8.fix_code(code))
 
     @staticmethod
     def on_asked_for_completion(kwargs):

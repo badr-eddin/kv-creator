@@ -1,14 +1,11 @@
-import sys
 import os
+import sys
 import traceback
 
-from libs import Creator, QApplication, debug
-
-os.environ["dev-env"] = "1"
-os.environ["theme"] = "dark"
+from libs import Creator, QApplication, init_resources, debug
 
 
-def excepts(exc_type, exc_value, exc_traceback):
+def excepts(_, exc_value, exc_traceback):
     tb = traceback.extract_tb(exc_traceback)
     filename, line, func, text = tb[-1]
     filename = os.path.basename(filename)
@@ -16,7 +13,12 @@ def excepts(exc_type, exc_value, exc_traceback):
 
 
 sys.excepthook = excepts
-app = QApplication(sys.argv)
+
+# os.environ["dev-env-loading"] = '1'
+os.environ["dev-env"] = '1'
+
+init_resources()
+
+app = QApplication([])
 window = Creator(app=app)
-# window = window.load(app)
 sys.exit(app.exec())

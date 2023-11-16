@@ -1,5 +1,6 @@
 import json
 import dpath.util as dutil
+from PyQt6.QtCore import QFile
 from PyQt6.QtGui import QColor
 
 from .resources_manager import import_
@@ -29,10 +30,14 @@ class settings:
         try:
             dutil.set(data, path, value)
 
-            with open(import_("data/settings.json"), "w") as e:
-                e.write(json.dumps(data, indent=4))
+            file: QFile = import_("data/settings.json", mode="w")
+            file.write(json.dumps(data, indent=4).encode())
+            file.close()
+
+            # with open(import_("data/settings.json"), "w") as e:
+            #     e.write(json.dumps(data, indent=4))
         except Exception as e:
-            debug(f"settings::push : {e}", _c="e")
+            debug(f"settings::push : {e} :", _c="e")
             return {}
 
 
