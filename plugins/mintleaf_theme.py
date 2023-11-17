@@ -1,3 +1,5 @@
+import os
+
 _THEME = """
 QWidget {
     selection-background-color: "$MAIN";
@@ -57,12 +59,12 @@ QTreeWidget QHeaderView::section:last {
 QTreeView::branch:has-children:!has-siblings:closed,
 QTreeView::branch:closed:has-children:has-siblings {
         border-image: none;
-        image: url($/img/style/arrow-right.svg);
+        image: url($ROOT/img/style/arrow-right.svg);
 }
 QTreeView::branch:open:has-children:!has-siblings,
 QTreeView::branch:open:has-children:has-siblings  {
         border-image: none;
-        image: url($/img/style/arrow-down.svg);
+        image: url($ROOT/img/style/arrow-down.svg);
 }
 QListWidget::item QLineEdit, QTreeWidget::item QLineEdit,
 QListWidget::item QComboBox, QTreeWidget::item QComboBox {
@@ -104,7 +106,7 @@ QComboBox::indicator:checked:editable{
     width: 16px;
     height: 16px;
     padding-left: 2px;
-    image: url($/img/style/check-icon.svg);
+    image: url($ROOT/img/style/check-icon.svg);
 }
 QComboBox::drop-down,
 QComboBox::drop-down:editable{
@@ -114,13 +116,13 @@ QComboBox::drop-down:editable{
 }
 QComboBox::down-arrow,
 QComboBox::down-arrow:editable{
-    image: url($/img/style/arrow-down.svg);
+    image: url($ROOT/img/style/arrow-down.svg);
     width: 16px;
     height: 16px;
 }
 QComboBox::down-arrow:disabled,
 QComboBox::down-arrow:disabled:editable{
-    image: url($/img/style/arrow-down.svg);
+    image: url($ROOT/img/style/arrow-down.svg);
 }
 QCompleter::item:selected,
 QComboBox::item:selected,
@@ -185,10 +187,10 @@ QTabBar QToolButton {
     margin: 2px;
 }
 QTabBar QToolButton::left-arrow {
-    image: url($/img/style/arrow-left.svg);
+    image: url($ROOT/img/style/arrow-left.svg);
 }
 QTabBar QToolButton::right-arrow {
-    image: url($/img/style/arrow-right.svg);
+    image: url($ROOT/img/style/arrow-right.svg);
 }
 QTabBar::tab {
     border: none;
@@ -208,10 +210,10 @@ QTabBar::tab:selected {
     border-bottom: 1px solid "$MAIN";
 }
 QTabBar::close-button{
-    image: url($/img/style/close.png);
+    image: url($ROOT/img/style/close.png);
 }
 QTabBar::close-button:hover{
-    image: url($/img/style/close-active.png);
+    image: url($ROOT/img/style/close-active.png);
 }
 #editor-tab-widget {
     background: transparent;
@@ -235,8 +237,8 @@ QDockWidget, #dockBody {
     background: "$BACKGROUND";
     color: "$FOREGROUND";
     border: 1px solid #191c1f;
-    titlebar-close-icon: url($/img/style/close.svg);
-    titlebar-normal-icon: url($/img/style/dock.svg);
+    titlebar-close-icon: url($ROOT/img/style/close.svg);
+    titlebar-normal-icon: url($ROOT/img/style/dock.svg);
 }
 QDockWidget::close-button {
     background: transparent;
@@ -376,13 +378,13 @@ QSpinBox::down-button, QDateTimeEdit::down-button, QDoubleSpinBox::down-button {
     background: transparent;
 }
 QSpinBox::down-arrow, QDateTimeEdit::down-arrow, QDoubleSpinBox::down-arrow {
-    image: url($/img/style/arrow-down.svg);
+    image: url($ROOT/img/style/arrow-down.svg);
     width: 16px;
     height: 16px;
     padding-right: 10px;
 }
 QSpinBox::up-arrow, QDateTimeEdit::up-arrow, QDoubleSpinBox::up-arrow {
-    image: url($/img/style/arrow-up.svg);
+    image: url($ROOT/img/style/arrow-up.svg);
     width: 16px;
     height: 16px;
     padding-right: 10px;
@@ -492,6 +494,8 @@ class MintLeaf:
         for k in self.palette:
             v = self.palette[k]
             theme = theme.replace('"' + k + '"', v)
+
+        theme = theme.replace("$ROOT", "./src" if os.getenv("dev-env") else ":")
 
         return theme
 

@@ -76,3 +76,38 @@ class CodeInspection(QsciScintilla):
         self.setLexer(CodeInspectionLexer(self, self.main))
 
 ************************************************************************************
+import os
+
+
+PATH = "./src"
+IGNORED = ["plugins", "tmp"]
+TARGET = "./src/tmp/app-qrc.qrc"
+
+rcc = '<RCC version="1.0">\n'
+
+
+for root, dirs, files in os.walk(PATH):
+    dirs[:] = [d for d in dirs if d not in IGNORED]
+
+    k = os.listdir(root)
+    x = 0
+    for _k in k:
+        if os.path.isdir(os.path.join(root, _k)):
+            x += 1
+
+    if len(k) == x:
+        continue
+
+    rcc += f'\t<qresource prefix="{root.replace(PATH, "")}">\n'
+
+    for file in files:
+        file = os.path.join(root, file)
+        rcc += f'\t\t<file alias="{os.path.basename(file)}">{file}</file>\n'
+    rcc += '\t</qresource>\n'
+
+
+rcc += '</RCC>'
+
+
+with open(TARGET, "w") as file:
+    file.write(rcc)

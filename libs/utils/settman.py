@@ -1,9 +1,10 @@
 import json
+import sqlite3
+
 import dpath.util as dutil
-from PyQt6.QtCore import QFile
 from PyQt6.QtGui import QColor
 
-from .resources_manager import import_
+from .resources_manager import import_, get_db
 from .debugger import debug
 
 
@@ -16,8 +17,30 @@ def color(key: str, _qc=True):
 
 class settings:
     @staticmethod
-    def pull(path, sep="/"):
-        data = json.loads(import_("data/settings.json", True))
+    def load_blob(key):
+        db = sqlite3.connect(get_db())
+        data = db.cursor().execute("SELECT content FRoM resources WHERE key='%s'" % key).fetchall()
+        db.close()
+        return data[0][0]
+
+    @staticmethod
+    def update_blob(key, data):
+        db = sqlite3.connect(get_db())
+        # TODO: doesnt save data
+        print(db.cursor().execute(
+            "UPDATE resources SET content = ? WHERE key = ?",
+            (
+                data if type(data) is bytes else str(data).encode(), key
+            )
+        ))
+        db.commit()
+        db.close()
+
+    @staticmethod
+    def pull(path="", sep="/", do=False):
+        data = json.loads(settings.load_blob("data/settings.json").decode())
+        if do:
+            return data
         try:
             return dutil.get(data, path, separator=sep)
         except Exception as e:
@@ -26,16 +49,10 @@ class settings:
 
     @staticmethod
     def push(path, value):
-        data = json.loads(import_("data/settings.json", True))
+        data = settings.pull(do=True)
         try:
             dutil.set(data, path, value)
-
-            file: QFile = import_("data/settings.json", mode="w")
-            file.write(json.dumps(data, indent=4).encode())
-            file.close()
-
-            # with open(import_("data/settings.json"), "w") as e:
-            #     e.write(json.dumps(data, indent=4))
+            settings.update_blob("./src/data/settings.json", json.dumps(data, indent=4))
         except Exception as e:
             debug(f"settings::push : {e} :", _c="e")
             return {}

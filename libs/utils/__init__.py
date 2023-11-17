@@ -1,4 +1,4 @@
-from .resources_manager import read_file, import_, get_object_from_memory
+from .resources_manager import read_file, import_, get_object_from_memory, get_db
 from .ui_customize import find_in, set_layout, bald, restore, set_shadow, scroller
 from .debugger import debug
 from .style import load_style

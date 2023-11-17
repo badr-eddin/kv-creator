@@ -2,7 +2,14 @@ import os
 import sys
 import traceback
 
-from libs import Creator, QApplication, init_resources, debug
+from libs import Creator, QApplication, debug, get_db
+
+
+os.environ["dev-env-loading"] = '1'
+os.environ["dev-env"] = '1'
+
+
+get_db()
 
 
 def excepts(_, exc_value, exc_traceback):
@@ -14,10 +21,6 @@ def excepts(_, exc_value, exc_traceback):
 
 sys.excepthook = excepts
 
-# os.environ["dev-env-loading"] = '1'
-os.environ["dev-env"] = '1'
-
-init_resources()
 
 app = QApplication([])
 window = Creator(app=app)

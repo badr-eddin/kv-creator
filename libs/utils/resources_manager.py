@@ -1,6 +1,10 @@
 import ctypes
 import os
+import sys
+
 from PyQt6.QtCore import QFile
+
+from .debugger import debug
 
 MODs = {
     "r": QFile.OpenModeFlag.ReadOnly,
@@ -8,6 +12,17 @@ MODs = {
     "w+": QFile.OpenModeFlag.ReadWrite,
     "r+": QFile.OpenModeFlag.ReadWrite,
 }
+
+
+def get_db():
+    path = os.path.join('.', 'db', 'resources.db')
+
+    if os.path.exists(path):
+        return path
+
+    else:
+        debug("couldn't find resources file !", _c="e")
+        exit(0)
 
 
 def import_(path: str, r=False, posix=False, mode='r'):
