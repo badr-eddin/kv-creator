@@ -154,3 +154,4 @@
 156 - : check if dialog not exists use qt dialog
 157 * : add plugin register to sql
 158 - : add to themes settings 'system theme'
+159: problem when plugins doesnt have db
