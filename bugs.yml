@@ -97,27 +97,27 @@
 97 * : on run kivy app cloe the text editor
 98 - : it open new tab when I run python app
 99 - : check if the editor opens the same file twice, if it is navigate to it tab
-00 - : when adding item outside of root, insert it as class <>
-01 - : make themes as plugin and create bluish MacOs theme
-02 - : add replace function in find action
-03 * : give settings tabs icons
-04 - : in file dialog stylesheet resets style of msg dialog msg
-05: on open file dialog it gliches with embed window
-06 - : try to access vs code icons and use it in project-tree
-07: create seperate script to restart app
-08: see if it is possible replace bar with icons
-09 - : use icons in dialogs (error, warning, info)
+100 - : when adding item outside of root, insert it as class <>
+101 - : make themes as plugin and create bluish MacOs theme
+102 - : add replace function in find action
+103 * : give settings tabs icons
+104 - : in file dialog stylesheet resets style of msg dialog msg
+105 - : on open file dialog it gliches with embed window
+106 - : try to access vs code icons and use it in project-tree
+107: create seperate script to restart app
+108: see if it is possible replace bar with icons
+109 - : use icons in dialogs (error, warning, info)
 110 - : when selection and request 'find' load selected text
 111 - : add jedi intellisense to python
-112: make editor can view images (svg, png ...)
+112 * : make editor can view images (svg, png ...)
 113 - : fix settings ui (general)
 114 - : add to settings editor font size
 115 * : create super_lang_support.py lexer to support wide range of languages
 116 - : on error add pointer to margins
-117: add .buildozer lexer and file type
+117 * : add .buildozer lexer and file type
 118 - : add main.on every where
 119 - : try to paint over lexer instead of regular selection
-120: using on build settings add external settings
+120 * : using on build settings add external settings
 121 - : override text manipulation in editor and save selected text pos
 122 - : kivy is not monkai, make one single editor theme and other will use it
 123 - : selection using arrows not valid in backward
@@ -142,11 +142,15 @@
 142 * : add kivy item icons in inspector add-item
 143 - : add on("context_menu_asked") to editor and create plugin for it
 145 - : add is_root to ptree context menu and add close project
-146: add git plugin next to settings
-147: add refactor code
-148: when close unsaved tab it doesnt remove it from regiter
+146 - : add git plugin next to settings
+147 - : add refactor code
+148: when close unsaved tab it doesnt remove it from register
 149: create custom autocompleter for kivy
-150: make plugins have context menu for editor
+150 - : make plugins have context menu for editor
 151: make pro selection
-152: qss checkbox and
-153: there is problem in dealing with settings qrc
+152 - : qss checkbox and
+153 - : there is problem in dealing with settings qrc
+154: make text-editor accessible from anywhere
+156 - : check if dialog not exists use qt dialog
+157 * : add plugin register to sql
+158 - : add to themes settings 'system theme'

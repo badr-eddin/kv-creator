@@ -4,11 +4,12 @@ import re
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import *
-from PyQt6.uic import loadUi
 from importlib_metadata import distributions
 
 
 class SettingsMan(QWidget):
+    ICON = "plugins/settings/settings.png"
+
     def __init__(self, main, **kwargs):
         super(SettingsMan, self).__init__(kwargs.get("editor"))
         self.editor: QTabWidget = kwargs.get("editor")
@@ -20,7 +21,7 @@ class SettingsMan(QWidget):
         self.pip_t = QTimer(self)
         self.already_edited = False
         self.pip_installer = self.std.InLineInput(self, self.__pip_install, "package")
-        self.widget = loadUi(self.std.import_("plugins/ui/settings.ui"))
+        self.widget = self.std.import_("plugins/settings/settings.ui")
         self.tabs: QTabWidget = self.widget.tabs
         self.kw_types = sorted(self.std.settings.pull("kivy/props-types") or [])
 

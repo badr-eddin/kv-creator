@@ -1,0 +1,4 @@
+entry = "settings.py"
+src = "src"
+name = "settings"
+resources = ["settings.ui", "settings.png"]

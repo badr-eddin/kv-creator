@@ -1,0 +1,4 @@
+entry = "mint.py"
+src = "src"
+name = "mint"
+resources = ["mint.qss"]

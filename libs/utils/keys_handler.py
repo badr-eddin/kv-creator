@@ -19,7 +19,7 @@ class Handler:
         lexer = self.editor.lexer()
 
         if not hasattr(lexer, "comment"):
-            self.main.buttons.get_obj("msg.pop")("comment not supported !")
+            self.main.element("msg.pop")("comment not supported !")
             return
 
         pos = list(self.editor.getCursorPosition())
@@ -39,7 +39,7 @@ class Handler:
         self.got.read_at(self.main.mapFromGlobal(self.main.cursor().pos()))
 
     def __goto(self, inp):
-        editor: _QSci = self.main.buttons.get_obj("editor.widget").currentWidget()
+        editor: _QSci = self.main.element("editor.widget").currentWidget()
 
         editor.setCursorPosition(int(inp.text())-1, 0)
         editor.setFocus()

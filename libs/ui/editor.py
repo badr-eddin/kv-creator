@@ -240,25 +240,32 @@ class Editor(QsciScintilla):
                     self.save_content(index)
                     self.config_lexer()
 
-            dialog = self.main.plugin("fbr")
-            if dialog:
+            dialog, plg = self.main.get_file_dialog()
+            if plg:
                 dialog = dialog(main=self.main, std=self.main.std)
                 dialog.open_save_file(
                     callback=_save,
                     selection=dialog.Selection.Single,
                     mode=dialog.Mode.Save,
                     target=dialog.Targets.Files,
+                    entry=self.main.project_path
                 )
+            else:
+                dialog = dialog(self)
+                path_ = dialog.getSaveFileName(directory=self.main.project_path)
+
+                path_ = pathlib.Path(path_[0])
+                _save(path_)
 
     def reload_it(self):
         self.reload = True
 
     def load_cls(self):
-        func1 = self.main.buttons.get_obj("imports.load")
+        func1 = self.main.element("imports.load")
         if func1 and self.reload:
             func1(self)
 
-        func = self.main.buttons.get_obj("inspector.load_class")
+        func = self.main.element("inspector.load_class")
 
         if func and self.reload:
             func(self)
@@ -283,7 +290,7 @@ class Editor(QsciScintilla):
 
         for exa in self.main.plugins_actions:
             if (self.main.plugins_actions.get(exa) or {}).get("@type") == "lexer":
-                if exa == getattr(self.lexer(), "NAME", "à"):
+                if isinstance(self.lexer(), exa):
                     actions.update(self.main.plugins_actions.get(exa) or {})
 
         for ac in actions:
@@ -295,7 +302,6 @@ class Editor(QsciScintilla):
 
                 func = str(ac).replace(" ", "_")
                 obj = self.act_hand
-                icon = QIcon(import_(actions.get(ac)))
                 text = ac
 
                 if func.startswith("$"):
@@ -305,6 +311,8 @@ class Editor(QsciScintilla):
                     func = func.replace(" ", "_")
                     text = ac[1:]
                     icon = QIcon(import_(icon))
+                else:
+                    icon = QIcon(import_(actions.get(ac)))
 
                 action.setIcon(icon)
                 action.setText(text)
@@ -510,7 +518,7 @@ class EditorWidget(QWidget):
         tab = self.widget.widget(index)
         if isinstance(tab, Editor):
             if not getattr(tab, "saved"):
-                func = self.main.buttons.get_obj("inform.inform")
+                func = self.main.element("inform.inform")
                 func("Changes have been made but haven't been saved. Would you like to save them now?", "Editor",
                      on_accept=lambda d: self._save_confirmed(tab, index, d),  # Type: ignore
                      on_deny=lambda d: self._single_deny(index, d, tab), sts=0)
@@ -571,27 +579,38 @@ class EditorWidget(QWidget):
             editor.save_content(self.widget.currentIndex())  # Type: ignore
 
     def _super_done(self):
-        self.main.buttons.get_obj("inspector.done")()
-        self.main.buttons.get_obj("p-editor.done")()
-        self.main.buttons.get_obj("imports.done")()
+        self.main.element("inspector.done")()
+        self.main.element("p-editor.done")()
+        self.main.element("imports.done")()
 
         kvf = os.path.basename(str(getattr(self.widget.currentWidget(), "path", "0"))).endswith(".kv")
 
-        self.main.buttons.get_obj("inspector").setEnabled(kvf)
-        self.main.buttons.get_obj("p-editor").setEnabled(kvf)
-        self.main.buttons.get_obj("imports").setEnabled(kvf)
+        self.main.element("inspector").setEnabled(kvf)
+        self.main.element("p-editor").setEnabled(kvf)
+        self.main.element("imports").setEnabled(kvf)
 
     def open_file(self):
-        dialog = self.main.plugin("fbr")
-        if dialog:
+        dialog, plg = self.main.get_file_dialog()
+
+        if plg:
             dialog = dialog(main=self.main, std=self.main.std)
             dialog.open_save_file(
                 callback=self._add_editor_on_open,
                 selection=dialog.Selection.Single,
                 encapsulate=pathlib.Path,
                 mode=dialog.Mode.Open,
-                custom_check=self._check_file_mimetype
+                custom_check=self._check_file_mimetype,
+                entry=self.main.project_path
             )
+        else:
+            dialog = dialog(self)
+            path_ = dialog.getOpenFileName(directory=self.main.project_path)
+
+            if path_[0]:
+                path_ = path_[0]
+
+                if self._check_file_mimetype(path_):
+                    self._add_editor_on_open(pathlib.Path(path_))
 
     def _add_editor_on_open(self, path: pathlib.Path):
         if path:
@@ -631,7 +650,7 @@ class EditorWidget(QWidget):
 
         if unsaved:
             mn.close_win = False
-            func = self.main.buttons.get_obj("inform.inform")
+            func = self.main.element("inform.inform")
             func("Changes have been made but haven't been saved. Would you like to save them now?", "Editor",
                  on_accept=lambda d: self._save_all(d, unsaved), on_deny=lambda d: self._deny(d), sts=0)
         else:

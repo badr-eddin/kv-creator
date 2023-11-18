@@ -5,6 +5,9 @@ import re
 import shutil
 import sys
 import tempfile
+import zipfile
+
+import toml
 
 from .ui import COMPONENTS, PCreator
 from .utils import *
@@ -42,10 +45,11 @@ class Button(QPushButton):
 
 class Creator(QMainWindow):
     PROJECT_FILE = ".kvc"
+    MAX_PLUGIN_SIZE = 1024 * 1024 * 15  # 15MB
 
     def __init__(self, parent=None, app=None, args=None):
         super(Creator, self).__init__(parent)
-        self.widget = loadUi(import_("ui/main-editor.ui"))
+        self.widget = loadUi(import_("ui/main-editor.ui", 'io'))
         self.components = {}
         self.plugins = {}
         self.__themes = {}
@@ -73,13 +77,14 @@ class Creator(QMainWindow):
 
         self.config_window()
         self.load_plugins()
-        self.load_theme(app)
-        # self.showMaximized()
+        self.load_theme(self.app)
         self.get_project()
         self.load_elements()
         self.load_actions()
         self.load_editors()
         self.build_components_menu()
+
+        self.test()
 
     # *****************************
 
@@ -96,7 +101,6 @@ class Creator(QMainWindow):
         super(Creator, self).resizeEvent(a0)
 
     def closeEvent(self, a0):
-
         def _close_callbacks(cb):
             for o in self.components:
                 _o = self.components.get(o)
@@ -115,7 +119,7 @@ class Creator(QMainWindow):
                 if os.path.exists(self.tmp):
                     shutil.rmtree(self.tmp)
 
-                settings.push("themes", {})
+                settings.push("themes", {"System": " "})
                 settings.push("themes-colors", {})
             super(Creator, self).closeEvent(a0)
 
@@ -123,6 +127,14 @@ class Creator(QMainWindow):
             a0.ignore()
 
     # *****************************
+    def test(self):
+        pass
+
+    def restart(self):
+        pass
+
+    def element(self, k):
+        return self.buttons.get_obj(k)
 
     def load_elements(self):
         for com in COMPONENTS:
@@ -158,7 +170,7 @@ class Creator(QMainWindow):
                 required.append(os.path.basename(v))
 
         if required:
-            self.buttons.get_obj("msg.pop")(f"requirements: {tuple(required)} not found ! "
+            self.element("msg.pop")(f"requirements: {tuple(required)} not found ! "
                                             f"some functions wouldn't work properly .")
 
     def load_plugins(self):
@@ -195,7 +207,7 @@ class Creator(QMainWindow):
 
         elif plugin.TYPE == "theme/qss":
             obj = plugin.CLASS()
-            _theme = obj.load()
+            _theme = obj.load(self)
 
             themes = settings.pull("themes")
             themes_c = settings.pull("themes-colors")
@@ -233,7 +245,7 @@ class Creator(QMainWindow):
             self.editor_functions[f].append(plugin.NAME)
 
         if hasattr(obj, "ACTIONS"):
-            self.plugins_actions.update({plugin.NAME: getattr(obj, "ACTIONS", {})})
+            self.plugins_actions.update({plugin.CLASS: getattr(obj, "ACTIONS", {})})
         # *******************************
 
         self.plugins.update({plugin.NAME.lower(): obj or plugin})
@@ -294,13 +306,104 @@ class Creator(QMainWindow):
                 self,
                 editor.NAME,
                 self._launch_editor,
-                QIcon(import_("img/editors/winic/settings.png")),
+                QIcon(import_(editor.CLASS.ICON)),
                 editor.CLASS
             )
             self.widget.plugins.layout().addWidget(btn)
-            self.widget.plugins.layout().addItem(SPItem())
+        self.widget.plugins.layout().addItem(SPItem())
 
     # *****************************
+    def install_plugin(self):
+        dialog, plg = self.get_file_dialog()
+
+        if plg:
+            paths = []
+
+        else:
+            dialog = QFileDialog(self)
+            paths = dialog.getOpenFileNames(self, filter="*.zip")
+
+        self._install(paths)
+
+    def _install(self, paths):
+        self.on("start_install_plugin", {"path": paths})
+
+        for path in paths[0]:
+            name = os.path.basename(path)
+            if os.path.exists(path):
+                if os.path.getsize(path) <= self.MAX_PLUGIN_SIZE:
+
+                    if not zipfile.is_zipfile(path):
+                        debug(f"plugin.install: '{name}' not a zip file !", _c="e")
+                        return
+
+                    try:
+                        tmp = os.path.join(self.tmp, name.split(".")[0])
+
+                        with zipfile.ZipFile(path, 'r') as zf:
+                            zf.extractall(self.tmp)
+
+                        if not os.path.exists(tmp):
+                            continue
+
+                        kvc = os.path.join(tmp, ".kvc")
+                        src = os.path.join(tmp, "src")
+
+                        if os.path.isdir(src) and os.path.isfile(kvc):
+                            data = toml.load(kvc)
+
+                            entry = os.path.join(tmp, data.get("entry") or '')
+
+                            if not os.path.isfile(entry):
+                                continue
+
+                            # move entry to plugins directory
+                            dst = os.path.join(".", 'plugins')
+
+                            if not os.path.exists(dst):
+                                os.mkdir(dst)
+
+                            _k = os.path.join(dst, os.path.basename(entry))
+                            if os.path.exists(_k):
+                                os.remove(_k)
+
+                            entry = shutil.move(entry, dst)
+
+                            # register data
+                            if not os.path.exists(src):
+                                continue
+
+                            for rs in data.get("resources") or []:
+                                rsp = os.path.join(src, rs)
+
+                                if os.path.exists(rsp):
+                                    _p = data.get('name')
+                                    settings.set_blob(
+                                        f"plugins{'/' + _p if _p else ''}/{rs}", open(rsp, "rb").read()
+                                    )
+
+                            PLoader(self, self._load_plugin).load_from_path(entry)
+
+                    except Exception as e:
+                        _ = e
+                        debug(f"plugin.install: '{name}' unable to complete installation process!", _c="e")
+                else:
+                    debug(f"plugin.install: '{name}' "
+                          f"exceeded maximum size '{self.MAX_PLUGIN_SIZE // 1024**2}MB'", _c="e")
+            else:
+                debug(f"plugin.install: '{name}' not exists ! probably deleted externally .", _c="e")
+
+        self.restart()
+
+        self.on("plugin_install_done", {"path": paths})
+
+    def get_file_dialog(self):
+        dialog = self.plugin("fbr")
+
+        if dialog:
+            return dialog, True
+        return QFileDialog, False
+
     def on(self, func, kwargs=None):
         _f = "on_" + func
         funcs = self.editor_functions.get(_f)
@@ -325,14 +428,14 @@ class Creator(QMainWindow):
                 debug(f"main::on('{_f}') {e}", _c="e")
 
     def show_this(self, nm, sts=True):
-        tar = self.buttons.get_obj(nm)
+        tar = self.element(nm)
 
         if isinstance(tar, QDockWidget):
             tar.setVisible(sts)
 
     def _launch_editor(self, btn):
-        cls = btn.editor(self, editor=self.buttons.get_obj("editor"))
-        tabs = self.buttons.get_obj("editor.widget")
+        cls = btn.editor(self, editor=self.element("editor"))
+        tabs = self.element("editor.widget")
         index = tabs.addTab(cls, btn.toolTip())
         tabs.setCurrentIndex(index)
 
@@ -343,7 +446,7 @@ class Creator(QMainWindow):
         self.addAction(action)
 
     def search_in(self, target):
-        self.buttons.get_obj("search.pop")(target)
+        self.element("search.pop")(target)
 
     def on_mouse_move(self, func):
         if func not in self.__on_mouse_move__:
@@ -405,10 +508,10 @@ class Creator(QMainWindow):
     def load_project(self, proj):
         self.close_temp = False
         self.project_path = proj.as_posix()
-        x = self.buttons.get_obj("ptree.load_files_at")
+        x = self.element("ptree.load_files_at")
         if x:
             x(proj.as_posix())
-            
+
         self.showMaximized()
 
     def get_project(self):

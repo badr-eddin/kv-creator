@@ -152,7 +152,7 @@ class PTree(QDockWidget):
         self.item_going_to_change = None
         self.create_input = InLineInput(self)
         self.root = None
-        self.widget = loadUi(import_("ui/ptree.ui"))
+        self.widget = loadUi(import_("ui/ptree.ui", 'io'))
         self.files_tree: QTreeWidget = self.widget.files
 
     def initialize(self, _p=None):
@@ -244,7 +244,7 @@ class PTree(QDockWidget):
         path = pathlib.Path(path)
 
         if path.is_file():
-            self.main.buttons.get_obj("editor.add_editor")(path.read_text(), path.as_posix())
+            self.main.element("editor.add_editor")(path.read_text(), path.as_posix())
 
     def _item_changed(self, item):
         if (self.item_going_to_change or {}).get(id(item)):
@@ -302,7 +302,7 @@ class PTree(QDockWidget):
         path = os.path.join(parent_path, inp)
 
         if os.path.exists(path):
-            self.main.buttons.get_obj("msg.pop")(f"name '{inp.text()}' already exists !", 3000)
+            self.main.element("msg.pop")(f"name '{inp.text()}' already exists !", 3000)
             return
 
         os.mkdir(path)
@@ -310,14 +310,14 @@ class PTree(QDockWidget):
             self.load_files_at()
             self.main.on("project_create_folder", {"path": path})
         else:
-            self.main.buttons.get_obj("msg.pop")(f"couldn't create '{inp.text()}', "
+            self.main.element("msg.pop")(f"couldn't create '{inp.text()}', "
                                                  f"unexpected error occur !", 2000)
 
     def __create_file(self, inp, parent_path):
         path = os.path.join(parent_path, inp)
 
         if os.path.exists(path):
-            self.main.buttons.get_obj("msg.pop")(f"name '{inp.text()}' already exists !")
+            self.main.element("msg.pop")(f"name '{inp.text()}' already exists !")
             return
 
         open(path, "w").write("")
@@ -326,7 +326,7 @@ class PTree(QDockWidget):
             self.load_files_at()
             self.main.on("project_create_file", {"path": path})
         else:
-            self.main.buttons.get_obj("msg.pop")(f"couldn't create '{inp.text()}', unexpected error occur !")
+            self.main.element("msg.pop")(f"couldn't create '{inp.text()}', unexpected error occur !")
 
     def delete(self, items):
         self.__delete_item(items)
@@ -341,12 +341,12 @@ class PTree(QDockWidget):
 
             if os.path.exists(path):
                 if path == self.root_path:
-                    self.main.buttons.get_obj("msg.pop")("cannot delete project root folder !")
+                    self.main.element("msg.pop")("cannot delete project root folder !")
                     return
 
                 if os.path.isdir(path):
                     if os.listdir(path):
-                        inform = self.main.buttons.get_obj("inform")
+                        inform = self.main.element("inform")
                         inform.no_cancel()
                         inform.inform(
                             "you are about to permanently delete the entire folder and all its contents.",
@@ -358,7 +358,7 @@ class PTree(QDockWidget):
                 send2trash.send2trash(path)
 
             else:
-                self.main.buttons.get_obj("msg.pop")("it seems that this file has been deleted externally .",
+                self.main.element("msg.pop")("it seems that this file has been deleted externally .",
                                                      5000)
         self.load_files_at()
 

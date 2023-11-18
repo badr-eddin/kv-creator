@@ -1,0 +1,4 @@
+entry = "browser.py"
+src = "src"
+name = "fbr"
+resources = ["file-dialog.ui"]

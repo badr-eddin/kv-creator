@@ -115,7 +115,7 @@ class InformUser(Dialog):
             0: QIcon(import_("img/dialog/warning.png")),
             1: QIcon(import_("img/dialog/info.png"))
         }
-        self.widget = loadUi(import_("ui/ask-user.ui"))
+        self.widget = loadUi(import_("ui/ask-user.ui", 'io'))
         if i:
             self.initialize()
 
@@ -178,7 +178,7 @@ class KivyInnerWindow(Dialog):
     def __init__(self, parent, main, d=False):
         super(KivyInnerWindow, self).__init__(parent, main)
         self.main = main
-        self.widget = loadUi(import_("ui/kv-win.ui"))
+        self.widget = loadUi(import_("ui/kv-win.ui", 'io'))
         self.setFixedSize(self.widget.size())
         set_layout(self, QVBoxLayout)
         self.layout().addWidget(self.widget)
@@ -320,7 +320,7 @@ class SearchTip(DraggableFrame):
         self.target = parent
         self.find_pos = None
         self.current_pos = 0
-        self.widget = loadUi(import_("ui/find-in-editor.ui"))
+        self.widget = loadUi(import_("ui/find-in-editor.ui", 'io'))
         set_shadow(self)
 
     def initialize(self, _):
@@ -476,7 +476,7 @@ class AppScene(QWidget):
     def __init__(self, parent, main):
         super(AppScene, self).__init__(parent)
         self.main = main
-        self.widget = loadUi(import_("ui/scene.ui"))
+        self.widget = loadUi(import_("ui/scene.ui", 'io'))
 
     def init(self, _, wid):
         set_layout(self, QGridLayout)

@@ -1052,6 +1052,13 @@
                     "console.add_terminal"
                 ]
             ]
+        },
+        "plugin": {
+            "icon": "img/toolbar/new.svg",
+            "function": [
+                "add_plugin",
+                []
+            ]
         }
     },
     "editor": {

@@ -591,6 +591,9 @@
                 <property name="headerHidden">
                  <bool>true</bool>
                 </property>
+                <property name="type" stdset="0">
+                 <string>container</string>
+                </property>
                 <column>
                  <property name="text">
                   <string notr="true">1</string>
@@ -720,6 +723,9 @@
                 </property>
                 <property name="headerHidden">
                  <bool>true</bool>
+                </property>
+                <property name="type" stdset="0">
+                 <string>container</string>
                 </property>
                 <column>
                  <property name="text">

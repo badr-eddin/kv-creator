@@ -1,0 +1,4 @@
+entry = "python.py"
+src = "src"
+name = "python"
+resources = ["comment.png", "fix.png", "run.png"]

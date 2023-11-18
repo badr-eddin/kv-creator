@@ -1,3 +1,4 @@
 src/tmp
 token.txt
 **/__pycache__/
+.trash

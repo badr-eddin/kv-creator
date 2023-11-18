@@ -14,7 +14,7 @@ class ImportsEditor(QDockWidget):
         self.main = main
         self.imports = []
         self.map = {}
-        self.widget = loadUi(import_("ui/imports-editor.ui"))
+        self.widget = loadUi(import_("ui/imports-editor.ui", 'io'))
         self.setWidget(self.widget)
 
     def initialize(self, _p=None):
@@ -43,7 +43,7 @@ class ImportsEditor(QDockWidget):
 
     def _update(self):
         os.environ["editor-editing"] = "0"
-        self.main.buttons.get_obj("inspector.save")()
+        self.main.element("inspector.save")()
 
     def _item_going_to_edit(self, item):
         data = (item.text(1), item.text(0), self.map.get(id(item)))

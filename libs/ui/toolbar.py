@@ -39,19 +39,25 @@ class Bar:
         self.kv_app_running = False
         self.embed_wins = []
         self.timer = QTimer(main)
-        self.layout = set_layout(self.ui, QHBoxLayout, (2, 2, 2, 2))
+        self.layout = self.ui.layout()
+
+        if not self.layout:
+            self.layout = set_layout(self.ui, QHBoxLayout, (2, 2, 2, 2))
 
     def _close_app(self, _):
         self.main.close()
 
+    def add_plugin(self, _):
+        self.main.install_plugin()
+
     def search_(self, _):
-        self.main.search_in(self.main.buttons.get_obj("editor.widget").currentWidget())
+        self.main.search_in(self.main.element("editor.widget").currentWidget())
 
     def no_app_running(self):
         self.kv_app_running = False
 
     def _run_app(self, _e):
-        widget = self.main.buttons.get_obj("editor.widget").currentWidget()
+        widget = self.main.element("editor.widget").currentWidget()
 
         if hasattr(widget, "lexer"):
             lexer = widget.lexer()
@@ -61,7 +67,7 @@ class Bar:
                 lexer.run(self.process_started)
 
             else:
-                self.main.buttons.get_obj("msg.pop")("action 'run' not supported !", 5000)
+                self.main.element("msg.pop")("action 'run' not supported !", 5000)
 
     def process_started(self, kv_file, process, kwargs):
         self.timer = QTimer(self.main)
@@ -79,12 +85,12 @@ class Bar:
 
         debug(f"embedding window 'pid={wid}' ...")
         self.timer.stop()
-        func = self.main.buttons.get_obj("editor.add_external_window")
+        func = self.main.element("editor.add_external_window")
         if func:
             func(wid, title=os.path.basename(kvf), path=kvf, pid=pid, kwargs=args)
 
     def _global_connector(self, _, args):
-        func = self.main.buttons.get_obj(args[0])
+        func = self.main.element(args[0])
         if func:
             func(*args[1:])
 

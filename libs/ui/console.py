@@ -20,7 +20,7 @@ class Console(QDockWidget):
             "error": QIcon(import_("img/editors/console/error.png")),
         }
         self.terminals = []
-        self.widget = loadUi(import_("ui/problems.ui"))
+        self.widget = loadUi(import_("ui/problems.ui", 'io'))
         self.tabs: QTabWidget = self.widget.tabs
         self.problems: QTreeWidget = self.widget.problems
         self.setVisible(False)
@@ -64,7 +64,7 @@ class Console(QDockWidget):
         if not msg:
             return
 
-        editor = self.main.buttons.get_obj("editor.widget").currentWidget()
+        editor = self.main.element("editor.widget").currentWidget()
 
         if not isinstance(editor, QsciScintilla):
             return
@@ -143,9 +143,9 @@ class Terminal(QWidget):
 
     def _process_done(self, ec, es):
         if es == QProcess.ExitStatus.CrashExit:
-            self.main.buttons.get_obj("msg.pop")("The process crashed!", 3000)
+            self.main.element("msg.pop")("The process crashed!", 3000)
         else:
-            self.main.buttons.get_obj("msg.pop")(f"The process finished with exit code {ec}.", 5000)
+            self.main.element("msg.pop")(f"The process finished with exit code {ec}.", 5000)
 
         parent = self.tabs
         if isinstance(parent, QTabWidget):

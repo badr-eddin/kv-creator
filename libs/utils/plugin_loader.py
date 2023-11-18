@@ -38,20 +38,23 @@ class PLoader:
 
         return True
 
+    def load_from_path(self, path):
+        name = self.filename_check(path)
+        if name:
+            debug(f"loading plugin '{name}' ...")
+
+            plugin_obj = importlib.machinery.SourceFileLoader(name, path).load_module()
+
+            if self.is_plugin_valid(plugin_obj) and self.callback:
+                self.callback(plugin_obj)
+            else:
+                debug(f"couldn't load plugin '{name}' !", _c="e")
+        else:
+            debug(f"invalid plugin '{path}' !", _c="e")
+
     def load(self):
         if self.path.exists():
             plugins = os.listdir(self.path.as_posix())
             for plugin in plugins:
                 path = os.path.join(self.path.as_posix(), plugin)
-                name = self.filename_check(path)
-                if name:
-                    debug(f"loading plugin '{name}' ...")
-
-                    plugin_obj = importlib.machinery.SourceFileLoader(name, path).load_module()
-
-                    if self.is_plugin_valid(plugin_obj) and self.callback:
-                        self.callback(plugin_obj)
-                    else:
-                        debug(f"couldn't load plugin '{name}' !", _c="e")
-                else:
-                    debug(f"invalid plugin '{path}' !", _c="e")
+                self.load_from_path(path)

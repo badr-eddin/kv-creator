@@ -1,12 +1,9 @@
-import os
-
-_THEME = """
 QWidget {
     selection-background-color: "$MAIN";
     selection-color: "$SELECTION-COLOR";
     font-size: "$FONT-SIZE";
     font-family: "$FONT";
-    color: "$FOREGROUND"
+    color: "$FOREGROUND";
 }
 #head, #footer {
     background: "$WIDGET-1";
@@ -59,12 +56,12 @@ QTreeWidget QHeaderView::section:last {
 QTreeView::branch:has-children:!has-siblings:closed,
 QTreeView::branch:closed:has-children:has-siblings {
         border-image: none;
-        image: url($ROOT/img/style/arrow-right.svg);
+        image: url($ROOT/arrow-right.svg);
 }
 QTreeView::branch:open:has-children:!has-siblings,
 QTreeView::branch:open:has-children:has-siblings  {
         border-image: none;
-        image: url($ROOT/img/style/arrow-down.svg);
+        image: url($ROOT/arrow-down.svg);
 }
 QListWidget::item QLineEdit, QTreeWidget::item QLineEdit,
 QListWidget::item QComboBox, QTreeWidget::item QComboBox {
@@ -106,7 +103,7 @@ QComboBox::indicator:checked:editable{
     width: 16px;
     height: 16px;
     padding-left: 2px;
-    image: url($ROOT/img/style/check-icon.svg);
+    image: url($ROOT/checked.svg);
 }
 QComboBox::drop-down,
 QComboBox::drop-down:editable{
@@ -116,13 +113,13 @@ QComboBox::drop-down:editable{
 }
 QComboBox::down-arrow,
 QComboBox::down-arrow:editable{
-    image: url($ROOT/img/style/arrow-down.svg);
+    image: url($ROOT/arrow-down.svg);
     width: 16px;
     height: 16px;
 }
 QComboBox::down-arrow:disabled,
 QComboBox::down-arrow:disabled:editable{
-    image: url($ROOT/img/style/arrow-down.svg);
+    image: url($ROOT/arrow-down.svg);
 }
 QCompleter::item:selected,
 QComboBox::item:selected,
@@ -187,10 +184,10 @@ QTabBar QToolButton {
     margin: 2px;
 }
 QTabBar QToolButton::left-arrow {
-    image: url($ROOT/img/style/arrow-left.svg);
+    image: url($ROOT/arrow-left.svg);
 }
 QTabBar QToolButton::right-arrow {
-    image: url($ROOT/img/style/arrow-right.svg);
+    image: url($ROOT/arrow-right.svg);
 }
 QTabBar::tab {
     border: none;
@@ -210,10 +207,10 @@ QTabBar::tab:selected {
     border-bottom: 1px solid "$MAIN";
 }
 QTabBar::close-button{
-    image: url($ROOT/img/style/close.png);
+    image: url($ROOT/close.png);
 }
 QTabBar::close-button:hover{
-    image: url($ROOT/img/style/close-active.png);
+    image: url($ROOT/close-active.png);
 }
 #editor-tab-widget {
     background: transparent;
@@ -237,8 +234,8 @@ QDockWidget, #dockBody {
     background: "$BACKGROUND";
     color: "$FOREGROUND";
     border: 1px solid #191c1f;
-    titlebar-close-icon: url($ROOT/img/style/close.svg);
-    titlebar-normal-icon: url($ROOT/img/style/dock.svg);
+    titlebar-close-icon: url($ROOT/close-cross.svg);
+    titlebar-normal-icon: url($ROOT/dock.svg);
 }
 QDockWidget::close-button {
     background: transparent;
@@ -378,13 +375,13 @@ QSpinBox::down-button, QDateTimeEdit::down-button, QDoubleSpinBox::down-button {
     background: transparent;
 }
 QSpinBox::down-arrow, QDateTimeEdit::down-arrow, QDoubleSpinBox::down-arrow {
-    image: url($ROOT/img/style/arrow-down.svg);
+    image: url($ROOT/arrow-down.svg);
     width: 16px;
     height: 16px;
     padding-right: 10px;
 }
 QSpinBox::up-arrow, QDateTimeEdit::up-arrow, QDoubleSpinBox::up-arrow {
-    image: url($ROOT/img/style/arrow-up.svg);
+    image: url($ROOT/arrow-up.svg);
     width: 16px;
     height: 16px;
     padding-right: 10px;
@@ -424,6 +421,41 @@ QDoubleSpinBox:hover{
     background: "$WIDGET-2-H";
 }
 
+QCheckBox::indicator,
+QGroupBox::indicator,
+QAbstractItemView::indicator,
+QRadioButton::indicator {
+    height: 18px;
+    width: 18px;
+}
+QCheckBox::indicator,
+QGroupBox::indicator,
+QAbstractItemView::indicator {
+    image: url($ROOT/checkbox-unchecked.png);
+}
+QCheckBox::indicator:unchecked:disabled,
+QGroupBox::indicator:unchecked:disabled,
+QAbstractItemView::indicator:unchecked:disabled {
+    image: url($ROOT/checkbox-unchecked.png);
+}
+QCheckBox::indicator:checked,
+QGroupBox::indicator:checked,
+QAbstractItemView::indicator:checked {
+    image: url($ROOT/checkbox-checked.png);
+}
+QCheckBox::indicator:checked:disabled,
+QGroupBox::indicator:checked:disabled,
+QAbstractItemView::indicator:checked:disabled {
+    image: url($ROOT/checkbox-checked.png);
+}
+QCheckBox::indicator:indeterminate,
+QAbstractItemView::indicator:indeterminate {
+    image: url($ROOT/checkbox-unchecked.png);
+}
+QCheckBox::indicator:indeterminate:disabled,
+QAbstractItemView::indicator:indeterminate:disabled {
+    image: url($ROOT/checkbox-unchecked.png);
+}
 QAbstractSpinBox:focus,
 QDoubleSpinBox:focus
 {
@@ -431,20 +463,19 @@ QDoubleSpinBox:focus
     border-radius: 2px;
     padding: 0px 4px;
 }
-QWidget[type="view"]::item{
+QWidget::item[type="view"]{
     background: transparent;
 }
-QWidget[type="view"]::item:hover{
+QWidget::item:hover[type="view"]{
     background: rgba(255, 255, 255, 5);
 }
 QWidget[type="popup"]{
     background: #0d0d0d;
     border: 1px solid #191c1f;
 }
-QWidget[type="icon-button"]:pressed{
+QWidget:pressed[type="icon-button"]{
     background: "$MAIN";
 }
-
 QMenu {
     background: "$WIDGET-2";
     border: 1px solid "$BORDER";
@@ -458,56 +489,3 @@ QMenu::item {
 QMenu::item:selected {
     background: "$MAIN";
 }
-
-"""
-
-
-class MintLeaf:
-    FUNCTIONS = ["on_save_settings"]
-
-    colors = {
-        "background_c": "#0d0d0d",
-        "head_c": "#191C1F",
-        "border_c": "#97B0B8",
-        "shadow_c": "#000000",
-        "primary_c": "#32926F"
-    }
-
-    palette = {
-        "$MAIN": colors.get("primary_c"),
-        "$WIDGET-1": colors.get("head_c"),
-        "$BACKGROUND": colors.get("background_c"),
-        "$BORDER": colors.get("border_c"),
-        "$WIDGET-2": "#0D1117",
-        "$WIDGET-2-H": "#13181E",
-        "$FONT": "Ubuntu Mono",
-        "$FONT-SIZE": "13px",
-        "$FOREGROUND": "#FFFFFF",
-        "$SELECTION-COLOR": "#000000"
-    }
-
-    name = "Mint Leaf"
-
-    def load(self):
-        theme = _THEME
-
-        for k in self.palette:
-            v = self.palette[k]
-            theme = theme.replace('"' + k + '"', v)
-
-        theme = theme.replace("$ROOT", "./src" if os.getenv("dev-env") else ":")
-
-        return theme
-
-    @staticmethod
-    def on_save_settings(kw):
-        if not kw.get("self"):
-            return
-
-        kw.get("self").main.load_theme()
-
-
-CLASS = MintLeaf
-VERSION = 0.1
-TYPE = "theme/qss"
-NAME = "MintLeaf"

@@ -5,7 +5,7 @@ import traceback
 from libs import Creator, QApplication, debug, get_db
 
 
-os.environ["dev-env-loading"] = '1'
+# os.environ["dev-env-loading"] = '1'
 os.environ["dev-env"] = '1'
 
 

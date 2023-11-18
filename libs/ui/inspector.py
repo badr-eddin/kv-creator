@@ -59,7 +59,7 @@ class Inspector(QDockWidget):
         self.loaded_ids = []
         self.elements = {}
         self.objects = {}
-        self.widget = loadUi(import_("ui/inspector.ui"))
+        self.widget = loadUi(import_("ui/inspector.ui", 'io'))
         self.tree: QTreeWidget = self.widget.tree
         self.setWidget(self.widget)
         self.tree.itemClicked.connect(self.item_clicked)  # Type: ignore
@@ -142,13 +142,13 @@ class Inspector(QDockWidget):
     def _tree_clicked(self):
         items = self.tree.selectedItems()
         if not items:
-            obj = self.main.buttons.get_obj("p-editor.properties")
+            obj = self.main.element("p-editor.properties")
             obj.clear()
 
     def save(self):
         if os.getenv("building") != "1" and os.getenv("editor-editing") != "1":
             _kv = ""
-            imports = self.main.buttons.get_obj("imports.imports") or []
+            imports = self.main.element("imports.imports") or []
 
             for imp in imports:
                 _kv += f"#:{imp[2]} {imp[1]} {imp[0]}\n"
@@ -159,9 +159,9 @@ class Inspector(QDockWidget):
             self.ids.clear()
             item = self.widget.tree.invisibleRootItem()
             _kv += self.tree_to_string(item, idn=id(item))
-            self.main.buttons.get_obj("p-editor.done")()
-            self.main.buttons.get_obj("imports.done")()
-            ew: QTabWidget = self.main.buttons.get_obj("editor.widget")
+            self.main.element("p-editor.done")()
+            self.main.element("imports.done")()
+            ew: QTabWidget = self.main.element("editor.widget")
             if ew:
                 ed = ew.currentWidget()
                 ed.reload = True
@@ -175,7 +175,7 @@ class Inspector(QDockWidget):
                         if hasattr(ed, "editor"):
                             ed.editor.setText(_kv)
                     else:
-                        self.main.buttons.get_obj("msg.pop")("target file not exists !", 3000)
+                        self.main.element("msg.pop")("target file not exists !", 3000)
                         debug(f"{temp_path} not found !", _c="e")
                 else:
                     ed.setText(_kv)  # Type: ignore
@@ -209,7 +209,7 @@ class Inspector(QDockWidget):
         if level:
             if item.text(0):
                 output += item.text(0) + ':\n'
-                props = self.main.buttons.get_obj("p-editor.props")
+                props = self.main.element("p-editor.props")
                 props = props.get(idn)
                 self.ids.append(idn)
                 obj = self.objects.get(id(item))
@@ -263,19 +263,19 @@ class Inspector(QDockWidget):
         text = obj.text()
 
         if not obj.path or not str(obj.path).endswith(".kv"):
-            self.main.buttons.get_obj("p-editor.done")()
+            self.main.element("p-editor.done")()
             return
 
         try:
             kv_file = Parser(content=text, filename=obj.path)
-            self.main.buttons.get_obj("console.done")()
-            self.main.buttons.get_obj("p-editor.done")()
+            self.main.element("console.done")()
+            self.main.element("p-editor.done")()
 
             if hasattr(obj.lexer(), "clear_errors"):
                 obj.lexer().clear_errors()
 
         except Exception as e:
-            self.main.buttons.get_obj("console.report")(f"{e}")
+            self.main.element("console.report")(f"{e}")
             if hasattr(obj.lexer(), "error"):
                 obj.lexer().error(e)
             return
@@ -297,10 +297,10 @@ class Inspector(QDockWidget):
             self.populate_tree_widget(root, _rot)
 
         self.tree.expandAll()
-        self.main.buttons.get_obj("editor.widget").currentWidget().reload = True
+        self.main.element("editor.widget").currentWidget().reload = True
         os.environ["building"] = "0"
 
     def item_clicked(self, item):
         pid = id(item)
-        func = self.main.buttons.get_obj("p-editor.load_properties")
+        func = self.main.element("p-editor.load_properties")
         func(self.elements.get(pid), pid)

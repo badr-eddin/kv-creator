@@ -34,7 +34,7 @@ class PropertyEditor(QDockWidget):
         # }
 
         self.kv_props = settings.pull("kivy/properties")
-        self.widget = loadUi(import_("ui/property-editor.ui"))
+        self.widget = loadUi(import_("ui/property-editor.ui", 'io'))
         self.properties: QTreeWidget = self.widget.properties
         self.setWidget(self.widget)
 
@@ -52,9 +52,9 @@ class PropertyEditor(QDockWidget):
         self.setEnabled(False)
 
     def _item(self):
-        current = self.main.buttons.get_obj("inspector.widget").tree.selectedItems()
+        current = self.main.element("inspector.widget").tree.selectedItems()
         if not current:
-            self.main.buttons.get_obj("msg.pop")("no item selected !", 2000)
+            self.main.element("msg.pop")("no item selected !", 2000)
             return
         return current[0]
 
@@ -96,12 +96,12 @@ class PropertyEditor(QDockWidget):
 
     def _update(self):
         os.environ["editor-editing"] = "0"
-        self.main.buttons.get_obj("inspector.save")()
+        self.main.element("inspector.save")()
 
     def _item_going_to_change(self, item):
         os.environ["editor-editing"] = "0"
 
-        current_item = self.main.buttons.get_obj("inspector.tree").selectedItems()
+        current_item = self.main.element("inspector.tree").selectedItems()
         if not current_item:
             return
 
@@ -112,7 +112,7 @@ class PropertyEditor(QDockWidget):
                 del self.props[id(current_item)][item.text(0)]
 
     def update_prop(self, item):
-        func = self.main.buttons.get_obj("inspector.save")
+        func = self.main.element("inspector.save")
         props_id = self.map.get(id(item))
         if props_id:
             rule = DemoParserRule()

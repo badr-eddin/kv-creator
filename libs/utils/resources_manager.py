@@ -1,17 +1,13 @@
 import ctypes
+import io
 import os
-import sys
+import sqlite3
 
+from PyQt6.QtGui import QPixmap, QImage
 from PyQt6.QtCore import QFile
+from PyQt6.uic import loadUi
 
 from .debugger import debug
-
-MODs = {
-    "r": QFile.OpenModeFlag.ReadOnly,
-    "w": QFile.OpenModeFlag.WriteOnly,
-    "w+": QFile.OpenModeFlag.ReadWrite,
-    "r+": QFile.OpenModeFlag.ReadWrite,
-}
 
 
 def get_db():
@@ -25,19 +21,34 @@ def get_db():
         exit(0)
 
 
-def import_(path: str, r=False, posix=False, mode='r'):
+def import_(path: str, r=None):
     if os.getenv("dev-env-loading"):
         return os.path.join("src", path) if not r else open(os.path.join("src", path), "r").read()
 
-    if not r:
-        file = QFile(f":/{path}")
-        file.open(MODs.get(mode))
-        return file if os.path.splitext(path)[1] not in [".png", ".svg"] else f":/{path}"
-    else:
-        if posix:
-            return f":/{path}"
-        else:
-            return read_file(f":/{path}")
+    cursor = sqlite3.connect(get_db()).cursor()
+    data = cursor.execute("SELECT content, type FROM resources WHERE key = ?", (path, )).fetchall()
+
+    if not data:
+        debug(f"{os.path.basename(path)} : missing resources file !", _c="e")
+        return
+
+    data, type_ = data[0]
+
+    if r == "r":
+        return data
+
+    if r == "io":
+        return io.BytesIO(data)
+
+    if type_ == "ui":
+        return loadUi(io.StringIO(data.decode()))
+
+    if type_ in ["png", "svg", "jpg", "jpeg"]:
+        img = QImage()
+        img.loadFromData(data)
+        return QPixmap(img)
+
+    return [data, type_]
 
 
 def read_file(path, b=False):
@@ -54,4 +65,3 @@ def get_object_from_memory(idn):
     if str(idn).isdigit():
         return ctypes.cast(int(str(idn)), ctypes.py_object).value
     return idn
-

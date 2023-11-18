@@ -15,7 +15,7 @@ class PCreator(QWidget):
         self.main = main
         self.tab_unselected = f"background: #13181E; border: none; border-left: 2px solid transparent"
         self.tab_selected = f"background: #0D1117; border: none; border-left: 2px solid #32926F"
-        self.widget = loadUi(import_("ui/project_creator.ui"))
+        self.widget = loadUi(import_("ui/project_creator.ui", 'io'))
         self.layout_: QVBoxLayout = set_layout(self, QVBoxLayout)
         self.stack: QStackedWidget = self.widget.stack
         self.responsive = settings.pull("kivy/responsive")
