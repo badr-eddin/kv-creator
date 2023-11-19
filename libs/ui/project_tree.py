@@ -242,7 +242,6 @@ class PTree(QDockWidget):
             return
 
         path = pathlib.Path(path)
-
         if path.is_file():
             self.main.element("editor.add_editor")(path.read_text(), path.as_posix())
 

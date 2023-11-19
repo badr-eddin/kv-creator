@@ -210,7 +210,7 @@ class Messenger(QWidget):
         self.__pos = self.POS.RIGHT
         self.close_btn = QPushButton(self)
         self.close_btn.setMaximumSize(QSize(25, 25))
-        self.close_btn.setIcon(QIcon(import_("img/style/close.svg")))
+        self.close_btn.setIcon(QIcon(import_("img/widgets/close.png")))
         self.close_btn.clicked.connect(self.close_)  # Type: ignore
         lay = QHBoxLayout(self)
         lay.setContentsMargins(6, 2, 2, 2)

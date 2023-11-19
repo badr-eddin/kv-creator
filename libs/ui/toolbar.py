@@ -9,8 +9,8 @@ class Button(QPushButton):
 
     def __init__(self, parent, on_click, bar):
         super(Button, self).__init__(parent)
-        self.setFixedSize(QSize(60, 25))
-        self.setIconSize(QSize(16, 16))
+        self.setFixedSize(QSize(30, 25))
+        self.setIconSize(QSize(20, 20))
         self.setObjectName("bar-button")
         self.bar = bar
         self.on_click = on_click
@@ -98,7 +98,8 @@ class Bar:
         for _b in sorted(self.buttons.keys()):
             obj = self.buttons.get(_b)
             btn = Button(self.ui, obj.get("function"), self)
-            btn.setText(_b)
+            # btn.setText(_b)
+            btn.setIcon(QIcon(import_(obj.get("icon"))))
             btn.obj = obj
             self.layout.addWidget(btn)
         self.layout.addItem(QSpacerItem(5000, 25, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed))

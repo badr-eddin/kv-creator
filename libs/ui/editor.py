@@ -59,7 +59,7 @@ class Editor(QsciScintilla):
     ERROR_INDICATOR = 0
     SELECTION_IND = 1
 
-    def __init__(self, parent, main, tabs):
+    def __init__(self, parent, main, tabs=None):
         super(Editor, self).__init__(parent)
         self.main = main
         self.clip = Clipboard()
@@ -160,11 +160,13 @@ class Editor(QsciScintilla):
         self.saved = False
         os.environ["editor-editing"] = "1"
 
-        mi = self.tabs.indexOf(self)
-        tit = self.tabs.tabText(mi)
-        tit = tit + " *" if not tit.endswith("*") else tit
-        self.saved = False
-        self.tabs.setTabText(mi, tit)
+        if self.tabs:
+            mi = self.tabs.indexOf(self)
+            tit = self.tabs.tabText(mi)
+            tit = tit + " *" if not tit.endswith("*") else tit
+            self.saved = False
+            self.tabs.setTabText(mi, tit)
+
         self.clip.register(self.text())
 
     # ****************************************
@@ -188,6 +190,10 @@ class Editor(QsciScintilla):
 
         self._setup_default_lexer(lxr)
         self.setLexer(lxr)
+
+    def set_path(self, path):
+        self.path = path
+        self.config_lexer()
 
     def _setup_default_lexer(self, lxr):
         lxr.setDefaultPaper(color("background"))
@@ -229,7 +235,8 @@ class Editor(QsciScintilla):
             try:
                 with open(self.path, "w") as file:
                     file.write(self.text())
-                self.tabs.setTabText(index, os.path.basename(self.path))
+                if self.tabs:
+                    self.tabs.setTabText(index, os.path.basename(self.path))
                 self.saved = True
             except Exception as e:
                 _ = e
@@ -516,6 +523,9 @@ class EditorWidget(QWidget):
 
     def close_editor_tab(self, index):
         tab = self.widget.widget(index)
+
+        self.main.editor_closed(tab)
+
         if isinstance(tab, Editor):
             if not getattr(tab, "saved"):
                 func = self.main.element("inform.inform")
@@ -545,6 +555,8 @@ class EditorWidget(QWidget):
         d.close()
         if tab in self.editors:
             self.editors.remove(tab)
+        if tab.path in self.opened_paths:
+            self.opened_paths.pop(tab.path)
 
     def add_external_window(self, wid, title="Kivy", path=None, pid=0, kwargs=None):
         debug("adding external window ... ")
@@ -676,18 +688,26 @@ class EditorWidget(QWidget):
         content = content if isinstance(content, str) else ""
         ed = Editor(self, self.main, self.widget)
         ed.reload = False
-        ed.path = path
-        ed.index = self.widget.indexOf(ed)
         ed.setText(content)
         ed.saved = True
         index = self.widget.addTab(ed, os.path.basename(path) if path else "New Tab")
-        ed.config_lexer()
+        ed.index = index
+        ed.set_path(path)
         self.editors.append(ed)
         self.widget.setTabToolTip(ed.index, path or "")
         self.widget.setCurrentWidget(ed)
         self.opened_paths.update({path: index})
 
         self.main.on("editor_tab_created", {"editor": self.widget.widget(index)})
+
+    @staticmethod
+    def get_text_editor(*args, path=""):
+        ed = Editor(*args)
+        ed.reload = False
+        ed.index = -1
+        ed.saved = True
+        ed.set_path(path)
+        return ed
 
     def initialize(self, _p):
         parent = _p or self.parent()

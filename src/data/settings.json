@@ -985,7 +985,7 @@
     },
     "-buttons": {
         "view": {
-            "icon": "img/toolbar/reload.png",
+            "icon": "img/toolbar/view.png",
             "function": [
                 "_global_connector",
                 [
@@ -994,10 +994,7 @@
             ]
         },
         "run": {
-            "icon": [
-                "img/toolbar/run.png",
-                "img/toolbar/break.png"
-            ],
+        "icon": "img/toolbar/run.png",
             "function": [
                 "_run_app",
                 []
@@ -1022,7 +1019,7 @@
             ]
         },
         "new": {
-            "icon": "img/toolbar/new.svg",
+            "icon": "img/toolbar/add.png",
             "function": [
                 "_global_connector",
                 [
@@ -1031,21 +1028,21 @@
             ]
         },
         "exit": {
-            "icon": "img/toolbar/new.svg",
+            "icon": "img/toolbar/exit.png",
             "function": [
                 "_close_app",
                 []
             ]
         },
         "find": {
-            "icon": "img/toolbar/new.svg",
+            "icon": "img/toolbar/find.png",
             "function": [
                 "search_",
                 []
             ]
         },
         "terminal": {
-            "icon": "img/toolbar/new.svg",
+            "icon": "img/toolbar/new-terminal.png",
             "function": [
                 "_global_connector",
                 [
@@ -1054,7 +1051,7 @@
             ]
         },
         "plugin": {
-            "icon": "img/toolbar/new.svg",
+            "icon": "img/toolbar/plugin-add.png",
             "function": [
                 "add_plugin",
                 []

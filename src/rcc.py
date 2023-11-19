@@ -1,7 +1,8 @@
 import os
 import pathlib
+import shutil
 import sqlite3
-
+import zipfile
 
 PATH = "./src"
 DB = "./db/resources.db"
@@ -38,10 +39,26 @@ def build_all():
     # *************************************
 
 
+def zip_plugin(pl):
+    m = os.path.join("src", "dst", pl + ".zip")
+    if os.path.exists(m):
+        os.remove(m)
+
+    shutil.make_archive(
+        os.path.join("src", "dst", pl),
+        "zip",
+        os.path.join("src", "plugins"),
+        pl
+    )
+
+
 k = input("*| >>> ")
 
 if k == "*":
     build_all()
+
+elif k.startswith("@"):
+    zip_plugin(k[1:])
 
 db.commit()
 db.close()

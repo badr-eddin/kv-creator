@@ -2,6 +2,8 @@ import os
 import sys
 import traceback
 
+from PyQt6.QtWidgets import QStyleFactory
+
 from libs import Creator, QApplication, debug, get_db
 
 

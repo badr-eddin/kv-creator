@@ -30,7 +30,7 @@ def import_(path: str, r=None):
 
     if not data:
         debug(f"{os.path.basename(path)} : missing resources file !", _c="e")
-        return
+        data = [[b"", os.path.basename(path).split(".")[-1]]]
 
     data, type_ = data[0]
 

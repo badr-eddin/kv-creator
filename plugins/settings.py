@@ -9,7 +9,7 @@ from importlib_metadata import distributions
 
 class SettingsMan(QWidget):
     ICON = "plugins/settings/settings.png"
-    
+
     def __init__(self, main, **kwargs):
         super(SettingsMan, self).__init__(kwargs.get("editor"))
         self.editor: QTabWidget = kwargs.get("editor")
@@ -75,16 +75,21 @@ class SettingsMan(QWidget):
     # ********************************************
 
     def browse4(self, w, r):
-        dialog = self.main.plugin("fbr")
-        if dialog:
+        dialog, plg = self.main.get_file_dialog()
+        if plg:
             dialog = dialog(main=self.main, std=self.std)
             dialog.open_save_file(
-                callback=lambda path: w.setText(path.as_posix()),
+                callback=w.setText,  # (path.as_posix()),
                 selection=dialog.Selection.Single,
-                encapsulate=pathlib.Path,
+                # encapsulate=pathlib.Path,
                 mode=dialog.Mode.Open,
                 regex=re.compile(r)
             )
+        else:
+            dialog = QFileDialog(self)
+            path = dialog.getOpenFileName(self)
+            if re.compile(r).match(path[0]):
+                w.setText(path[0])
 
     def item_done_editing(self, item):
         if self.already_edited:

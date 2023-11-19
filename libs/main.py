@@ -28,14 +28,22 @@ class Action(QAction):
 
 
 class Button(QPushButton):
+    name = ""
+
     def __init__(self, parent=None, text="", on_click=None, icon=None, editor=None):
         super(Button, self).__init__(parent)
         self.setText("")
         self.setToolTip(text)
+        self.name = text
         self.setFixedSize(QSize(25, 25))
         self.setIcon(icon)
         self.on_click = on_click
+
+        if editor:
+            editor.name = text
+
         self.editor = editor
+
         self.clicked.connect(self.__tr)  # Type: ignore
 
     def __tr(self):
@@ -54,6 +62,7 @@ class Creator(QMainWindow):
         self.plugins = {}
         self.__themes = {}
         self.plugins_actions = {}
+        self.opened_plugin_editors = []
         self.env_args = args
         self.app = app
         self.proc = pathlib.Path(os.path.join(os.path.expanduser("~"), ".kvc-project"))
@@ -66,7 +75,7 @@ class Creator(QMainWindow):
         self.close_win = True
         self.close_temp = False
         self.std = std
-        # self.act_hand = Handler(self)
+        self.status_bar = QStatusBar(self)
         self.buttons = Buttons(self)
         self.on_main_close = True
         self.menu = None
@@ -127,15 +136,6 @@ class Creator(QMainWindow):
             a0.ignore()
 
     # *****************************
-    def test(self):
-        pass
-
-    def restart(self):
-        pass
-
-    def element(self, k):
-        return self.buttons.get_obj(k)
-
     def load_elements(self):
         for com in COMPONENTS:
             debug("loading", '"' + com.__name__ + '"', "...")
@@ -191,65 +191,6 @@ class Creator(QMainWindow):
         _theme = themes[user_thm]
 
         app.setStyleSheet(load_style(_theme))
-
-    def _load_plugin(self, plugin):
-
-        if plugin.TYPE == "window/callable":
-            obj = plugin.CLASS
-
-        elif plugin.TYPE == "window/initiate":
-            target = self.widget.findChild(plugin.CLASS.ui_type, plugin.CLASS.ui)
-            obj = plugin.CLASS(parent=target, main=self, std=std)
-
-        elif plugin.TYPE == "window/editor":
-            obj = plugin
-            self.editors.append(obj)
-
-        elif plugin.TYPE == "theme/qss":
-            obj = plugin.CLASS()
-            _theme = obj.load(self)
-
-            themes = settings.pull("themes")
-            themes_c = settings.pull("themes-colors")
-
-            themes.update({
-                obj.name: _theme
-            })
-
-            if hasattr(obj, "colors"):
-                themes_c.update({obj.name.lower().replace(" ", ""): obj.colors})
-
-            settings.push("themes-colors", themes_c)
-            settings.push("themes", themes)
-
-        else:
-            obj = plugin.CLASS
-
-            ui, type_ = plugin.TYPE.split("/")
-
-            if not self.ui_plugins.get(ui):
-                self.ui_plugins[ui] = {}
-
-            if not self.ui_plugins[ui].get(type_):
-                self.ui_plugins[ui][type_] = []
-
-            self.ui_plugins[ui][type_].append(obj)
-
-        # *******************************
-        self.functions_co.update({plugin.NAME: obj})
-
-        for f in getattr(obj, "FUNCTIONS", []):
-            if not self.editor_functions.get(f):
-                self.editor_functions[f] = []
-
-            self.editor_functions[f].append(plugin.NAME)
-
-        if hasattr(obj, "ACTIONS"):
-            self.plugins_actions.update({plugin.CLASS: getattr(obj, "ACTIONS", {})})
-        # *******************************
-
-        self.plugins.update({plugin.NAME.lower(): obj or plugin})
-        self._plugins.update({plugin.NAME.lower(): plugin})
 
     def load_actions(self):
         actions = settings.pull("-actions")
@@ -312,25 +253,97 @@ class Creator(QMainWindow):
             self.widget.plugins.layout().addWidget(btn)
         self.widget.plugins.layout().addItem(SPItem())
 
-    # *****************************
-    def install_plugin(self):
-        dialog, plg = self.get_file_dialog()
+    def config_window(self):
+        self.setCentralWidget(self.widget)
+        self.resize(QSize(1200, 600))
+        self.setMouseTracking(True)
 
-        if plg:
-            paths = []
+        if os.path.exists(self.tmp):
+            shutil.rmtree(self.tmp)
+
+        os.mkdir(self.tmp)
+        os.environ["tmp"] = self.tmp
+
+        self.setStatusBar(self.status_bar)
+
+        QTimer(self).singleShot(5000, self.check_deps)
+
+    def load_project(self, proj):
+        self.close_temp = False
+        self.project_path = proj.as_posix()
+        x = self.element("ptree.load_files_at")
+        if x:
+            x(proj.as_posix())
+
+        self.showMaximized()
+
+    # *****************************
+    def _load_plugin(self, plugin):
+        if plugin.TYPE == "window/callable":
+            obj = plugin.CLASS
+
+        elif plugin.TYPE == "window/initiate":
+            target = self.widget.findChild(plugin.CLASS.ui_type, plugin.CLASS.ui)
+            obj = plugin.CLASS(parent=target, main=self, std=std)
+
+        elif plugin.TYPE == "window/editor":
+            obj = plugin
+            self.editors.append(obj)
+
+        elif plugin.TYPE == "theme/qss":
+            obj = plugin.CLASS()
+            _theme = obj.load(self)
+
+            themes = settings.pull("themes")
+            themes_c = settings.pull("themes-colors")
+
+            themes.update({
+                obj.name: _theme
+            })
+
+            if hasattr(obj, "colors"):
+                themes_c.update({obj.name.lower().replace(" ", ""): obj.colors})
+
+            settings.push("themes-colors", themes_c)
+            settings.push("themes", themes)
 
         else:
-            dialog = QFileDialog(self)
-            paths = dialog.getOpenFileNames(self, filter="*.zip")
+            obj = plugin.CLASS
 
-        self._install(paths)
+            ui, type_ = plugin.TYPE.split("/")
+
+            if not self.ui_plugins.get(ui):
+                self.ui_plugins[ui] = {}
+
+            if not self.ui_plugins[ui].get(type_):
+                self.ui_plugins[ui][type_] = []
+
+            self.ui_plugins[ui][type_].append(obj)
+
+        # *******************************
+        self.functions_co.update({plugin.NAME: obj})
+
+        for f in getattr(obj, "FUNCTIONS", []):
+            if not self.editor_functions.get(f):
+                self.editor_functions[f] = []
+
+            self.editor_functions[f].append(plugin.NAME)
+
+        if hasattr(obj, "ACTIONS"):
+            self.plugins_actions.update({plugin.CLASS: getattr(obj, "ACTIONS", {})})
+        # *******************************
+
+        self.plugins.update({plugin.NAME.lower(): obj or plugin})
+        self._plugins.update({plugin.NAME.lower(): plugin})
 
     def _install(self, paths):
+
         self.on("start_install_plugin", {"path": paths})
 
-        for path in paths[0]:
+        for path in paths or []:
             name = os.path.basename(path)
             if os.path.exists(path):
+                self.inform(f"install plugin from '{path}'", 2000)
                 if os.path.getsize(path) <= self.MAX_PLUGIN_SIZE:
 
                     if not zipfile.is_zipfile(path):
@@ -397,11 +410,72 @@ class Creator(QMainWindow):
 
         self.on("plugin_install_done", {"path": paths})
 
+    def _launch_editor(self, btn):
+        name = btn.name
+
+        if name in self.opened_plugin_editors:
+            self.element("msg.pop")(f"'{name}' already there !")
+        else:
+            cls = btn.editor(self, editor=self.element("editor"))
+            tabs = self.element("editor.widget")
+            index = tabs.addTab(cls, name)
+            tabs.setCurrentIndex(index)
+            self.opened_plugin_editors.append(name)
+
+    def _co_clicked(self, checked, dock: QDockWidget):
+        _ = self
+        dock.setVisible(checked)
+
+    # *****************************
+    def editor_closed(self, tab):
+        if hasattr(tab, "name"):
+            if tab.name:
+                self.opened_plugin_editors.remove(tab.name)
+
+    def test(self):
+        pass
+
+    def restart(self):
+        pass
+
+    def inform(self, txt, ms=0):
+        self.status_bar.showMessage(txt, ms)
+
+    def element(self, k):
+        return self.buttons.get_obj(k)
+
+    def install_plugin(self):
+        dialog, plg = self.get_file_dialog()
+
+        if plg:
+            dialog = dialog(main=self, std=std)
+            dialog.open_save_file(
+                callback=self._install,
+                selection=dialog.Selection.Multi,
+                encapsulate=pathlib.Path,
+                mode=dialog.Mode.Open,
+                entry=self.project_path,
+                regex=re.compile(r".*\.zip")
+            )
+
+        else:
+            dialog = QFileDialog(self)
+            paths = dialog.getOpenFileNames(self, filter="*.zip")
+
+            self._install(paths[0] if paths else [])
+
     def get_file_dialog(self):
         dialog = self.plugin("fbr")
 
         if dialog:
-            return dialog, True
+            if hasattr(dialog, "is_usable"):
+                if dialog.is_usable(std):
+                    return dialog, True
+                else:
+                    debug(f"main::get_fd : cannot be usable !", _c="e")
+            else:
+                return dialog, True
+
         return QFileDialog, False
 
     def on(self, func, kwargs=None):
@@ -432,12 +506,6 @@ class Creator(QMainWindow):
 
         if isinstance(tar, QDockWidget):
             tar.setVisible(sts)
-
-    def _launch_editor(self, btn):
-        cls = btn.editor(self, editor=self.element("editor"))
-        tabs = self.element("editor.widget")
-        index = tabs.addTab(cls, btn.toolTip())
-        tabs.setCurrentIndex(index)
 
     def add_action(self, _sc, _fn, parent=None):
         action = QAction(parent or self)
@@ -482,37 +550,11 @@ class Creator(QMainWindow):
         with open(self.proc, "w") as file:
             file.write(path.as_posix() if isinstance(path, pathlib.Path) else str(path))
 
-    def _co_clicked(self, checked, dock: QDockWidget):
-        _ = self
-        dock.setVisible(checked)
-
     def plugin(self, name, m=False):
         return (self.plugins if not m else self._plugins).get(name)
 
     def on_resize(self, fun):
         self.__on_size_change__.append(fun)
-
-    def config_window(self):
-        self.setCentralWidget(self.widget)
-        self.resize(QSize(1200, 600))
-        self.setMouseTracking(True)
-
-        if os.path.exists(self.tmp):
-            shutil.rmtree(self.tmp)
-
-        os.mkdir(self.tmp)
-        os.environ["tmp"] = self.tmp
-
-        QTimer(self).singleShot(5000, self.check_deps)
-
-    def load_project(self, proj):
-        self.close_temp = False
-        self.project_path = proj.as_posix()
-        x = self.element("ptree.load_files_at")
-        if x:
-            x(proj.as_posix())
-
-        self.showMaximized()
 
     def get_project(self):
         args = sys.argv
