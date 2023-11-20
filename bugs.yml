@@ -144,7 +144,7 @@
 145 - : add is_root to ptree context menu and add close project
 146 - : add git plugin next to settings
 147 - : add refactor code
-148: when close unsaved tab it doesnt remove it from register
+148 - : when close unsaved tab it doesnt remove it from register
 149: create custom autocompleter for kivy
 150 - : make plugins have context menu for editor
 151: make pro selection
@@ -156,4 +156,8 @@
 158 - : add to themes settings 'system theme'
 159 - : problem when plugins doesnt have db
 160 - : use single editor each time
-161: extend system theme for colors (as standalone inner class)
+161 * : extend system theme for colors (as standalone inner class)
+162: new project not implemented
+163: encrypt settings
+164: priority ofor plugins
+165 - : ptree doesnt trigger validation of kv

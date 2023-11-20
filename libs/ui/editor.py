@@ -186,6 +186,7 @@ class Editor(QsciScintilla):
                     break
 
         _lxr = self.main.on("lexer_setup_done", {"color": color, "path": self.path})
+        _lxr = (_lxr[0] if len(_lxr) >= 1 else _lxr) if type(_lxr) is list else _lxr
         lxr = _lxr if isinstance(_lxr, QsciLexer) else lxr
 
         self._setup_default_lexer(lxr)
@@ -534,7 +535,7 @@ class EditorWidget(QWidget):
                      on_deny=lambda d: self._single_deny(index, d, tab), sts=0)
             else:
                 self.widget.removeTab(index)
-                self._super_done()
+                self.super_done()
                 if tab.path in self.opened_paths:
                     self.opened_paths.pop(tab.path)
 
@@ -576,7 +577,7 @@ class EditorWidget(QWidget):
     def _save_confirmed(self, tab, index, _d, c=True):
         tab.save_content(index)
         _d.close()
-        self._super_done()
+        self.super_done()
         if c:
             self.widget.removeTab(index)
             if tab.path in self.opened_paths:
@@ -590,7 +591,7 @@ class EditorWidget(QWidget):
         if isinstance(editor, Editor):
             editor.save_content(self.widget.currentIndex())  # Type: ignore
 
-    def _super_done(self):
+    def super_done(self):
         self.main.element("inspector.done")()
         self.main.element("p-editor.done")()
         self.main.element("imports.done")()
@@ -648,7 +649,7 @@ class EditorWidget(QWidget):
 
         if widget:
             os.environ["building"] = "1"
-            self._super_done()
+            self.super_done()
             widget.reload_it()
             widget.load_cls()
 
@@ -685,14 +686,15 @@ class EditorWidget(QWidget):
             return
 
         debug(f"create new tab '{path or 'anonymous'}'")
+
         content = content if isinstance(content, str) else ""
         ed = Editor(self, self.main, self.widget)
         ed.reload = False
         ed.setText(content)
         ed.saved = True
+        ed.set_path(path)
         index = self.widget.addTab(ed, os.path.basename(path) if path else "New Tab")
         ed.index = index
-        ed.set_path(path)
         self.editors.append(ed)
         self.widget.setTabToolTip(ed.index, path or "")
         self.widget.setCurrentWidget(ed)

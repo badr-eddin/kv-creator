@@ -1264,7 +1264,7 @@
             "close project": {
                 "callback": "close_project",
                 "multi": false,
-                "icon": "img/style/close.png",
+                "icon": "img/widgets/close.png",
                 "check": "is_root"
             },
             "new project": {

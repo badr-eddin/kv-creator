@@ -2,7 +2,7 @@ import collections
 import os
 import re
 from ..utils import *
-from kivy.lang import Parser
+from kivy.lang import Parser, ParserException
 
 
 class DemoParserRule:
@@ -10,6 +10,38 @@ class DemoParserRule:
     properties: dict
     id: str
     value: str
+
+
+class ThreadedParser(QThread):
+    on_error = pyqtSignal(object, list)
+    on_finish = pyqtSignal(object, object)
+
+    def __init__(self, parent, text, path, arg=None):
+        super(ThreadedParser, self).__init__(parent)
+        self.path = path
+        self.text = text
+        self.arg = arg
+
+    def run(self):
+        try:
+            parsed = Parser(content=self.text, filename=self.path)
+
+            if self.arg:
+                self.on_finish.emit(self.arg, parsed)
+            else:
+                self.on_finish.emit(parsed)
+
+        except Exception as e:
+            debug(f"thread::parse : {e.msg}", _c="e")
+            self.on_error.emit(self.arg, [
+                {
+                    "type": "error",
+                    "message": e.msg,
+                    "line": e.lineno
+                }
+            ])
+
+        self.finished.emit()
 
 
 class Inspector(QDockWidget):
@@ -49,12 +81,15 @@ class Inspector(QDockWidget):
         re.compile("vkeyboard$"): "img/editors/kve/keyboard.png",
     }
 
+    FUNCTIONS = ["on_cursor_moved"]
+
     def __init__(self, parent, main):
         super(Inspector, self).__init__(parent)
         self.main = main
         self.loading = False
         self.prev_item = None
         self.indent_map = {}
+        self.lines_map = {}
         self.ids = []
         self.loaded_ids = []
         self.elements = {}
@@ -134,6 +169,47 @@ class Inspector(QDockWidget):
         self.tree.update()
         self.update()
         self.save()
+
+    @staticmethod
+    def on_cursor_moved(kwargs):
+        try:
+            if not settings.pull("user-prefs/detect-kivy-item"):
+                return
+
+            editor = kwargs.get("editor")
+
+            if not isinstance(editor, QsciScintilla):
+                return
+
+            if not hasattr(editor, "path"):
+                return
+
+            if not str(editor.path).endswith(".kv"):
+                return
+
+            text = editor.text().splitlines(False)
+            line = kwargs.get("pos")[0]
+
+            if line + 1 > len(text):
+                return
+
+            if not text[line] or re.match(r"^\s*#.*.", text[line]):
+                return
+
+            if not re.match(r"\s*\w+\s*:\s*$", text[line]):
+                return
+
+            tree: QTreeWidget = editor.main.element('inspector.tree')
+            lines_map: dict = editor.main.element('inspector.lines_map')
+            item: QTreeWidgetItem = lines_map.get(line)
+
+            if item:
+                tree.clearSelection()
+                item.setSelected(True)
+                editor.main.element('inspector.item_clicked')(item)
+
+        except Exception as e:
+            debug(f"inspector::cursor_moved: {e}", _c="e")
 
     @staticmethod
     def _item_going_to_change():
@@ -232,15 +308,16 @@ class Inspector(QDockWidget):
 
     def populate_tree_widget(self, parent, kivy_widget):
         def load(child):
-            # if child.name in string.ascii_letters:
             text = str(child.name or "Widget")
             item = QTreeWidgetItem(parent)
             self.set_item_icon(text, item)
             item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
+            item.setData(0, Qt.ItemDataRole.UserRole, child.line)
             item.setText(0, text)
             self.loaded_ids.append(id(item))
             events = [(i.name, i) for i in child.handlers]
             self.elements[id(item)] = child.properties
+            self.lines_map[child.line] = item
             self.elements[id(item)].update(
                 collections.OrderedDict(events)
             )
@@ -254,6 +331,43 @@ class Inspector(QDockWidget):
         else:
             load(kivy_widget)
 
+    def parsing_finished(self, obj, parsed):
+        self.main.element("console.done")()
+        self.main.element("p-editor.done")()
+
+        if hasattr(obj.lexer(), "clear_errors"):
+            obj.lexer().clear_errors()
+
+        self.parsing_done_well(parsed)
+
+    def parsing_crashed(self, obj, errors):
+        self.main.element("console.report")(errors)
+
+    def parsing_done_well(self, parsed_kv):
+        if not parsed_kv.root and not parsed_kv.rules:
+            return
+
+        for rot in [parsed_kv.root] + parsed_kv.rules:
+            if not rot:
+                continue
+
+            _rot = rot[1] if type(rot) is tuple else rot
+            root = QTreeWidgetItem(self.tree)
+
+            self.set_item_icon(_rot.name, root)
+            root.setText(0, _rot.name)
+            root.setFlags(root.flags() | Qt.ItemFlag.ItemIsEditable)
+
+            self.lines_map[_rot.line] = root
+            self.elements[id(root)] = _rot.properties
+            self.objects[id(root)] = _rot
+
+            self.populate_tree_widget(root, _rot)
+
+        self.tree.expandAll()
+        self.main.element("editor.widget").currentWidget().reload = True
+        os.environ["building"] = "0"
+
     def load_class(self, obj):
         self.prev_item = self.tree.currentItem()
 
@@ -266,39 +380,10 @@ class Inspector(QDockWidget):
             self.main.element("p-editor.done")()
             return
 
-        try:
-            kv_file = Parser(content=text, filename=obj.path)
-            self.main.element("console.done")()
-            self.main.element("p-editor.done")()
-
-            if hasattr(obj.lexer(), "clear_errors"):
-                obj.lexer().clear_errors()
-
-        except Exception as e:
-            self.main.element("console.report")(f"{e}")
-            if hasattr(obj.lexer(), "error"):
-                obj.lexer().error(e)
-            return
-
-        if not kv_file.root and not kv_file.rules:
-            return
-
-        for rot in [kv_file.root] + kv_file.rules:
-            if not rot:
-                continue
-
-            _rot = rot[1] if type(rot) is tuple else rot
-            root = QTreeWidgetItem(self.tree)
-            self.set_item_icon(_rot.name, root)
-            root.setText(0, _rot.name)
-            root.setFlags(root.flags() | Qt.ItemFlag.ItemIsEditable)
-            self.elements[id(root)] = _rot.properties
-            self.objects[id(root)] = _rot
-            self.populate_tree_widget(root, _rot)
-
-        self.tree.expandAll()
-        self.main.element("editor.widget").currentWidget().reload = True
-        os.environ["building"] = "0"
+        thread = ThreadedParser(self, text, obj.path, obj)
+        thread.on_error.connect(self.parsing_crashed)
+        thread.on_finish.connect(self.parsing_finished)
+        thread.start()
 
     def item_clicked(self, item):
         pid = id(item)

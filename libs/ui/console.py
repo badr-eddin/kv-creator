@@ -31,7 +31,7 @@ class Console(QDockWidget):
         self.setWidget(self.widget)
         self.problems.itemDoubleClicked.connect(self._item_double_clicked)
 
-    def report(self, messages: [str]):
+    def report(self, messages: list):
         self.done()
         for message in messages:
             if message.get("type") not in self.icons:

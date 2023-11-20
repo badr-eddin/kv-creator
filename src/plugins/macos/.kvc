@@ -1,0 +1,4 @@
+entry = "macos.py"
+src = "src"
+name = "macos"
+resources = ["macos.qss"]

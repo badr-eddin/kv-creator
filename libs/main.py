@@ -144,7 +144,17 @@ class Creator(QMainWindow):
             else:
                 par = self.widget.findChild(com.ui_type, com.ui)  # component parent
             component = com(par, self)
-            self.components.update({(com.name if hasattr(com, "name") else com.__name__).lower(): component})
+            name = (com.name if hasattr(com, "name") else com.__name__).lower()
+            self.components.update({name: component})
+
+            self.functions_co.update({name: component})
+
+            for f in getattr(component, "FUNCTIONS", []):
+                if not self.editor_functions.get(f):
+                    self.editor_functions[f] = []
+
+                self.editor_functions[f].append(name)
+
             component.initialize(par)
 
     def build_components_menu(self):
@@ -485,21 +495,25 @@ class Creator(QMainWindow):
         if not funcs:
             return
 
+        res = []
+
         for func in funcs:
+
             func = self.functions_co.get(func)
 
             if not func:
-                return
+                continue
 
             func = getattr(func, _f)
-
             if not func:
-                return
+                continue
 
             try:
-                return func(kwargs)
+                res.append(func(kwargs) or "")
             except Exception as e:
                 debug(f"main::on('{_f}') {e}", _c="e")
+
+        return res[0] if len(res) == 1 else res
 
     def show_this(self, nm, sts=True):
         tar = self.element(nm)
