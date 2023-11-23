@@ -921,7 +921,8 @@
         "responsive-min": [
             360,
             768
-        ]
+        ],
+        "escapable-chars": ["\\", "\"", "'", "n", "t", "r", "b", "f", "v"]
     },
     "-actions": {
         "quit": {

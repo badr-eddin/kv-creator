@@ -24,10 +24,10 @@ class Mak:
         "$SELECTION-COLOR": "#000000"
     }
 
-    name = "Mak"
+    name = "MacOs"
 
     def load(self, main):
-        theme = main.std.import_("plugins/mak/mak.qss", 'io').read().decode()
+        theme = main.std.import_("plugins/macos/macos.qss", 'io').read().decode()
 
         for k in self.palette:
             v = self.palette[k]

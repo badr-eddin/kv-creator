@@ -1,7 +1,6 @@
 import os
 import pathlib
 import send2trash
-
 from ..utils import *
 from . import InLineInput
 
@@ -17,7 +16,6 @@ class MAction(QAction):
     def __clicked(self):
         if self.on_click:
             self.on_click(*(self.args or ()))
-
 
 class Menu(QMenu):
     def __init__(self, main, parent):
@@ -130,6 +128,15 @@ class Menu(QMenu):
         debug("opening file ...")
         item = self.get_item_s(obj.get("multi"))
         self.parent.open_file(item[0][0])
+
+    def new_project(self, _=None):
+        self.close_project(d=False)
+
+    def close_project(self, _=None, d=True):
+        with open(self.main.proc, "w") as f:
+            f.write("")
+
+        self.main.get_project(d)
 
 
 class PTree(QDockWidget):

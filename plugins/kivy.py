@@ -103,6 +103,14 @@ class KivyLexer(QsciLexerCustom):
     FILES = [".kv"]
     COMMENT = "#"
 
+    class CONFIG:
+        string = False
+        comment = False
+        custom_class = False
+        alais = False
+        error = False
+        escape = False
+
     def __init__(self, parent, main, std=None):
         super(KivyLexer, self).__init__(parent)
         std = std or main.std
@@ -113,9 +121,11 @@ class KivyLexer(QsciLexerCustom):
         self.parent = parent
         self.aliases = []
         self.errors = []
+        self.config = self.CONFIG()
         self.props = list((std.settings.pull("kivy/properties") or {}).keys())
         self.classes = std.settings.pull("kivy/classes")
         self.keywords = std.settings.pull("kivy/keywords")
+        self.escapable_chars = std.settings.pull("kivy/escapable-chars")
 
         self.setColor(std.color("foreground"), self.styles.get("default"))
         self.setColor(std.color("c4"), self.styles.get("class"))
@@ -145,167 +155,110 @@ class KivyLexer(QsciLexerCustom):
         self.parent.setAutoCompletionSource(self.parent.AutoCompletionSource.AcsAll)
         self.parent.setLexer(self)
 
-    def _style_it(self, group_name, style_name, valid_tokens: int | list | tuple | str, pattern, text):
-        iterator = pattern.finditer(text)
-        for match_ in iterator:
-            token_ = match_.group(group_name)
-            self.startStyling(match_.start(group_name))
-            if valid_tokens == -1 or token_ in valid_tokens:
-                self.setStyling(len(token_), self.styles.get(style_name))
-            else:
-                self.setStyling(len(token_), self.styles.get("default"))
-
-    def _style_classes_and_props(self, text):
-        classes_pattern = re.compile(r"^\s*(?P<class>\w+)\s*:\s*(?=\s*$)",
-                                     flags=re.MULTILINE | re.UNICODE)
-        props_pattern = re.compile(r"^\s*(?P<property>\w+)\s*:(?P<value>.+?)(?=\s*(?:\w+\s*:\s*|$))",
-                                   flags=re.MULTILINE | re.UNICODE)
-
-        self._style_it("property", "prop", self.props, props_pattern, text)
-        self._style_it("class", "class", self.classes, classes_pattern, text)
-
-    def _style_keywords(self, text):
-        aliases_pattern = re.compile(
-            r"^#:(?P<import>import)\s+(?P<alias>\w+)\s+(?P<src>[.\w'\"]+)\s*$|"
-            r"^#:(?P<set>set)\s+(?P<var>\w+)\s+(?P<value>['\"]*(.*?)['\"]*)\s*$",
-            re.MULTILINE | re.UNICODE)
-
-        aliases = []
-        iterator = aliases_pattern.finditer(text)
-        for al in iterator:
-            aliases.append(al.group("alias") or al.group("var"))
-
-        aliases.extend(self.keywords)
-
-        keywords_pattern = "|".join(re.escape(keyword) for keyword in aliases)
-
-        keyw_value_pattern = re.compile(
-            r"^\s*\w+\s*:(?P<line_content>.+)$",
-            re.MULTILINE
-        )
-        keyword_pattern = re.compile(
-            r"\b(?P<keyword>" + keywords_pattern + r")\b"
-        )
-
-        for match in keyw_value_pattern.finditer(text):
-            line_content = match.group("line_content")
-            start_position = match.start("line_content")
-            self.startStyling(start_position)
-            self.setStyling(len(line_content), self.styles.get("default"))
-            for kw_match in keyword_pattern.finditer(line_content):
-                self.startStyling(start_position + kw_match.start("keyword"))
-                if kw_match.group("keyword") in aliases:
-                    self.setStyling(len(kw_match.group("keyword")), self.styles.get("keywords"))
-
-    def _style_digits(self, text):
-        digit_pattern = re.compile(r"(?<![a-zA-Z0-9_.])(?P<float>[+-]?(\d+\.\d*|\.\d+))(?![a-zA-Z0-9_])|"
-                                   r"(?<![a-zA-Z0-9_.])(?P<int>[+-]?\d+)(?![a-zA-Z0-9_])", re.MULTILINE | re.UNICODE)
-        for dgt in digit_pattern.finditer(text):
-            group = "int" if dgt.group("int") else "float"
-            self.startStyling(dgt.start(group))
-            self.setStyling(len(dgt.group(group)), self.styles.get("digit"))
-
-    def _style_comments_and_imports(self, text):
-        # Comments
-        comments_pattern = re.compile(r"#\s*.*?$", re.MULTILINE | re.UNICODE)
-        for cmt in comments_pattern.finditer(text):
-            self.startStyling(cmt.start())
-            self.setStyling(len(cmt.group(0)), self.styles.get("comment"))
-
-        # Imports and variables
-        ims_pattern = re.compile(
-            r"\s*#\s*:\s*(?P<import>import)\s+(?P<alias>\w+)\s+(?P<src>[.\w'\"]+)\s*$|"
-            r"\s*#\s*:\s*(?P<set>set)\s+(?P<var>\w+)\s+(?P<value>['\"]*(.*?)['\"]*)\s*$",
-            re.MULTILINE | re.UNICODE)
-
-        for cmt in ims_pattern.finditer(text):
-            group = "import" if cmt.group("import") else "set"
-
-            self.startStyling(cmt.start(group))
-            self.setStyling(len(cmt.group(group)), self.styles.get("keywords"))
-
-            cnd_grp = "alias" if group == "import" else "var"
-
-            self.startStyling(cmt.start(cnd_grp))
-            self.setStyling(len(cmt.group(cnd_grp)), self.styles.get("alias"))
-
-            self.aliases.append(cmt.group(cnd_grp))
-
-            if group == "import":
-                self.startStyling(cmt.start("src"))
-                self.setStyling(len(cmt.group("src")), self.styles.get("string"))
-            else:
-                value = cmt.group("value")
-                self.startStyling(cmt.start("value"))
-
-                if value.isdigit():
-                    self.setStyling(len(value), self.styles.get("digit"))
-
-                elif value in self.std.settings.pull("kivy/keywords"):
-                    self.setStyling(len(value), self.styles.get("keywords"))
-
-                else:
-                    if re.match(r"'.*?'\s*$|\".*?\"\s*$", value, re.MULTILINE | re.UNICODE):
-                        self.setStyling(len(value or ""), self.styles.get("string"))
-                    else:
-                        self.setStyling(len(value or ""), self.styles.get("error"))
-
-        kvv_pattern = re.compile(r"\s*#\s*:\s*(?P<kivy>kivy)\s+(?P<version>.*)$", re.MULTILINE | re.UNICODE)
-
-        for v in kvv_pattern.finditer(text):
-            self.startStyling(v.start("kivy"))
-            self.setStyling(len(v.group("kivy")), self.styles.get("keywords"))
-
-            self.startStyling(v.start("version"))
-            version = v.group("version")
-
-            if version[-1] not in string.digits or not re.match(r"\d+\.*\d*\.*\d*\s*", version):
-                self.setStyling(len(version), self.styles.get("error"))
-            else:
-                self.setStyling(len(version), self.styles.get("digit"))
-
-        self.editor().update()
-
-    def _style_quote(self, text):
-        line_pattern = re.compile(r'^\s*\w+\s*:\s*.*?(?=\n|$)', re.MULTILINE | re.UNICODE)
-        line_matches = line_pattern.finditer(text)
-
-        for line_match in line_matches:
-            line = line_match.group(0)
-            quote_matches = re.finditer(r'".*?[^\\]"' + r"|'.*?[^\\]'", line)
-            for quote_match in quote_matches:
-                absolute_start = line_match.start() + quote_match.start()
-                co = quote_match.group()
-                self.startStyling(absolute_start)
-                self.setStyling(len(co), self.styles["string"])
-
-            # Capture escaped quotes and apply "esc" style
-            escapable = ['\\', '\'', '"', 'a', 'b', 'f', 'n', 'r', 't', 'v']
-            escaped_quote_matches = re.finditer(r'\\.', line)
-            for esc_match in escaped_quote_matches:
-                if esc_match.group()[1] in escapable:
-                    absolute_start = line_match.start() + esc_match.start()
-                    self.startStyling(absolute_start)
-                    self.setStyling(2, self.styles["escape"])
-
     def description(self, *_):
         return "KivyLexer"
 
     def styleText(self, start, end):
-        path = getattr(self.editor(), "path")
         self.startStyling(start)
 
-        if not path or str(path).endswith(".kv"):
-            text = self.editor().text()
-            self._style_keywords(text)
+        txt = self.editor().text()
+        text = txt[start:end]
 
-            self._style_digits(text)
+        p = re.compile(r"(\{\.|\.\}|\#|\'\'\'|\"\"\"|\n|\s+|\w+|\W)")
+        token_list = [(token, len(bytearray(token, "utf-8"))) for token in p.findall(text)]
 
-            self._style_classes_and_props(text)
+        for i, token in enumerate(token_list):
+            # --------------------------------
 
-            self._style_quote(text)
+            next1 = ''
 
-            self._style_comments_and_imports(text)
+            if i + 1 < len(token_list):
+                next1 = token_list[i + 1][0]
+
+            # --------------------------------
+            if self.config.escape:
+                self.setStyling(1, self.styles.get(str(self.config.escape)))
+                self.setStyling(token[1] - 1, self.styles.get("string"))
+                self.config.escape = False
+
+            elif self.config.error:
+                self.setStyling(token[1], self.styles.get("error"))
+
+            elif self.config.custom_class:
+                if token[0] == "@":
+                    self.config.custom_class = "class"
+                    self.setStyling(token[1], self.styles.get("default"))
+
+                elif re.match(r"\s*>$", token[0]):
+                    self.config.custom_class = False
+                    self.setStyling(token[1], self.styles.get("default"))
+
+                else:
+                    x = self.config.custom_class
+                    self.setStyling(
+                        token[1],
+                        self.styles.get(
+                            (x if type(x) is str else "alias") if token[0] in self.classes else "alias"
+                        ))
+
+            elif self.config.comment:
+                self.setStyling(token[1], self.styles.get("comment"))
+                if re.match(r"\s*\n$", token[0]):
+                    self.config.comment = False
+
+            elif self.config.string:
+                if self.config.string == token[0] or re.match(r"\s*\n$", token[0]):
+                    self.config.string = False
+
+                if token[0] == "\\":
+
+                    if next1[0] in self.escapable_chars:
+                        x = "escape"
+                    else:
+                        x = "comment"
+
+                    self.config.escape = x
+
+                    self.setStyling(1, self.styles.get(x))
+                else:
+                    self.setStyling(token[1], self.styles.get("string"))
+
+            else:
+                if token[0] in self.classes:
+                    self.setStyling(token[1], self.styles.get("class"))
+
+                elif token[0] == "<":
+                    self.config.custom_class = True
+                    self.setStyling(token[1], self.styles.get("default"))
+
+                elif token[0] in self.keywords:
+                    self.setStyling(token[1], self.styles.get("keywords"))
+
+                elif token[0] in self.props:
+                    self.setStyling(token[1], self.styles.get("prop"))
+
+                elif token[0].isdigit():
+                    self.setStyling(token[1], self.styles.get("digit"))
+
+                elif token[0] in ['"', "'"]:
+                    self.config.string = token[0]
+
+                    self.setStyling(token[1], self.styles.get("string"))
+
+                elif token[0] == "#":
+                    if token_list[i + 1][0] == ":":
+                        if token_list[i + 2][0] in ["set", "import"]:
+                            self.setStyling(token[1], self.styles.get("default"))
+                            self.config.alias = token_list[i + 2][0]
+                        else:
+                            self.setStyling(token[1], self.styles.get("comment"))
+                            self.config.comment = True
+                    else:
+                        self.config.comment = True
+                        self.setStyling(token[1], self.styles.get("comment"))
+
+                else:
+                    self.setStyling(token[1], self.styles.get("default"))
 
     def run(self, callback=None):
         path = getattr(self.editor(), "path")

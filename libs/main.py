@@ -570,7 +570,7 @@ class Creator(QMainWindow):
     def on_resize(self, fun):
         self.__on_size_change__.append(fun)
 
-    def get_project(self):
+    def get_project(self, done=False):
         args = sys.argv
 
         if self.proc.is_file():
@@ -578,14 +578,15 @@ class Creator(QMainWindow):
         else:
             project = pathlib.Path(args[0] if args else "")
 
-        if project:
+        if project and not done:
             if project.is_dir():
                 if Creator.PROJECT_FILE in os.listdir(project.as_posix()):
                     self.load_project(project)
                     return
 
-        self.ptr = PCreator(main=self)
-        self.ptr.show()
+        if not done:
+            self.ptr = PCreator(main=self)
+            self.ptr.show()
 
         self.close_temp = True
         self.close()

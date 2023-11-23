@@ -34,9 +34,9 @@ class SettingsMan(QWidget):
     def conf_window(self):
         self.std.set_layout(self, QVBoxLayout, (1, 1, 1, 1))
 
-        self.widget.kv_keywords.itemChanged.connect(self.item_done_editing)
-        self.widget.kv_classes.itemChanged.connect(self.item_done_editing)
-        self.widget.kv_props.itemChanged.connect(self.item_done_editing)
+        self.widget.kv_keywords.itemChanged.connect(lambda i: self.item_done_editing(i, "kw"))
+        self.widget.kv_classes.itemChanged.connect(lambda i: self.item_done_editing(i, "cls"))
+        self.widget.kv_props.itemChanged.connect(lambda i: self.item_done_editing(i, "prp"))
         self.widget.pip_search.textChanged.connect(self.pip_search)
 
         self.widget.progress.setStyleSheet("background: transparent;")
@@ -79,9 +79,8 @@ class SettingsMan(QWidget):
         if plg:
             dialog = dialog(main=self.main, std=self.std)
             dialog.open_save_file(
-                callback=w.setText,  # (path.as_posix()),
+                callback=w.setText,
                 selection=dialog.Selection.Single,
-                # encapsulate=pathlib.Path,
                 mode=dialog.Mode.Open,
                 regex=re.compile(r)
             )
@@ -91,7 +90,7 @@ class SettingsMan(QWidget):
             if re.compile(r).match(path[0]):
                 w.setText(path[0])
 
-    def item_done_editing(self, item):
+    def item_done_editing(self, item, sn):
         if self.already_edited:
             self.already_edited = False
             return
@@ -102,6 +101,12 @@ class SettingsMan(QWidget):
             if widget:
                 self.widget.kv_props.removeItemWidget(item, 1)
                 item.setText(1, widget.currentText())
+
+        {
+            "kw": self.widget.kv_keywords,
+            "cls": self.widget.kv_classes,
+            "prp": self.widget.kv_props
+        }[sn].closePersistentEditor(item, 0)
 
         item.setFlags(QTreeWidgetItem().flags())
 
@@ -224,6 +229,8 @@ class SettingsMan(QWidget):
         item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
         self.widget.kv_classes.addTopLevelItem(item)
         self.widget.kv_classes.scrollToItem(item)
+        item.setSelected(True)
+        self.widget.kv_classes.openPersistentEditor(item, 0)
 
     def _minus_cls(self):
         items = self.widget.kv_classes.selectedItems() or []
@@ -240,6 +247,8 @@ class SettingsMan(QWidget):
         self.widget.kv_props.addTopLevelItem(item)
         self.widget.kv_props.setItemWidget(item, 1, item_widget)
         self.widget.kv_props.scrollToItem(item)
+        item.setSelected(True)
+        self.widget.kv_props.openPersistentEditor(item, 0)
 
     def _minus_prop(self):
         items = self.widget.kv_props.selectedItems()
@@ -250,14 +259,16 @@ class SettingsMan(QWidget):
 
     def _add_keyword(self):
         k = "None"
-        item = QListWidgetItem()
-        item.setText(k)
+        item = QTreeWidgetItem()
+        item.setText(0, k)
         item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
-        self.widget.kv_keywords.addItem(item)
+        self.widget.kv_keywords.addTopLevelItem(item)
         self.widget.kv_keywords.scrollToItem(item)
+        item.setSelected(True)
+        self.widget.kv_keywords.openPersistentEditor(item, 0)
 
     def _minus_keyword(self):
-        items = self.widget.kv_classes.selectedItems() or []
+        items = self.widget.kv_keywords.selectedItems() or []
         for item in items:
             self.widget.kv_keywords.takeTopLevelItem(self.widget.kv_keywords.indexOfTopLevelItem(item))
 

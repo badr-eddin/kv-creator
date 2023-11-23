@@ -157,7 +157,13 @@
 159 - : problem when plugins doesnt have db
 160 - : use single editor each time
 161 * : extend system theme for colors (as standalone inner class)
-162: new project not implemented
+162 - : new project not implemented
 163: encrypt settings
-164: priority ofor plugins
+164: priority for plugins
 165 - : ptree doesnt trigger validation of kv
+166: use github student pack to get license for your app
+167: use lexer to report errors
+168 - : settings has problem in line 256
+169 - : add to settings 'add / remove ' keywrods
+170: on parse kv file, collect imports and export them as python code and use it with jedi
+171: kivy to string doesnt get custom classes properties

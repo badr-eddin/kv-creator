@@ -250,10 +250,10 @@ class SettingsMan(QWidget):
 
     def _add_keyword(self):
         k = "None"
-        item = QListWidgetItem()
-        item.setText(k)
+        item = QTreeWidgetItem()
+        item.setText(0, k)
         item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
-        self.widget.kv_keywords.addItem(item)
+        self.widget.kv_keywords.addTopLevelItem(item)
         self.widget.kv_keywords.scrollToItem(item)
 
     def _minus_keyword(self):

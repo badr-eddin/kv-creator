@@ -16,7 +16,7 @@ class ThreadedParser(QThread):
     on_error = pyqtSignal(object, list)
     on_finish = pyqtSignal(object, object)
 
-    def __init__(self, parent, text, path, arg=None):
+    def __init__(self, parent, text="", path="", arg=None):
         super(ThreadedParser, self).__init__(parent)
         self.path = path
         self.text = text
@@ -32,16 +32,29 @@ class ThreadedParser(QThread):
                 self.on_finish.emit(parsed)
 
         except Exception as e:
-            debug(f"thread::parse : {e.msg}", _c="e")
+            debug(f"thread::parse : {e.msg if hasattr(e, 'msg') else e}", _c="e")
             self.on_error.emit(self.arg, [
                 {
                     "type": "error",
-                    "message": e.msg,
-                    "line": e.lineno
+                    "message": getattr(e, "msg", str(e).replace("\n", " ")),
+                    "line": getattr(e, "lineno", 0),
                 }
             ])
 
         self.finished.emit()
+
+    def trigger(self, text, path, arg=None):
+        self.text = text
+        self.path = path
+
+        if arg:
+            self.arg = arg
+
+        if self.isRunning():
+            self.terminate()
+            self.wait()
+
+        self.run()
 
 
 class Inspector(QDockWidget):
@@ -88,6 +101,7 @@ class Inspector(QDockWidget):
         self.main = main
         self.loading = False
         self.prev_item = None
+        self.thread = ThreadedParser(self)
         self.indent_map = {}
         self.lines_map = {}
         self.ids = []
@@ -114,6 +128,8 @@ class Inspector(QDockWidget):
         self.setEnabled(False)
         self.setWindowTitle("Inspector")
 
+        self.thread.on_error.connect(self.parsing_crashed)
+        self.thread.on_finish.connect(self.parsing_finished)
         # self.tree.setIconSize(QSize(20, 20))
 
     def _remove_item(self):
@@ -340,7 +356,7 @@ class Inspector(QDockWidget):
 
         self.parsing_done_well(parsed)
 
-    def parsing_crashed(self, obj, errors):
+    def parsing_crashed(self, _, errors):
         self.main.element("console.report")(errors)
 
     def parsing_done_well(self, parsed_kv):
@@ -374,16 +390,14 @@ class Inspector(QDockWidget):
         self.tree.clear()
         self.elements.clear()
         self.objects.clear()
+
         text = obj.text()
 
         if not obj.path or not str(obj.path).endswith(".kv"):
             self.main.element("p-editor.done")()
             return
 
-        thread = ThreadedParser(self, text, obj.path, obj)
-        thread.on_error.connect(self.parsing_crashed)
-        thread.on_finish.connect(self.parsing_finished)
-        thread.start()
+        self.thread.trigger(text, obj.path, obj)
 
     def item_clicked(self, item):
         pid = id(item)
