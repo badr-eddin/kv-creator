@@ -56,8 +56,11 @@ class Editor(QsciScintilla):
     index = 0
     editor = True
 
-    ERROR_INDICATOR = 0
-    SELECTION_IND = 1
+    ERROR_INDICATOR = 14500
+    WARNING_INDICATOR = 14600
+    DEFAULT_INDICATOR = 14700
+
+    SELECTION_IND = 3
 
     def __init__(self, parent, main, tabs=None):
         super(Editor, self).__init__(parent)
@@ -115,11 +118,15 @@ class Editor(QsciScintilla):
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.customContextMenuRequested.connect(self.context_menu_requested)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.setIndicatorForegroundColor(DefaultTheme.error_c, self.ERROR_INDICATOR)
+        self.setIndicatorForegroundColor(QColor("#FF3333"), self.ERROR_INDICATOR)
+        self.setIndicatorForegroundColor(QColor("#FF5600"), self.WARNING_INDICATOR)
+        self.setIndicatorForegroundColor(QColor("#E5C07B"), self.DEFAULT_INDICATOR)
         self.setIndicatorOutlineColor(DefaultTheme.transparent_c, self.SELECTION_IND)
         self.indicatorDefine(self.IndicatorStyle.FullBoxIndicator, self.SELECTION_IND)
         self.setIndicatorForegroundColor(DefaultTheme.selection_bg_c, self.SELECTION_IND)
         self.indicatorDefine(QsciScintilla.IndicatorStyle.SquiggleIndicator, self.ERROR_INDICATOR)
+        self.indicatorDefine(QsciScintilla.IndicatorStyle.SquiggleIndicator, self.WARNING_INDICATOR)
+        self.indicatorDefine(QsciScintilla.IndicatorStyle.SquiggleIndicator, self.DEFAULT_INDICATOR)
 
         self.main.on("editor_context_menu_requested", {"editor": self})
 
@@ -628,6 +635,19 @@ class EditorWidget(QWidget):
     def _add_editor_on_open(self, path: pathlib.Path):
         if path:
             self.add_editor(path.read_text(), path.as_posix())
+
+    def point_under(self, *args):
+        editor = self.editor()
+        if editor:
+            editor.point_under(*args)
+
+    def editor(self, k=None, d=None) -> Editor | int:
+        if isinstance(self.widget.currentWidget(), Editor):
+            if not k:
+                return self.widget.currentWidget()
+
+            return getattr(self.widget.currentWidget(), str(k), d)
+        return 0
 
     @staticmethod
     def _check_file_mimetype(path: str):

@@ -2,7 +2,7 @@ import collections
 import os
 import re
 from ..utils import *
-from kivy.lang import Parser, ParserException
+from kivy.lang import Parser
 
 
 class DemoParserRule:
@@ -32,12 +32,17 @@ class ThreadedParser(QThread):
                 self.on_finish.emit(parsed)
 
         except Exception as e:
-            debug(f"thread::parse : {e.msg if hasattr(e, 'msg') else e}", _c="e")
+            if hasattr(e, 'msg'):
+                debug(f"thread::parse : {e.msg}", _c="e")
+
             self.on_error.emit(self.arg, [
                 {
                     "type": "error",
                     "message": getattr(e, "msg", str(e).replace("\n", " ")),
-                    "line": getattr(e, "lineno", 0),
+                    "line": getattr(e, "lineno", 0) + 1,
+                    "endLine": getattr(e, "lineno", 0) + 1,
+                    "column": 0,
+                    "endColumn": len(self.text.splitlines(False)[getattr(e, "lineno", 0)])
                 }
             ])
 
@@ -200,7 +205,7 @@ class Inspector(QDockWidget):
             if not hasattr(editor, "path"):
                 return
 
-            if not str(editor.path).endswith(".kv"):
+            if not str(getattr(editor, "path", "")).endswith(".kv"):
                 return
 
             text = editor.text().splitlines(False)
@@ -215,14 +220,14 @@ class Inspector(QDockWidget):
             if not re.match(r"\s*\w+\s*:\s*$", text[line]):
                 return
 
-            tree: QTreeWidget = editor.main.element('inspector.tree')
-            lines_map: dict = editor.main.element('inspector.lines_map')
+            tree: QTreeWidget = getattr(editor, "main").element('inspector.tree')
+            lines_map: dict = getattr(editor, "main").element('inspector.lines_map')
             item: QTreeWidgetItem = lines_map.get(line)
 
             if item:
                 tree.clearSelection()
                 item.setSelected(True)
-                editor.main.element('inspector.item_clicked')(item)
+                getattr(editor, "main").element('inspector.item_clicked')(item)
 
         except Exception as e:
             debug(f"inspector::cursor_moved: {e}", _c="e")
@@ -357,7 +362,8 @@ class Inspector(QDockWidget):
         self.parsing_done_well(parsed)
 
     def parsing_crashed(self, _, errors):
-        self.main.element("console.report")(errors)
+        if settings.pull("user-prefs/code-analyse"):
+            self.main.element("console.report")(errors)
 
     def parsing_done_well(self, parsed_kv):
         if not parsed_kv.root and not parsed_kv.rules:

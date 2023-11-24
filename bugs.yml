@@ -6,7 +6,7 @@
 6  - : in inspector implement search
 7  - : create a small widget like tooltip that represents search and follows cursor around the windows
 8  - : add cancel button to exit dialog
-9: implement char unicode styling factor in editor
+9  * : implement char unicode styling factor in editor
 10 - : on close app the dialog keep showing even if no tab open
 11 - : using regex and os walk, go throw a kivy lib and collect all properties
 12 - : on property key changed it adds new property, so when item entered delete the old prop
@@ -34,11 +34,11 @@
 34 - : edit imports and set and add \s*
 35 - : some properties actually are classes (Color)
 36 - : custom classes are not loaded
-37: remember last element when update
+37 - : remember last element when update
 38 * : get icons for properties (string, number ...)
 39 - : make autocmpeltion as plugin that could be added later
 40 - : find a method to implement plugins
-41: multiline doesnt apply on lexer
+41 - : multiline doesnt apply on lexer
 42 - : add in main window plugins tabs
 43 * : make plugin builder that it takes a package and build it to qrc
 44 - : scroll file dialog path bar
@@ -162,8 +162,11 @@
 164: priority for plugins
 165 - : ptree doesnt trigger validation of kv
 166: use github student pack to get license for your app
-167: use lexer to report errors
+167 - : use lexer to report errors
 168 - : settings has problem in line 256
 169 - : add to settings 'add / remove ' keywrods
 170: on parse kv file, collect imports and export them as python code and use it with jedi
 171: kivy to string doesnt get custom classes properties
+172: use kivy surfe to element to remember last slected elemnt
+173 - : create different indicators
+174: move plugins to another pos

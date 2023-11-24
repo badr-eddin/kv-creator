@@ -111,6 +111,14 @@ class KivyLexer(QsciLexerCustom):
         error = False
         escape = False
 
+        def reset(self):
+            self.string = False
+            self.comment = False
+            self.custom_class = False
+            self.alais = False
+            self.error = False
+            self.escape = False
+
     def __init__(self, parent, main, std=None):
         super(KivyLexer, self).__init__(parent)
         std = std or main.std
@@ -127,16 +135,18 @@ class KivyLexer(QsciLexerCustom):
         self.keywords = std.settings.pull("kivy/keywords")
         self.escapable_chars = std.settings.pull("kivy/escapable-chars")
 
-        self.setColor(std.color("foreground"), self.styles.get("default"))
-        self.setColor(std.color("c4"), self.styles.get("class"))
-        self.setColor(std.color("c1"), self.styles.get("prop"))
-        self.setColor(std.color("c3"), self.styles.get("string"))
-        self.setColor(std.color("Error"), self.styles.get("error"))
-        self.setColor(std.color("c1"), self.styles.get("escape"))
-        self.setColor(std.color("Comment"), self.styles.get("comment"))
-        self.setColor(std.color("c2"), self.styles.get("keywords"))
-        self.setColor(std.color("c7"), self.styles.get("digit"))
-        self.setColor(std.color("c6"), self.styles.get("alias"))
+        styles = std.duck(self.styles)
+
+        self.setColor(std.color("foreground"), styles.default)
+        self.setColor(std.color("c4"), styles.class_)
+        self.setColor(std.color("c1"), styles.prop)
+        self.setColor(std.color("c3"), styles.string)
+        self.setColor(std.color("Error"), styles.error)
+        self.setColor(std.color("c1"), styles.escape)
+        self.setColor(std.color("Comment"), styles.comment)
+        self.setColor(std.color("c2"), styles.keywords)
+        self.setColor(std.color("c7"), styles.digit)
+        self.setColor(std.color("c6"), styles.alias)
         self.setPaper(std.color("c6"), 10)
         self.setColor(std.color("Error"), 10)
 
@@ -167,6 +177,8 @@ class KivyLexer(QsciLexerCustom):
         p = re.compile(r"(\{\.|\.\}|\#|\'\'\'|\"\"\"|\n|\s+|\w+|\W)")
         token_list = [(token, len(bytearray(token, "utf-8"))) for token in p.findall(text)]
 
+        self.config.reset()
+
         for i, token in enumerate(token_list):
             # --------------------------------
 
@@ -183,6 +195,24 @@ class KivyLexer(QsciLexerCustom):
 
             elif self.config.error:
                 self.setStyling(token[1], self.styles.get("error"))
+
+            elif self.config.string:
+
+                if self.config.string == token[0] or re.match(r"\s*\n$", token[0]):
+                    self.config.string = False
+
+                if token[0] == "\\":
+
+                    if next1[0] in self.escapable_chars:
+                        x = "escape"
+                    else:
+                        x = "comment"
+
+                    self.config.escape = x
+
+                    self.setStyling(1, self.styles.get(x))
+                else:
+                    self.setStyling(token[1], self.styles.get("string"))
 
             elif self.config.custom_class:
                 if token[0] == "@":
@@ -205,23 +235,6 @@ class KivyLexer(QsciLexerCustom):
                 self.setStyling(token[1], self.styles.get("comment"))
                 if re.match(r"\s*\n$", token[0]):
                     self.config.comment = False
-
-            elif self.config.string:
-                if self.config.string == token[0] or re.match(r"\s*\n$", token[0]):
-                    self.config.string = False
-
-                if token[0] == "\\":
-
-                    if next1[0] in self.escapable_chars:
-                        x = "escape"
-                    else:
-                        x = "comment"
-
-                    self.config.escape = x
-
-                    self.setStyling(1, self.styles.get(x))
-                else:
-                    self.setStyling(token[1], self.styles.get("string"))
 
             else:
                 if token[0] in self.classes:

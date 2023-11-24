@@ -1,3 +1,4 @@
+import json
 import re
 import xdo
 from PyQt6.Qsci import QsciScintilla, QsciLexerCustom
@@ -31,30 +32,70 @@ class Console(QDockWidget):
         self.setWidget(self.widget)
         self.problems.itemDoubleClicked.connect(self._item_double_clicked)
 
+    def underline(self, m):
+        message = duck(m)
+
+        if message.type == "warning":
+            x = "WARNING_INDICATOR"
+
+        elif message.type == "error":
+            x = "ERROR_INDICATOR"
+
+        else:
+            x = "DEFAULT_INDICATOR"
+
+        x = self.main.element("editor.editor")(x)
+
+        if not x:
+            return
+
+        self.main.element("editor.point_under")(
+            message.line - 1, message.column,
+            (message.endLine or message.line) - 1, message.endColumn or message.column, x
+        )
+
     def report(self, messages: list):
         self.done()
+
+        msg = {}
+        msg_ = []
+
+        # classify depend on object
         for message in messages:
-            if message.get("type") not in self.icons:
-                continue
-
-            parent = None
             if message.get("obj"):
-                parent = QTreeWidgetItem()
-                parent.setText(0, f"{message.get('obj')}")
-                parent.setIcon(0, QIcon(import_("img/editors/console/object.png")))
+                if message.get("obj") not in msg:
+                    msg[message.get("obj")] = []
 
+                msg[message.get("obj")].append(message)
+            else:
+                msg_.append(message)
+
+        for message in msg:
+            message_obj = msg.get(message)
+
+            parent = QTreeWidgetItem()
+            parent.setText(0, message)
+            parent.setIcon(0, QIcon(import_("img/editors/console/object.png")))
+
+            for m in message_obj:
+                item = QTreeWidgetItem()
+
+                item.setText(0, m.get("message") + " :" + str(m.get('line')))
+                item.setIcon(0, self.icons.get(m.get("type")) or QIcon())
+                self.lines.update({id(item): m})
+                parent.addChild(item)
+                self.underline(m)
+
+            self.problems.addTopLevelItem(parent)
+
+        for message in msg_:
             item = QTreeWidgetItem()
-
             item.setText(0, message.get("message") + " :" + str(message.get('line')))
             item.setIcon(0, self.icons.get(message.get("type")) or QIcon())
 
             self.lines.update({id(item): message})
-
-            if parent:
-                parent.addChild(item)
-                self.problems.addTopLevelItem(parent)
-            else:
-                self.problems.addTopLevelItem(item)
+            self.underline(message)
+            self.problems.addTopLevelItem(item)
 
         self.main.on("report_error", {"msg": messages})
         self.problems.expandAll()
