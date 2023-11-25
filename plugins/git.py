@@ -14,7 +14,7 @@ class GitMan(QWidget):
         self.editor: QTabWidget = kwargs.get("editor")
         self.main = main
         self.std = main.std
-        self.widget = self.main.element("editor").get_text_editor(self, self.main, path="dump.py")
+        self.widget = self.std.import_("plugins/git/git.ui")
         self.std.set_layout(self, QVBoxLayout).addWidget(self.widget)
 
 

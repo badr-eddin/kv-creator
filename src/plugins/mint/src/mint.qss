@@ -155,7 +155,7 @@ QAbstractItemView::item{
 }
 QLineEdit, QTextEdit{
     background: #000;
-    border: 1px solid #333;
+    border: 1px solid "$BORDER-2";
     border-radius: 1px;
     min-height: 25px;
     padding: 0 4px;
@@ -163,13 +163,13 @@ QLineEdit, QTextEdit{
 QLineEdit:focus, QLineEdit:hover, QTextEdit:focus, QTextEdit:hover{
     border: 1px solid "$MAIN";
 }
-QStackedWidget {
-    border: 1px solid #333;
-}
 QTabWidget::pane {
     border: none;
     background: #000;
     top: -2px;
+}
+QStackedWidget{
+    border: none;
 }
 QTabWidget {
     border: none;
@@ -227,8 +227,8 @@ QListWidget, QTreeWidget {
     padding-right: 0px;
 }
 QListWidget[type="cont"], QTreeWidget[type="cont"] {
-    background: #020202;
-    border: 1px solid #333;
+    background: "$BACKGROUND";
+    border: 1px solid "$BORDER-2";
 }
 QDockWidget, #dockBody {
     background: "$BACKGROUND";
@@ -286,7 +286,7 @@ QScrollBar::handle:horizontal {
     width: 20px;
 }
 QScrollBar::handle:horizontal:hover {
-    background: #333;
+    background: "$BORDER-2";
     border-radius: 2px;
     width: 20px;
 }
@@ -311,7 +311,7 @@ QScrollBar:vertical {
     padding-left: 3px;
 }
 QScrollBar::handle:vertical {
-    background: #333;
+    background: "$BORDER-2";
     min-height: 40px;
 }
 QScrollBar::handle:vertical:hover {
@@ -363,8 +363,12 @@ QScrollArea {
     background: transparent;
 }
 QWidget[type="container"]{
-    border: 1px solid #333;
-    background: #020202;
+    border: 1px solid "$BORDER-2";
+    background: "$BACKGROUND";
+}
+QWidget[type="gcontainer"]{
+    border: 1px solid "$BORDER-2";
+    background: transparent;
 }
 QSpinBox::up-button, QDateTimeEdit::up-button, QDoubleSpinBox::up-button  {
     padding: 0px;
@@ -488,4 +492,11 @@ QMenu::item {
 }
 QMenu::item:selected {
     background: "$MAIN";
+}
+QSplitter::handle{
+	background: "$BORDER";
+	width: 2px;
+}
+QSplitter::handle:hover{
+	background: "$MAIN";
 }

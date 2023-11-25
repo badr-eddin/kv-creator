@@ -8,6 +8,7 @@ class MintLeaf:
         "background_c": "#0d0d0d",
         "head_c": "#191C1F",
         "border_c": "#97B0B8",
+        "border_2c": "#333333",
         "shadow_c": "#000000",
         "primary_c": "#32926F"
     }
@@ -17,6 +18,7 @@ class MintLeaf:
         "$WIDGET-1": colors.get("head_c"),
         "$BACKGROUND": colors.get("background_c"),
         "$BORDER": colors.get("border_c"),
+        "$BORDER-2": colors.get("border_2c"),
         "$WIDGET-2": "#0D1117",
         "$WIDGET-2-H": "#13181E",
         "$FONT": "Ubuntu Mono",

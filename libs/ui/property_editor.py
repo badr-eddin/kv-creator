@@ -16,7 +16,11 @@ class PropertyEditor(QDockWidget):
         super(PropertyEditor, self).__init__(parent)
         self.main = main
         self.props = {}
+        self.parent_item = None
         self.map = {}
+        self.lines_map = {}
+        self.parents_lines_map = {}
+
         # self.props_widgets = {
         #     "VariableListProperty": QLineEdit,  # csv value
         #     "OptionProperty": QComboBox,
@@ -114,6 +118,9 @@ class PropertyEditor(QDockWidget):
     def update_prop(self, item):
         func = self.main.element("inspector.save")
         props_id = self.map.get(id(item))
+
+        # todo: select previous element
+
         if props_id:
             rule = DemoParserRule()
             rule.name = item.text(0)
@@ -139,9 +146,12 @@ class PropertyEditor(QDockWidget):
 
         return value
 
-    def load_properties(self, props, pid):
+    def load_properties(self, props, par):
         self.properties.clear()
-        self.props.update({pid: props})
+        self.lines_map.clear()
+        self.props.update({id(par): props})
+
+        self.parent_item = par
 
         if not props:
             props = OrderedDict([])
@@ -157,4 +167,6 @@ class PropertyEditor(QDockWidget):
             item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
             item.setText(1, value)
             self.properties.insertTopLevelItem(0, item)
-            self.map.update({id(item): pid})
+            self.map.update({id(item): id(par)})
+            self.lines_map[props[prop].line] = item
+            self.parents_lines_map[props[prop].line] = par

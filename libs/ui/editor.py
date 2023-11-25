@@ -1,12 +1,10 @@
 import os.path
 import pathlib
-
 import magic
 import psutil
 import pyperclip
 
 from .dialogs import AppScene
-# from .project_tree import MAction
 from ..utils import *
 
 
@@ -494,6 +492,14 @@ class EditorWidget(QWidget):
         self.opened_paths = {}
         self.widget = QTabWidget(self)
 
+    def style_on_off(self, on=False):
+        if on:
+            k = f"1px solid {theme('border_2c', False)}"
+        else:
+            k = "none"
+
+        self.widget.setStyleSheet("QStackedWidget{" f"border: {k};" "}")
+
     def config_window(self):
         set_layout(self, QVBoxLayout)
         self.layout().addWidget(self.widget)
@@ -505,6 +511,7 @@ class EditorWidget(QWidget):
         self.widget.tabBar().setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.widget.setAcceptDrops(True)
         self.setAcceptDrops(True)
+        self.style_on_off()
         self.widget.dropEvent = lambda e: self.dropped_from(e)
         
     def dropEvent(self, e):
@@ -533,6 +540,9 @@ class EditorWidget(QWidget):
         tab = self.widget.widget(index)
 
         self.main.editor_closed(tab)
+
+        if self.widget.count() == 1:
+            self.style_on_off()
 
         if isinstance(tab, Editor):
             if not getattr(tab, "saved"):
@@ -715,6 +725,8 @@ class EditorWidget(QWidget):
         ed.set_path(path)
         index = self.widget.addTab(ed, os.path.basename(path) if path else "New Tab")
         ed.index = index
+
+        self.style_on_off(True)
         self.editors.append(ed)
         self.widget.setTabToolTip(ed.index, path or "")
         self.widget.setCurrentWidget(ed)

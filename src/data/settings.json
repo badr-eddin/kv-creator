@@ -450,7 +450,7 @@
             "option_cls": "ObjectProperty",
             "options": "DictProperty",
             "order": "ListProperty",
-            "orientation": "OptionsProperty",
+            "orientation": "StringProperty",
             "original_textures": "ListProperty",
             "outline_color": "ColorProperty",
             "outline_width": "NumericProperty",
@@ -693,8 +693,7 @@
             "StringProperty",
             "ObjectProperty",
             "BooleanProperty",
-            "DictProperty",
-            "#1c191f"
+            "DictProperty"
         ],
         "classes": [
             "Accordion",

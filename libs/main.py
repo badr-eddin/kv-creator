@@ -35,7 +35,8 @@ class Button(QPushButton):
         self.setText("")
         self.setToolTip(text)
         self.name = text
-        self.setFixedSize(QSize(25, 25))
+        self.setIconSize(QSize(32, 32))
+        self.setStyleSheet("background: transparent; border: none")
         self.setIcon(icon)
         self.on_click = on_click
 
@@ -75,7 +76,6 @@ class Creator(QMainWindow):
         self.close_win = True
         self.close_temp = False
         self.std = std
-        self.status_bar = QStatusBar(self)
         self.buttons = Buttons(self)
         self.on_main_close = True
         self.menu = None
@@ -261,10 +261,13 @@ class Creator(QMainWindow):
                 editor.CLASS
             )
             self.widget.plugins.layout().addWidget(btn)
-        self.widget.plugins.layout().addItem(SPItem())
+        self.widget.plugins.layout().addItem(VSPItem())
 
     def config_window(self):
-        self.setCentralWidget(self.widget)
+        w = QWidget(self)
+        set_layout(w, QVBoxLayout, (4, 4, 4, 4)).addWidget(self.widget)
+        self.setCentralWidget(w)
+
         self.resize(QSize(1200, 600))
         self.setMouseTracking(True)
 
@@ -273,8 +276,6 @@ class Creator(QMainWindow):
 
         os.mkdir(self.tmp)
         os.environ["tmp"] = self.tmp
-
-        self.setStatusBar(self.status_bar)
 
         QTimer(self).singleShot(5000, self.check_deps)
 
@@ -353,7 +354,7 @@ class Creator(QMainWindow):
         for path in paths or []:
             name = os.path.basename(path)
             if os.path.exists(path):
-                self.inform(f"install plugin from '{path}'", 2000)
+                debug(f"install plugin from '{path}'")
                 if os.path.getsize(path) <= self.MAX_PLUGIN_SIZE:
 
                     if not zipfile.is_zipfile(path):
@@ -447,9 +448,6 @@ class Creator(QMainWindow):
 
     def restart(self):
         pass
-
-    def inform(self, txt, ms=0):
-        self.status_bar.showMessage(txt, ms)
 
     def element(self, k):
         return self.buttons.get_obj(k)
@@ -549,7 +547,7 @@ class Creator(QMainWindow):
             Qt.DockWidgetArea.RightDockWidgetArea |
             Qt.DockWidgetArea.BottomDockWidgetArea
         )
-        self.addDockWidget(pos, _w)
+        self.widget.addDockWidget(pos, _w)
 
     def super_close(self):
         self.close_win = True

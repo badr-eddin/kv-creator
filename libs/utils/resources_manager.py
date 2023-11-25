@@ -2,6 +2,7 @@ import ctypes
 import io
 import keyword
 import os
+import pathlib
 import sqlite3
 
 from PyQt6.QtGui import QPixmap, QImage
@@ -24,10 +25,17 @@ def get_db():
 
 def import_(path: str, r=None):
     if os.getenv("dev-env-loading"):
-        return os.path.join("src", path) if not r else open(os.path.join("src", path), "r").read()
 
-    cursor = sqlite3.connect(get_db()).cursor()
-    data = cursor.execute("SELECT content, type FROM resources WHERE key = ?", (path, )).fetchall()
+        if path.startswith("plugins"):
+            x = pathlib.Path(path)
+            path = os.path.join("src", "plugins", x.parent.name, "src", x.name)
+        else:
+            path = os.path.join("src", path)
+
+        data = [[open(path, "rb").read(), os.path.basename(path).split(".")[-1]]]
+    else:
+        cursor = sqlite3.connect(get_db()).cursor()
+        data = cursor.execute("SELECT content, type FROM resources WHERE key = ?", (path, )).fetchall()
 
     if not data:
         debug(f"{os.path.basename(path)} : missing resources file !", _c="e")

@@ -166,7 +166,11 @@
 168 - : settings has problem in line 256
 169 - : add to settings 'add / remove ' keywrods
 170: on parse kv file, collect imports and export them as python code and use it with jedi
-171: kivy to string doesnt get custom classes properties
-172: use kivy surfe to element to remember last slected elemnt
+171 - : kivy to string doesnt get custom classes properties
+172 - : use kivy surfe to element to remember last slected elemnt
 173 - : create different indicators
 174: move plugins to another pos
+175: fix some problems in kivy props, it type (str, int, obj ...)
+176: add to kivy file inspector 'pyloader' for handlers  <--- Premium
+177: create refactor to kivy, (props, handlers ...)      <--- Premium
+178: create node editor                                  <--- Premium

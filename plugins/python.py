@@ -96,6 +96,7 @@ class _PythonAnalyzer(QThread):
 
     def set_callback(self, cb):
         if not callable(cb):
+            self.main.std.debug(f"callback ({cb}) is not callable", _c="e")
             return
 
         self.__callback = cb
