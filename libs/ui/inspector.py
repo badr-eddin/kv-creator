@@ -283,8 +283,11 @@ class Inspector(QDockWidget):
             if ew:
                 ed = ew.currentWidget()
                 ed.reload = True
+
                 if hasattr(ed, "pid"):
                     temp_path = getattr(ed, "path")
+
+                    line = ed.editor.getCursorPosition()[0]
 
                     if os.path.exists(temp_path):
                         with open(temp_path, "w") as fl:
@@ -295,12 +298,15 @@ class Inspector(QDockWidget):
                     else:
                         self.main.element("msg.pop")("target file not exists !", 3000)
                         debug(f"{temp_path} not found !", _c="e")
+
+                    ed = ed.editor
+
                 else:
                     line = ed.getCursorPosition()[0]
                     ed.setText(_kv)  # Type: ignore
                     self.main.on("inspector_save", {"text": _kv})
 
-                    self.select_last_element(ed, line)
+                self.select_last_element(ed, line, True)
 
     def set_item_icon(self, txt, item, tree=True):
         txt: str = txt.lower()
@@ -339,7 +345,15 @@ class Inspector(QDockWidget):
                         output += k * level + f"id: {obj.id}\n"
 
                 for p in props or []:
-                    output += k * level + f"{p}: {pan.dump(p, props[p].value)}\n"
+                    val = pan.dump(p, props[p].value)
+                    vals = val.splitlines(False)
+
+                    if len(vals) > 1:
+                        n = k * (level + 1)
+                        x = f'\n{n}'.join(vals)
+                        val = f"\n{n}{x}"
+
+                    output += k * level + f"{p}: {val}\n"
 
         for i in range(item.childCount()):
             output += self.tree_to_string(item.child(i), level+1, id(item.child(i)))
@@ -419,8 +433,8 @@ class Inspector(QDockWidget):
 
         self.select_last_element(obj)
 
-    def select_last_element(self, obj, line=None):
-        x = self.prev_item or line
+    def select_last_element(self, obj, line=None, imp=False):
+        x = (self.prev_item or line) if not imp else line
         
         if type(x) is int:
             self.on_cursor_moved({"editor": obj, "pos": [x, 0]})

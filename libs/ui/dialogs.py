@@ -383,6 +383,10 @@ class SearchTip(DraggableFrame):
 
     def pop(self, _p=None):
         self.target = _p or self.target
+
+        if not hasattr(self.target, "text"):
+            return
+
         self.show()
         self.widget.search.setFocus()
         self.widget.search.setText(self.target.selectedText())

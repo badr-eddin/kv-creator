@@ -80,7 +80,7 @@
 80 - : bug when click exit and cancel and click close editor
 81 - : get icons for classes (root, layouts, items ...)
 82 - : on close import are not cleared
-83: on stringify the double tab props are ruined
+83 - : on stringify the double tab props are ruined
 84 - : add kivy required version to lexer
 85 - : string still highlighted inside of kivy comment
 86 - : evaluate props (str, int, bool ...)
@@ -105,7 +105,7 @@
 105 - : on open file dialog it gliches with embed window
 106 - : try to access vs code icons and use it in project-tree
 107: create seperate script to restart app
-108: see if it is possible replace bar with icons
+108 - : see if it is possible replace bar with icons
 109 - : use icons in dialogs (error, warning, info)
 110 - : when selection and request 'find' load selected text
 111 - : add jedi intellisense to python
@@ -145,7 +145,7 @@
 146 - : add git plugin next to settings
 147 - : add refactor code
 148 - : when close unsaved tab it doesnt remove it from register
-149: create custom autocompleter for kivy
+149 - : create custom autocompleter for kivy
 150 - : make plugins have context menu for editor
 151: make pro selection
 152 - : qss checkbox and
@@ -165,12 +165,14 @@
 167 - : use lexer to report errors
 168 - : settings has problem in line 256
 169 - : add to settings 'add / remove ' keywrods
-170: on parse kv file, collect imports and export them as python code and use it with jedi
+170 - : on parse kv file, collect imports and export them as python code and use it with jedi
 171 - : kivy to string doesnt get custom classes properties
 172 - : use kivy surfe to element to remember last slected elemnt
 173 - : create different indicators
-174: move plugins to another pos
-175: fix some problems in kivy props, it type (str, int, obj ...)
+174 - : move plugins to another pos
+175: fix some problems in kivy props, it type (str, int, obj ...) <--- Premium
 176: add to kivy file inspector 'pyloader' for handlers  <--- Premium
 177: create refactor to kivy, (props, handlers ...)      <--- Premium
 178: create node editor                                  <--- Premium
+179 - : error when updating element from process
+180 - : on find check if has path

@@ -41,7 +41,7 @@
       <enum>QAbstractItemView::SingleSelection</enum>
      </property>
      <property name="indentation">
-      <number>0</number>
+      <number>20</number>
      </property>
      <attribute name="headerDefaultSectionSize">
       <number>120</number>

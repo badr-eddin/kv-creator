@@ -19,6 +19,7 @@ class PropertyEditor(QDockWidget):
         self.parent_item = None
         self.map = {}
         self.lines_map = {}
+        self.map_lines = {}
         self.parents_lines_map = {}
 
         # self.props_widgets = {
@@ -117,9 +118,10 @@ class PropertyEditor(QDockWidget):
 
     def update_prop(self, item):
         func = self.main.element("inspector.save")
+        rem = self.main.element("inspector.select_last_element")
         props_id = self.map.get(id(item))
 
-        # todo: select previous element
+        c_line = self.map_lines.get(id(item))
 
         if props_id:
             rule = DemoParserRule()
@@ -128,6 +130,7 @@ class PropertyEditor(QDockWidget):
             self.props[props_id][item.text(0)] = rule
             self.main.on("update_property", {"property": item.text(0), "value": item.text(1)})
         func()
+        rem(self.main.element("editor.widget").currentWidget(), c_line)
 
     def done(self):
         self.properties.clear()
@@ -163,10 +166,14 @@ class PropertyEditor(QDockWidget):
             value = props[prop].value
             value = pan.load(prop, value)
             item = QTreeWidgetItem()
+
             item.setText(0, str(prop))
             item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
             item.setText(1, value)
+
             self.properties.insertTopLevelItem(0, item)
             self.map.update({id(item): id(par)})
+
             self.lines_map[props[prop].line] = item
+            self.map_lines[id(item)] = props[prop].line
             self.parents_lines_map[props[prop].line] = par
