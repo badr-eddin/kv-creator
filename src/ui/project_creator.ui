@@ -64,6 +64,9 @@
           <height>30</height>
          </size>
         </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>Open</string>
         </property>
@@ -90,6 +93,9 @@
           <height>30</height>
          </size>
         </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>Cancel</string>
         </property>
@@ -103,6 +109,9 @@
           <height>30</height>
          </size>
         </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>Create</string>
         </property>
@@ -114,7 +123,7 @@
    <item row="1" column="1">
     <widget class="QStackedWidget" name="stack">
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="gen">
       <layout class="QGridLayout" name="gridLayout_2">
@@ -262,7 +271,7 @@ p, li { white-space: pre-wrap; }
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="structure">
+     <widget class="QWidget" name="sizes_">
       <layout class="QGridLayout" name="gridLayout_3">
        <property name="leftMargin">
         <number>2</number>
@@ -569,7 +578,7 @@ p, li { white-space: pre-wrap; }
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="init_ui">
+     <widget class="QWidget" name="structure">
       <layout class="QGridLayout" name="gridLayout_5">
        <property name="leftMargin">
         <number>2</number>
@@ -743,6 +752,9 @@ p, li { white-space: pre-wrap; }
           <height>30</height>
          </size>
         </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>General</string>
         </property>
@@ -759,8 +771,11 @@ p, li { white-space: pre-wrap; }
           <height>30</height>
          </size>
         </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
-         <string>Structure</string>
+         <string>Size</string>
         </property>
         <property name="index" stdset="0">
          <number>1</number>
@@ -774,6 +789,9 @@ p, li { white-space: pre-wrap; }
           <width>150</width>
           <height>30</height>
          </size>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
         </property>
         <property name="text">
          <string>Configuration</string>
@@ -791,8 +809,11 @@ p, li { white-space: pre-wrap; }
           <height>30</height>
          </size>
         </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
-         <string>Initial UI</string>
+         <string>Structure</string>
         </property>
         <property name="index" stdset="0">
          <number>3</number>
@@ -806,6 +827,9 @@ p, li { white-space: pre-wrap; }
           <width>150</width>
           <height>30</height>
          </size>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
         </property>
         <property name="text">
          <string>Resources</string>

@@ -8,13 +8,43 @@ import toml
 from ..utils import *
 
 
+class Button(QPushButton):
+    m = 1
+    def __init__(self, parent, on_click, args=None):
+        super(Button, self).__init__(parent)
+        self.args = args
+        self.on_click = on_click
+        self.clicked.connect(self._clicked)  # Type: ignore
+
+    def _clicked(self):
+        args = self.args
+        on_click = self.on_click
+
+        if args:
+            on_click(self, args)
+        else:
+            on_click(self)
+
+
 class PCreator(QWidget):
 
     def __init__(self, main=None):
-        super().__init__()
+        super().__init__(None)
         self.main = main
         self.tab_unselected = f"background: #13181E; border: none; border-left: 2px solid transparent"
         self.tab_selected = f"background: #0D1117; border: none; border-left: 2px solid #32926F"
+        self.added_resources = []
+        self.btn_anim = None
+        self.btn_anim2 = None
+        self.current_btn = None, (0, 0)
+        self.added = []
+        self.structures = {
+            "Basic": import_("img/projectc/basic-structure.svg"),
+            "Comprehensive": import_("img/projectc/comprehensive-structure.svg"),
+            "Modularized": import_("img/projectc/modularized-structure.svg"),
+            "Widget Based": import_("img/projectc/widget-based-structure.svg")
+        }
+
         self.widget = loadUi(import_("ui/project_creator.ui", 'io'))
         self.layout_: QVBoxLayout = set_layout(self, QVBoxLayout)
         self.stack: QStackedWidget = self.widget.stack
@@ -32,6 +62,7 @@ class PCreator(QWidget):
 
         self.init()
         self.load_primaries()
+        self.load_structures()
 
     def init(self):
         bald(self)
@@ -49,13 +80,18 @@ class PCreator(QWidget):
         scroller(self.widget.rcc, self.main)
 
         self.widget.cancel.clicked.connect(self.close)
+        self.widget.rem_rcc.clicked.connect(self._remove_rcc)
+        self.widget.add_rcc.clicked.connect(self._add_rcc)
         self.widget.create.clicked.connect(self._create_project)
         self.widget.open_proj.clicked.connect(self._open_project)
         self.widget.sizes.currentTextChanged.connect(self._setup_win_size)
+        self.widget.kw_width.valueChanged.connect(self._setup_win_size)
+        self.widget.kw_height.valueChanged.connect(self._setup_win_size)
 
         self.widget.sizes.addItems(self.responsive.keys())
 
-        mn, mx = settings.pull("kivy/responsive-max"), settings.pull("kivy/responsive-min")
+        mx, mn = settings.pull("kivy/responsive-max"), settings.pull("kivy/responsive-min")
+
         self.widget.kw_width.setMinimum(mn[0])
         self.widget.kw_width.setMaximum(mx[0])
         self.widget.kw_height.setMinimum(mn[1])
@@ -65,13 +101,113 @@ class PCreator(QWidget):
         self.widget.rem_rcc.setIcon(QIcon(import_("img/editors/actions/remove.png")))
 
         self.show()
+        self._setup_win_size()
+
+    def _structure_item_clicked(self, k):
+        print(k.m)
+        sw, sh = self.size().width(), self.size().height()
+        w, h = int(sw / 1.5), int(sh / 1.5)
+        t = 100
+
+        if self.current_btn[0]:
+            self.current_btn[0].move(self.current_btn[1])  # Type: ignore
+            self.current_btn[0].setIconSize(QSize(32, 32))  # Type: ignore
+            self.current_btn[0].resize(QSize(48, 48))  # Type: ignore
+
+        self.current_btn = k, k.pos()
+
+        self.btn_anim = QPropertyAnimation(k, b"pos")  # Type: ignore
+        self.btn_anim.setEndValue(QPoint(0, 0))
+        self.btn_anim.setDuration(t)
+        self.btn_anim.finished.connect(lambda: k.setIconSize(QSize(w, h)))  # Type: ignore
+        self.btn_anim.start()
+
+        self.btn_anim2 = QPropertyAnimation(k, b"size")  # Type: ignore
+        self.btn_anim2.setEndValue(self.widget.structure.size())
+        self.btn_anim2.setDuration(t)
+        self.btn_anim2.start()
+
+    def load_structures(self):
+        for btn in self.added:
+            btn.close()
+            # del btn
+
+        self.added.clear()
+
+        for i, p_img in enumerate(self.structures.values()):
+            img = Button(self.widget.structure, self._structure_item_clicked)
+            img.m = i
+            img.setIcon(QIcon(p_img))
+            img.resize(QSize(48, 48))
+            img.setIconSize(QSize(32, 32))
+            img.setStyleSheet("background: transparent;")
+            img.move(QPoint(48 * i, self.size().height() - 100))
+            self.added.append(img)
+            img.show()
+
+    def _remove_rcc(self):
+        items: [QTreeWidgetItem] = self.widget.rcc.selectedItems()
+        for item in items:
+            item: QTreeWidgetItem
+            path = item.data(0, Qt.ItemDataRole.UserRole)
+
+            if path in self.added_resources:
+                self.added_resources.remove(path)
+            else:
+                debug(f"resource '{path}' not in registered resources !", _c="w")
+
+            self.widget.rcc.takeTopLevelItem(self.widget.rcc.indexOfTopLevelItem(item))
+
+    def _add_rcc(self):
+        dialog, plg = self.main.get_file_dialog()
+        entry = os.path.expanduser("~")
+
+        if plg:
+            dialog = dialog(main=self.main, std=self.main.std)
+            dialog.open_save_file(
+                callback=self.__add_rcc,
+                selection=dialog.Selection.Multi,
+                encapsulate=pathlib.Path,
+                target=dialog.Targets.Files,
+                mode=dialog.Mode.Open,
+                entry=entry
+            )
+        else:
+            dialog = QFileDialog(self)
+            paths = dialog.getOpenFileNames(self, directory=entry)
+
+            paths = [pathlib.Path(path) for path in paths[0]]
+
+            self.__add_rcc(paths)
+
+    def __add_rcc(self, paths: [pathlib.Path]):
+        for path in paths:
+            if not path.is_file():
+                debug(f"cannot add resources: '{path.name}' from '{path.parent.as_posix()}'", _c="w")
+                continue
+
+            if path.as_posix() in self.added_resources:
+                debug(f"resource already exist: '{path.name}' from '{path.parent.as_posix()}'", _c="w")
+                continue
+
+            item = QTreeWidgetItem()
+            item.setText(0, path.name)
+            item.setIcon(0, QFileIconProvider().icon(QFileInfo(path.as_posix())))
+            item.setData(0, Qt.ItemDataRole.UserRole, path.as_posix())
+
+            self.added_resources.append(path.as_posix())
+            self.widget.rcc.addTopLevelItem(item)
 
     def _setup_win_size(self):
-        text = self.widget.sizes.currentText()
-        reso = self.responsive.get(text) or list(settings.pull("kivy/window-resolution").values())
         scene_size = self.widget.kw_scene.size()
         scene_size = [scene_size.width(), scene_size.height()]
         resp_max = settings.pull("kivy/responsive-max")
+
+        if self.widget.custom_res.isChecked():
+            reso = [self.widget.kw_width.value(), self.widget.kw_height.value()]
+        else:
+            text = self.widget.sizes.currentText()
+            reso = self.responsive.get(text) or list(settings.pull("kivy/window-resolution").values())
 
         placeholder_reso = [
             (reso[0] * scene_size[0]) // resp_max[0],
@@ -106,7 +242,7 @@ class PCreator(QWidget):
             res = [self.widget.kw_width.value(), self.widget.kw_height.value()]
 
         data["resources"].update({
-            "files": []
+            "paths": self.added_resources
         })
 
         data["configuration"].update({

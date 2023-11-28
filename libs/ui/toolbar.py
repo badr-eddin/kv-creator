@@ -16,7 +16,7 @@ class Button(QPushButton):
         self.on_click = on_click
 
         self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.clicked.connect(self._clicked)
+        self.clicked.connect(self._clicked)  # Type: ignore
 
     def _clicked(self):
         if hasattr(self.bar, self.on_click[0]):

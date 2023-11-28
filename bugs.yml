@@ -176,3 +176,6 @@
 178: create node editor                                  <--- Premium
 179 - : error when updating element from process
 180 - : on find check if has path
+181: add options for custom project structure
+182: add to embed scene option to use real size or percentage size
+183: create slider in project structue and remove initial ui as free image position controlled by animation
