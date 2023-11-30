@@ -1,6 +1,5 @@
 import os.path
 import pathlib
-import re
 
 import pyautogui
 import toml
@@ -9,21 +8,26 @@ from ..utils import *
 
 
 class Button(QPushButton):
-    m = 1
-    def __init__(self, parent, on_click, args=None):
+    def __init__(self, parent, on_click=None):
         super(Button, self).__init__(parent)
-        self.args = args
         self.on_click = on_click
         self.clicked.connect(self._clicked)  # Type: ignore
 
-    def _clicked(self):
-        args = self.args
-        on_click = self.on_click
+        self.select(True)
 
-        if args:
-            on_click(self, args)
+    def select(self, v=False):
+        if v:
+            c = theme('border_c', False)
+            bg = "transparent"
         else:
-            on_click(self)
+            c = theme('primary_c', False)
+            bg = f"rgba{hex2rgba(c[1:], 50)}"
+
+        self.setStyleSheet(f"background: {bg}; border: 2px solid {c}; padding: 5px;")
+
+    def _clicked(self):
+        if self.on_click:
+            self.on_click(self)
 
 
 class PCreator(QWidget):
@@ -103,47 +107,35 @@ class PCreator(QWidget):
         self.show()
         self._setup_win_size()
 
-    def _structure_item_clicked(self, k):
-        print(k.m)
-        sw, sh = self.size().width(), self.size().height()
-        w, h = int(sw / 1.5), int(sh / 1.5)
-        t = 100
+    def _structure_selected(self, btn):
 
-        if self.current_btn[0]:
-            self.current_btn[0].move(self.current_btn[1])  # Type: ignore
-            self.current_btn[0].setIconSize(QSize(32, 32))  # Type: ignore
-            self.current_btn[0].resize(QSize(48, 48))  # Type: ignore
+        for btn_ in self.added:
+            btn_.select(True)
 
-        self.current_btn = k, k.pos()
-
-        self.btn_anim = QPropertyAnimation(k, b"pos")  # Type: ignore
-        self.btn_anim.setEndValue(QPoint(0, 0))
-        self.btn_anim.setDuration(t)
-        self.btn_anim.finished.connect(lambda: k.setIconSize(QSize(w, h)))  # Type: ignore
-        self.btn_anim.start()
-
-        self.btn_anim2 = QPropertyAnimation(k, b"size")  # Type: ignore
-        self.btn_anim2.setEndValue(self.widget.structure.size())
-        self.btn_anim2.setDuration(t)
-        self.btn_anim2.start()
+        btn.select()
 
     def load_structures(self):
-        for btn in self.added:
-            btn.close()
-            # del btn
+        layout: QGridLayout = self.widget.structure.layout()
 
-        self.added.clear()
+        sw, sh = self.size().width(), self.size().height()
+        w, h = int(sw / (len(self.structures) // 1)), int(sh / (len(self.structures) // 2))
+        row, col = 0, 0
 
-        for i, p_img in enumerate(self.structures.values()):
-            img = Button(self.widget.structure, self._structure_item_clicked)
-            img.m = i
-            img.setIcon(QIcon(p_img))
-            img.resize(QSize(48, 48))
-            img.setIconSize(QSize(32, 32))
-            img.setStyleSheet("background: transparent;")
-            img.move(QPoint(48 * i, self.size().height() - 100))
-            self.added.append(img)
-            img.show()
+        for img in self.structures:
+            if col == 2:
+                row += 1
+                col = 0
+
+            btn = Button(self, self._structure_selected)
+
+            btn.setIconSize(QSize(w, h))
+            btn.setIcon(QIcon(self.structures[img]))
+
+            self.added.append(btn)
+
+            layout.addWidget(btn, row, col)
+
+            col += 1
 
     def _remove_rcc(self):
         items: [QTreeWidgetItem] = self.widget.rcc.selectedItems()

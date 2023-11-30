@@ -579,18 +579,21 @@ p, li { white-space: pre-wrap; }
       </layout>
      </widget>
      <widget class="QWidget" name="structure">
+      <property name="styleSheet">
+       <string notr="true">#structure_parent, #structure_sc, #structure {background: transparent}</string>
+      </property>
       <layout class="QGridLayout" name="gridLayout_5">
        <property name="leftMargin">
-        <number>2</number>
+        <number>4</number>
        </property>
        <property name="topMargin">
-        <number>2</number>
+        <number>4</number>
        </property>
        <property name="rightMargin">
-        <number>2</number>
+        <number>4</number>
        </property>
        <property name="bottomMargin">
-        <number>2</number>
+        <number>4</number>
        </property>
        <property name="spacing">
         <number>2</number>
