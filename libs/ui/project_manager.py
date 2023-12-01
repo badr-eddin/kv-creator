@@ -7,10 +7,16 @@ import toml
 from ..utils import *
 
 
-class Button(QPushButton):
+class StructureWidget(QTreeWidget):
     def __init__(self, parent, on_click=None):
-        super(Button, self).__init__(parent)
+        super(StructureWidget, self).__init__(parent)
         self.on_click = on_click
+
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setHeaderHidden(True)
+        # self.setEnabled(False)
         self.clicked.connect(self._clicked)  # Type: ignore
 
         self.select(True)
@@ -23,7 +29,7 @@ class Button(QPushButton):
             c = theme('primary_c', False)
             bg = f"rgba{hex2rgba(c[1:], 50)}"
 
-        self.setStyleSheet(f"background: {bg}; border: 2px solid {c}; padding: 5px;")
+        self.setStyleSheet("QTreeWidget{" f"background: {bg}; border: 1px solid {c};" "}")
 
     def _clicked(self):
         if self.on_click:
@@ -42,12 +48,7 @@ class PCreator(QWidget):
         self.btn_anim2 = None
         self.current_btn = None, (0, 0)
         self.added = []
-        self.structures = {
-            "Basic": import_("img/projectc/basic-structure.svg"),
-            "Comprehensive": import_("img/projectc/comprehensive-structure.svg"),
-            "Modularized": import_("img/projectc/modularized-structure.svg"),
-            "Widget Based": import_("img/projectc/widget-based-structure.svg")
-        }
+        self.structures = settings.pull("structures")
 
         self.widget = loadUi(import_("ui/project_creator.ui", 'io'))
         self.layout_: QVBoxLayout = set_layout(self, QVBoxLayout)
@@ -107,35 +108,15 @@ class PCreator(QWidget):
         self.show()
         self._setup_win_size()
 
-    def _structure_selected(self, btn):
-
-        for btn_ in self.added:
-            btn_.select(True)
-
-        btn.select()
-
     def load_structures(self):
-        layout: QGridLayout = self.widget.structure.layout()
+        tree: QTreeWidget = self.widget.structures
 
-        sw, sh = self.size().width(), self.size().height()
-        w, h = int(sw / (len(self.structures) // 1)), int(sh / (len(self.structures) // 2))
-        row, col = 0, 0
+        self.structures.update({"Custom": None})
 
-        for img in self.structures:
-            if col == 2:
-                row += 1
-                col = 0
-
-            btn = Button(self, self._structure_selected)
-
-            btn.setIconSize(QSize(w, h))
-            btn.setIcon(QIcon(self.structures[img]))
-
-            self.added.append(btn)
-
-            layout.addWidget(btn, row, col)
-
-            col += 1
+        for stc in sorted(self.structures.keys()):
+            item = QTreeWidgetItem()
+            item.setText(0, stc)
+            tree.addTopLevelItem(item)
 
     def _remove_rcc(self):
         items: [QTreeWidgetItem] = self.widget.rcc.selectedItems()

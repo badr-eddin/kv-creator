@@ -27,9 +27,9 @@
      inkscape:pagecheckerboard="1"
      inkscape:deskcolor="#505050"
      showgrid="false"
-     inkscape:zoom="1.533172"
-     inkscape:cx="142.18888"
-     inkscape:cy="182.30179"
+     inkscape:zoom="1.2744707"
+     inkscape:cx="227.54545"
+     inkscape:cy="227.93777"
      inkscape:window-width="1366"
      inkscape:window-height="734"
      inkscape:window-x="0"
@@ -59,7 +59,8 @@ svg.ge-export-svg-dark image { filter: invert(100%) hue-rotate(180deg) }</style>
        stroke="rgb(0, 0, 0)"
        stroke-miterlimit="10"
        pointer-events="all"
-       id="path8" />
+       id="path8"
+       style="fill:#ffffff;stroke:#ffffff" />
     <rect
        x="0"
        y="0"
@@ -427,7 +428,8 @@ svg.ge-export-svg-dark image { filter: invert(100%) hue-rotate(180deg) }</style>
        stroke="rgb(0, 0, 0)"
        stroke-miterlimit="10"
        pointer-events="all"
-       id="path76" />
+       id="path76"
+       style="fill:#ffffff;stroke:#ffffff" />
     <path
        d="M 110 122 L 110 120 L 153.63 120"
        fill="none"

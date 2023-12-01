@@ -598,6 +598,33 @@ p, li { white-space: pre-wrap; }
        <property name="spacing">
         <number>2</number>
        </property>
+       <item row="0" column="0">
+        <widget class="QTreeWidget" name="structures">
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="indentation">
+          <number>0</number>
+         </property>
+         <property name="headerHidden">
+          <bool>true</bool>
+         </property>
+         <column>
+          <property name="text">
+           <string notr="true">1</string>
+          </property>
+         </column>
+        </widget>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="res">

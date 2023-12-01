@@ -1277,5 +1277,60 @@
     },
     "#prefs": {
         "kvc": ".kvc"
+    },
+    "structures": {
+        "Basic": {
+            "ui": [
+                "main.kv",
+                "__init__.py"
+            ],
+            "assets": [
+                "fonts",
+                "img"
+            ],
+            "main.py": null
+        },
+        "Comprehensive": {
+            "config": [
+                "__init__.py",
+                "config.json"
+            ],
+            "ui": {
+                "screens": [
+                    "__init__.py",
+                    "main.kv"
+                ]
+            },
+            "assets": [
+                "fonts",
+                "img"
+            ],
+            "widgets": [
+                "widget1.kv",
+                "widget2.kv",
+                "__init__.py"
+            ]
+        },
+        "Modularized": {
+            "screens": {
+                "screen1": [
+                    "screen.kv",
+                    "__init__.py"
+                ],
+                "screen2": [
+                    "screen.kv",
+                    "__init__.py"
+                ]
+            },
+            "assets": [
+                "fonts",
+                "img"
+            ]
+        },
+        "Widget Based": {
+            "widgets": ["__init__.py", "widget1.kv", "widget2.kv"],
+            "ui": ["__init__.py", "main.kv"],
+            "assets":  ["fonts", "img"]
+        }
     }
 }
