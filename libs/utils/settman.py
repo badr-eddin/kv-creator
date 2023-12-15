@@ -3,6 +3,7 @@ import os.path
 import sqlite3
 
 import dpath.util as dutil
+import toml
 from PyQt6.QtGui import QColor
 
 from .resources_manager import get_db
@@ -118,3 +119,12 @@ def theme(tar, c=True):
         return QColor(_c)
 
     return _c
+
+
+def load_from_project(key, root, def_=""):
+    path = os.path.join(root, ".kvc")
+
+    if os.path.exists(path):
+        return toml.load(open(path, "r")).get(key)
+
+    return def_

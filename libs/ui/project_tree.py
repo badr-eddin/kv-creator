@@ -3,6 +3,7 @@ import pathlib
 import send2trash
 from ..utils import *
 from . import InLineInput
+from .dialogs import CustomDockWidget
 
 
 class MAction(QAction):
@@ -16,6 +17,7 @@ class MAction(QAction):
     def __clicked(self):
         if self.on_click:
             self.on_click(*(self.args or ()))
+
 
 class Menu(QMenu):
     def __init__(self, main, parent):
@@ -139,7 +141,7 @@ class Menu(QMenu):
         self.main.get_project(d)
 
 
-class PTree(QDockWidget):
+class PTree(CustomDockWidget):
     ui = "head"
     ui_type = QFrame
 

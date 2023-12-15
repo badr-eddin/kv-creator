@@ -349,7 +349,7 @@ class Editor(QsciScintilla):
             return str(_t) + " " * (_m - len(str(_t)))
 
         # update footer
-        footer = f"Col {_config(_ind+1)} | Row {_config(_ln+1)} | Lines {_config(self.lines())}"
+        footer = f"Col: {_config(_ind+1)} | Row: {_config(_ln+1)} | Lines: {_config(self.lines())}"
         self.main.widget.editor_inspect.setText(footer)
 
         if self.is_selecting:
@@ -578,14 +578,12 @@ class EditorWidget(QWidget):
 
     def add_external_window(self, wid, title="Kivy", path=None, pid=0, kwargs=None):
         debug("adding external window ... ")
-
         scene = AppScene(self.widget, self.main)
         scene.pid = pid
         scene.title = title
         scene.path = path
         scene.editor = (kwargs or {}).get("editor")
         scene.init(path, wid)
-
         index = self.widget.addTab(scene, title)
         self.widget.setCurrentWidget(scene)
 

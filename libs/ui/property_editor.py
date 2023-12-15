@@ -5,9 +5,10 @@ from collections import OrderedDict
 
 from ..utils import *
 from .inspector import DemoParserRule
+from .dialogs import CustomDockWidget
 
 
-class PropertyEditor(QDockWidget):
+class PropertyEditor(CustomDockWidget):
     ui = "head"
     ui_type = QFrame
     name = "p-editor"

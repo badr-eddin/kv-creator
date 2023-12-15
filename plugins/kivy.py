@@ -260,7 +260,7 @@ class KivyLexer(QsciLexerCustom):
 
                 elif token[0] == "#":
                     if token_list[i + 1][0] == ":":
-                        if token_list[i + 2][0] in ["set", "import"]:
+                        if token_list[i + 2][0] in ["set", "import", "include"]:
                             self.setStyling(token[1], self.styles.get("default"))
                             self.config.alias = token_list[i + 2][0]
                         else:

@@ -437,14 +437,14 @@ class SearchTip(DraggableFrame):
             pos = []
             text = self.target.text()  # Type: ignore
             try:
-                color = "white"
+                _color = "white"
                 search_p = re.compile(query, re.M)
             except Exception as e:
                 _ = e
-                color = "red"
+                _color = "red"
                 search_p = None
 
-            self.widget.search.setStyleSheet(f"color: {color}")
+            self.widget.search.setStyleSheet(f"color: {_color}")
             if not search_p:
                 return
 
@@ -480,17 +480,44 @@ class AppScene(QWidget):
     def __init__(self, parent, main):
         super(AppScene, self).__init__(parent)
         self.main = main
+        self.container = None
         self.widget = loadUi(import_("ui/scene.ui", 'io'))
+        self.reso = (load_from_project("configuration", self.main.project_path) or {}).get("resolution")
 
     def init(self, _, wid):
         set_layout(self, QGridLayout)
 
         window = QWindow.fromWinId(wid)  # Type: ignore
-        container = QWidget(self).createWindowContainer(window, self)
+        window.setObjectName("cont-win")
+        self.container = QWidget(self).createWindowContainer(window, self)
 
-        container.setFixedSize(QSize(*settings.pull("kivy/window-resolution").values()))
-        self.widget.holder.layout().addWidget(container)
+        # self.widget.setStyleSheet("#cont-win{"f"border: 1px solid {theme('border_c', False)}; padding: 5px""}")
+        self.widget.holder.layout().addWidget(self.container)
+        self.widget.win_fit.clicked.connect(self.setup_size)
         self.layout().addWidget(self.widget)
+
+        self.setup_size(self.widget.win_fit.isChecked())
+
+    def setup_size(self, s):
+        if not self.container:
+            return
+
+        def_ = settings.pull("kivy/window-resolution").values()
+        psz = self.widget.size()
+
+        if s:
+            size = self.reso or def_
+            scaling_factor = min(psz.width() / size[0], psz.height() / size[1])
+            scaling_factor -= 0.02
+            size = [
+                int(size[0] * scaling_factor),
+                int(size[1] * scaling_factor)
+            ]
+
+        else:
+            size = self.reso or def_
+
+        self.container.setFixedSize(QSize(*size))
 
 
 class Pointer(QWidget):
@@ -571,3 +598,35 @@ class InLineInput(QLineEdit):
         self.show()
         self.raise_()
         self.setFocus()
+
+
+class CustomDockWidget(QDockWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.title = import_("ui/dockbar.ui")
+
+        self.createCustomTitleBar()
+
+    def createCustomTitleBar(self):
+        self.title.setStyleSheet("QPushButton{background: transparent; border: none;}")
+        self.title.close_d.clicked.connect(self.close)
+        self.title.dock_d.clicked.connect(self.undock)
+
+        self.title.dock_d.enterEvent = lambda _: self.sic("-hover", btn=2)
+        self.title.dock_d.leaveEvent = lambda _: self.sic(btn=2)
+        
+        self.title.close_d.enterEvent = lambda _: self.sic("-hover", btn=1)
+        self.title.close_d.leaveEvent = lambda _: self.sic(btn=1)
+
+        self.sic()
+        self.setTitleBarWidget(self.title)
+
+    def sic(self, k="", btn=0):
+        if btn == 1 or btn == 0:
+            self.title.close_d.setIcon(QIcon(import_(f"img/editors/actions/close{k}.png")))
+
+        if btn == 2 or btn == 0:
+            self.title.dock_d.setIcon(QIcon(import_(f"img/editors/actions/dock{k}.png")))
+
+    def undock(self):
+        self.setFloating(not self.isFloating())

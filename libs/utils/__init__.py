@@ -2,7 +2,7 @@ from .resources_manager import read_file, import_, get_object_from_memory, get_d
 from .ui_customize import find_in, set_layout, bald, restore, set_shadow, scroller
 from .debugger import debug
 from .style import load_style
-from .settman import settings, color, theme
+from .settman import settings, color, theme, load_from_project
 from .keys_handler import Handler
 from .tools import duck, hex2rgb, hex2rgba
 from PyQt6.QtGui import *

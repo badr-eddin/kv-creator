@@ -2,6 +2,7 @@ import collections
 import os
 import re
 from ..utils import *
+from .dialogs import CustomDockWidget
 from kivy.lang import Parser
 
 
@@ -62,7 +63,7 @@ class ThreadedParser(QThread):
         self.run()
 
 
-class Inspector(QDockWidget):
+class Inspector(CustomDockWidget):
     ui = "head"
     ui_type = QFrame
     name = "inspector"

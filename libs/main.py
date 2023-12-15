@@ -35,7 +35,7 @@ class Button(QPushButton):
         self.setText("")
         self.setToolTip(text)
         self.name = text
-        self.setIconSize(QSize(32, 32))
+        self.setIconSize(QSize(20, 20))
         self.setStyleSheet("background: transparent; border: none")
         self.setIcon(icon)
         self.on_click = on_click
@@ -261,7 +261,7 @@ class Creator(QMainWindow):
                 editor.CLASS
             )
             self.widget.plugins.layout().addWidget(btn)
-        self.widget.plugins.layout().addItem(VSPItem())
+        # self.widget.plugins.layout().addItem(VSPItem())
 
     def config_window(self):
         w = QWidget(self)

@@ -1,10 +1,10 @@
 import os
 import re
-
+from .dialogs import CustomDockWidget
 from ..utils import *
 
 
-class ImportsEditor(QDockWidget):
+class ImportsEditor(CustomDockWidget):
     ui = "head"
     ui_type = QFrame
     name = "imports"

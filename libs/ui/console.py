@@ -2,10 +2,11 @@ import json
 import re
 import xdo
 from PyQt6.Qsci import QsciScintilla, QsciLexerCustom
+from .dialogs import CustomDockWidget
 from ..utils import *
 
 
-class Console(QDockWidget):
+class Console(CustomDockWidget):
     ui = "head"
     ui_type = QFrame
 
