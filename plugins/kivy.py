@@ -150,6 +150,10 @@ class KivyLexer(QsciLexerCustom):
         self.setPaper(std.color("c6"), 10)
         self.setColor(std.color("Error"), 10)
 
+        self.setDefaultPaper(std.color("background"))
+        self.setDefaultColor(std.color("foreground"))
+        self.setPaper(std.color("background"))
+
     def config_auto_complete(self):
         api = QsciAPIs(self)
 
@@ -286,7 +290,7 @@ class KivyLexer(QsciLexerCustom):
             with open(path, "w") as file:
                 file.write(self.editor().text())
 
-        run = self.main.buttons.get_obj("console.add_terminal")
+        run = self.main.element("console.add_terminal")
         python = self.std.settings.pull("execution/python-interpreter")
 
         kvt = KV_APP.replace("$FILE", path)

@@ -930,7 +930,7 @@
         },
         "new-file": {
             "shortcut": "Ctrl+N",
-            "function": "buttons.get_obj%1.add_editor",
+            "function": "element%1.add_editor",
             "args": [
                 [
                     "editor"
@@ -939,7 +939,7 @@
         },
         "new-terminal": {
             "shortcut": "Ctrl+Shift+N",
-            "function": "buttons.get_obj%1.add_terminal",
+            "function": "element%1.add_terminal",
             "args": [
                 [
                     "console"
@@ -948,16 +948,16 @@
         },
         "run": {
             "shortcut": "F5",
-            "function": "buttons.get_obj%1._run_app",
+            "function": "element%1._run_app",
             "args": [
                 [
-                    "bar"
+                    "toolbar"
                 ]
             ]
         },
         "find": {
             "shortcut": "Ctrl+F",
-            "function": "buttons.get_obj%1.search",
+            "function": "element%1.search",
             "args": [
                 [
                     "editor"
@@ -966,7 +966,7 @@
         },
         "open": {
             "shortcut": "Ctrl+O",
-            "function": "buttons.get_obj%1.open_file",
+            "function": "element%1.open_file",
             "args": [
                 [
                     "editor"
@@ -975,7 +975,7 @@
         },
         "save": {
             "shortcut": "Ctrl+S",
-            "function": "buttons.get_obj%1._save",
+            "function": "element%1._save",
             "args": [
                 [
                     "editor"

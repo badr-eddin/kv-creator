@@ -3,11 +3,15 @@ import pathlib
 import shutil
 import sqlite3
 import zipfile
+import zlib
+
+from cryptography.fernet import Fernet
 
 PATH = "./src"
 DB = "./db/resources.db"
 IGNORED = ["plugins", "tmp"]
-
+ENC = {"settings.json": "conf"}
+KEY = b"mrqtXulGq-K3UwCN876qFDUuYafXBEApw0fzzhPUAXs="
 
 db = sqlite3.connect(DB)
 cursor = db.cursor()
@@ -32,8 +36,18 @@ def build_all():
             key = path.as_posix().replace("src/", "")
             ext = os.path.basename(key).split(".")[-1]
 
+            by = path.read_bytes()
+
+            if file in ENC:
+                fernet = Fernet(KEY)
+                by = zlib.compress(fernet.encrypt(by))
+
+                ext0 = ENC.get(file)
+                key = key.replace(ext, ext0)
+                ext = ext0
+
             cursor.execute(
-                "INSERT INTO resources (key, type, content) VALUES (?, ?, ?)", (key, ext, path.read_bytes())
+                "INSERT INTO resources (key, type, content) VALUES (?, ?, ?)", (key, ext, by)
             )
 
     # *************************************

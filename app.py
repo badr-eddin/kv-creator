@@ -2,18 +2,22 @@ import os
 import sys
 import traceback
 
-from PyQt6.QtWidgets import QStyleFactory
+os.environ['KIVY_NO_CONSOLELOG'] = '1'
+
 
 from libs import Creator, QApplication, debug, get_db
 
 
-os.environ["dev-env-loading"] = '1'
+# some env variables
+# os.environ["dev-env-loading"] = '1'
 os.environ["dev-env"] = '1'
 
 
+# if 'db' not found it will exit
 get_db()
 
 
+# exception handling
 def excepts(_, exc_value, exc_traceback):
     if os.getenv("dev-env"):
         tb = traceback.extract_tb(exc_traceback)
@@ -25,6 +29,7 @@ def excepts(_, exc_value, exc_traceback):
 sys.excepthook = excepts
 
 
+# create app
 app = QApplication([])
 window = Creator(app=app)
 sys.exit(app.exec())

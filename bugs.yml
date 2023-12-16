@@ -158,8 +158,8 @@
 160 - : use single editor each time
 161 * : extend system theme for colors (as standalone inner class)
 162 - : new project not implemented
-163: encrypt settings
-164: priority for plugins
+163 - : encrypt settings
+164 * : priority for plugins
 165 - : ptree doesnt trigger validation of kv
 166: use github student pack to get license for your app
 167 - : use lexer to report errors
@@ -180,6 +180,8 @@
 182 - : add to embed scene option to use real size or percentage size
 183 * : create slider in project structue and remove initial ui as free image position controlled by animation
 184 - : add 'include' to kivy and fix coloring issue
-185: kivy lexer margins doesnt work with colors
+185 - : kivy lexer margins doesnt work with colors
 186 - : add 'include' to imports <----- Premium
-187: on open terminal it doesnt open in the project path
+187 - : on open terminal it doesnt open in the project path
+188: add docs 'what is this' and translation to (arabic, russian, english, japanees, chinees)
+189: add run to tree menu

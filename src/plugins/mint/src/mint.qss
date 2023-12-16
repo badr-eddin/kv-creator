@@ -165,7 +165,7 @@ QLineEdit:focus, QLineEdit:hover, QTextEdit:focus, QTextEdit:hover{
 }
 QTabWidget::pane {
     border: none;
-    background: #000;
+    background: "$BACKGROUND";
     top: -2px;
 }
 QStackedWidget{
@@ -210,7 +210,7 @@ QTabBar::close-button{
     image: url($ROOT/close.png);
 }
 QTabBar::close-button:hover{
-    image: url($ROOT/close-active.png);
+    image: url($ROOT/close-hover.png);
 }
 #editor-tab-widget {
     background: transparent;
@@ -231,11 +231,9 @@ QListWidget[type="cont"], QTreeWidget[type="cont"] {
     border: 1px solid "$BORDER-2";
 }
 QDockWidget, #dockBody {
-    background: "$BACKGROUND";
+    background: transparent;
     color: "$FOREGROUND";
-    border: 1px solid #191c1f;
-    titlebar-close-icon: url($ROOT/close-cross.svg);
-    titlebar-normal-icon: url($ROOT/dock.svg);
+    border: 1px solid "$WIDGET-1";
 }
 QDockWidget::close-button {
     background: transparent;
@@ -248,12 +246,12 @@ QDockWidget::float-button {
     padding: 0px;
 }
 QDockWidget::title {
-    background: #191c1f;
+    background: "$WIDGET-1";
     min-height: 80px;
     padding: 5px;
 }
 QToolTip {
-    background: #191c1f;
+    background: "$WIDGET-1";
     border: 1px solid black;
     color: wheat;
     padding: 2px;
@@ -335,6 +333,7 @@ QProgressBar::chunk {
 }
 QsciScintilla > QListWidget {
     background: "$BACKGROUND";
+    color: "$FOREROUND";
     border: 1px solid #252525;
     border-radius: 1px;
     font-size: 14px;
@@ -474,8 +473,8 @@ QWidget::item:hover[type="view"]{
     background: rgba(255, 255, 255, 5);
 }
 QWidget[type="popup"]{
-    background: #0d0d0d;
-    border: 1px solid #191c1f;
+    background: "$BACKGROUND";
+    border: 1px solid "$WIDGET-1";
 }
 QWidget:pressed[type="icon-button"]{
     background: "$MAIN";
@@ -499,4 +498,7 @@ QSplitter::handle{
 }
 QSplitter::handle:hover{
 	background: "$MAIN";
+}
+#dockTitle {
+    padding-left: 5px;
 }

@@ -1,0 +1,2 @@
+FOLDER = 4
+FILE = 8

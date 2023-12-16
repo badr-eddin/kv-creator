@@ -1,15 +1,21 @@
-from .editor import EditorWidget
-from .inspector import Inspector, DemoParserRule
-from .imports_editor import ImportsEditor
-from .property_editor import PropertyEditor
-from .dialogs import InformUser, KivyInnerWindow, Messenger, SearchTip, \
-    Dialog, DraggableFrame, Pointer, InLineInput, CustomDockWidget
-from .toolbar import Bar
-from .project_tree import PTree
-from .demo_kv_app import get_kivy_window_id
-from .console import Console
-from .project_manager import PCreator
+from .code import EditorWidget
 
-COMPONENTS = [InformUser, Inspector, PTree, Messenger, PropertyEditor, Console, ImportsEditor, EditorWidget,
-              KivyInnerWindow, SearchTip, Bar]
+from .dialogs import InformUser, Messenger, SearchTip
+from .panels import ToolBar, Console
+from .editors import Inspector, Properties, Imports
+from .project import ProjectTree, ProjectCreator
+
+
+COMPONENTS = [
+    InformUser,
+    Inspector,
+    ProjectTree,
+    Messenger,
+    Properties,
+    Console,
+    Imports,
+    EditorWidget,
+    SearchTip,
+    ToolBar
+]
 
