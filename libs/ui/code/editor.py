@@ -222,7 +222,7 @@ class Editor(QsciScintilla):
                     callback=_save,
                     selection=dialog.Selection.Single,
                     mode=dialog.Mode.Save,
-                    target=dialog.Targets.Files,
+                    target=dialog.TARGETS.Files,
                     entry=self.main.project_path
                 )
             else:

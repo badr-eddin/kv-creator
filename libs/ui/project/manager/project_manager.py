@@ -142,7 +142,7 @@ class ProjectCreator(QWidget):
                 callback=self.__add_rcc,
                 selection=dialog.Selection.Multi,
                 encapsulate=pathlib.Path,
-                target=dialog.Targets.Files,
+                target=dialog.TARGETS.Files,
                 mode=dialog.Mode.Open,
                 entry=entry
             )
@@ -253,7 +253,7 @@ class ProjectCreator(QWidget):
                 selection=self.dialog.Selection.Single,
                 encapsulate=pathlib.Path,
                 mode=self.dialog.Mode.Open,
-                target=self.dialog.Targets.Dirs,
+                target=self.dialog.TARGETS.Dirs,
                 custom_check=self._isit_kvc_project
             )
 

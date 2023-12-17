@@ -9,7 +9,7 @@ from libs import Creator, QApplication, debug, get_db
 
 
 # some env variables
-# os.environ["dev-env-loading"] = '1'
+os.environ["dev-env-loading"] = '1'
 os.environ["dev-env"] = '1'
 
 

@@ -131,6 +131,7 @@ class KivyLexer(QsciLexerCustom):
         self.errors = []
         self.config = self.CONFIG()
         self.props = list((std.settings.pull("kivy/properties") or {}).keys())
+        self.props += list((std.settings.pull("kivy/actions") or {}).keys())
         self.classes = std.settings.pull("kivy/classes")
         self.keywords = std.settings.pull("kivy/keywords")
         self.escapable_chars = std.settings.pull("kivy/escapable-chars")
