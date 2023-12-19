@@ -6,7 +6,7 @@ from collections import OrderedDict
 from ..dialogs import CustomDockWidget
 from ...pyqt import QFrame, QTreeWidget, QTreeWidgetItem, QIcon, loadUi, Qt
 from ...kivy import HookParserRule
-from ...utils import pan, settings, import_, debug
+from ...utils import pan, settings, import_, debug, comp_update_inspector
 
 
 class Properties(CustomDockWidget):
@@ -103,8 +103,6 @@ class Properties(CustomDockWidget):
                 del self.props[id(current_item)][item.text(0)]
 
     def update_prop(self, item):
-        func = self.main.element("inspector.save")
-        rem = self.main.element("inspector.select_last_element")
         props_id = self.map.get(id(item))
 
         c_line = self.map_lines.get(id(item))
@@ -115,8 +113,8 @@ class Properties(CustomDockWidget):
             rule.value = item.text(1)
             self.props[props_id][item.text(0)] = rule
             self.main.on("update_property", {"property": item.text(0), "value": item.text(1)})
-        func()
-        rem(self.main.element("editor.widget").currentWidget(), c_line)
+
+        comp_update_inspector(c_line)
 
     def done(self):
         self.properties.clear()

@@ -1,7 +1,7 @@
 from .editor import Editor
 from ..dialogs import AppScene
 from ...pyqt import QWidget, QFrame, QTabWidget, QVBoxLayout, QMimeData, QDragEnterEvent, QUrl, Qt
-from ...utils import theme, set_layout, debug
+from ...utils import theme, set_layout, debug, comp_update
 
 import magic
 import psutil
@@ -209,8 +209,7 @@ class EditorWidget(QWidget):
         if widget:
             os.environ["building"] = "1"
             self.super_done()
-            widget.reload_it()
-            widget.load_cls()
+            comp_update(widget.text(), widget.path)
 
         self.main.on("tab_changed", {"editor": widget})
 

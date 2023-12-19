@@ -1,12 +1,8 @@
 import os.path
-import re
-
-from jedi.api.classes import Name
 
 from ..dialogs import CustomDockWidget
-from ...utils import import_, settings
-from ...kivy import KivyAnalyser
-from ...pyqt import QFrame, QIcon, loadUi, QTreeWidgetItem, QTreeWidget, QTimer, QComboBox
+from ...pyqt import QFrame, QIcon, loadUi, QTreeWidgetItem, QTreeWidget, Qt
+from ...utils import import_, settings, comp_update_inspector
 
 
 class ActionsEditor(CustomDockWidget):
@@ -14,86 +10,184 @@ class ActionsEditor(CustomDockWidget):
     ui_type = QFrame
     name = "actions"
 
+    class ActionType:
+        Function = 0
+        Property = 1
+
     def __init__(self, parent, main):
         super(ActionsEditor, self).__init__(parent)
         self.main = main
-        self.analyser = KivyAnalyser(self)
-        self.apps_loaded_from_src = {}
-        self.app_script = None
-        self.items_map = {}
-
-        self.src_valid = False
-
-        self.src_info_timer = QTimer(self)
-        self.actions = settings.pull("kivy/actions")
+        self.events_map = {}
+        self.events_parents = {}
+        self.events_line_map = {}
+        self.line_events_map = {}
+        self.event_callback_going_to_change = None
+        self._added_sub_items = []
+        self.added_events = []
+        self.events = settings.pull("kivy/actions")
         self.widget = loadUi(import_("ui/actions-editor.ui", 'io'))
+
         self.setWidget(self.widget)
 
     def initialize(self, _):
         self.main.dock_it(self, "ra")
-        self.setWindowTitle("Actions Editor")
-        self.src_info_timer.setSingleShot(True)
-
+        self.setWindowTitle("Events")
         # configuring elements
-        self.widget.actions_sel.addItems(list((self.actions or {}).keys()))
+        self.widget.event.addItems(list((self.events or {}).keys()))
+        self.widget.add_event.setIcon(QIcon(import_("img/editors/actions/add.png")))
+        self.widget.minus_event.setIcon(QIcon(import_("img/editors/actions/remove.png")))
 
-        self.widget.add_action.setIcon(QIcon(import_("img/editors/actions/add.png")))
-        self.widget.minus_action.setIcon(QIcon(import_("img/editors/actions/remove.png")))
+        self.widget.add_event.clicked.connect(self.add_action)
+        self.widget.minus_event.clicked.connect(self.remove_event)
+        self.widget.events.itemChanged.connect(self._event_item_changed)
+        self.widget.events.itemDoubleClicked.connect(self._event_item_going_to_change)
 
-        self.widget.add_action.clicked.connect(self.add_action)
-        self.widget.src.textChanged.connect(self.src_text_changed)
-        self.widget.src.returnPressed.connect(self.src_text_changed)
-        self.src_info_timer.timeout.connect(self._check_src)
+    # ---------------
+    def _event_item_going_to_change(self, item):
+        self.event_callback_going_to_change = item.text(0)
 
-    def add_action(self):
-        app_cls: Name = self.apps_loaded_from_src.get(self.widget.app.currentText())
+    def _event_item_changed(self, item: QTreeWidgetItem):
+        line = self.events_line_map.get(id(item))
+        ins_item = self.main.element("inspector.tree").selectedItems()
 
-        if not app_cls:
+        if not ins_item:
             return
 
-        tree: QTreeWidget = self.widget.action_s
-        item = QTreeWidgetItem()
+        ins_item = ins_item[0]
 
-        item.setText(0, self.widget.actions_sel.currentText())
+        event = self.events_parents.get(id(item))
 
-        combo_func = QComboBox(tree)
+        self.events_map[id(ins_item)][event.text(0)].remove(self.event_callback_going_to_change)
+        self.events_map[id(ins_item)][event.text(0)].append(item.text(0))
 
-        for dn in app_cls.defined_names():
-            dn: Name
-            # if not re.match(r"__.*.__", dn.name):
-            combo_func.addItem(dn.name)
+        self.main.on("update_event", {"callback": item.text(0)})
+        os.environ["editor-editing"] = "0"
+        comp_update_inspector(line)
 
-        self.items_map.update({
-            id(item): {
-                "widget": combo_func,
+    # ---------------
+    def done(self, n=True):
+        self.widget.events.clear()
+        self._added_sub_items.clear()
+        self.added_events.clear()
 
-            }
-        })
+        if n:
+            self.events_line_map.clear()
+            self.line_events_map.clear()
+            self.events_map.clear()
 
-        tree.addTopLevelItem(item)
-        tree.setItemWidget(item, 1, combo_func)
+    def load_actions(self, events, parent):
+        self.done(False)
 
-    def _check_src(self):
-        text: str = str(self.widget.src.text())
+        for event in events:
+            values = events[event].value.split("\n")
+            item = self.add_action(action=event, parent=[parent])
+            self.line_events_map.update({events[event].line: item})
 
-        if not text.endswith(".py"):
-            self.main.element("msg.pop")(f"'{os.path.basename(text)}' not a python file !", 2000)
+            for value in values:
+                item2 = self.add_action([item], value, [parent])
+                self.events_line_map.update({id(item2): events[event].line})
+
+    def events_of(self, item, lv1, lv2, tab):
+        events = self.events_map.get(id(item))
+
+        if not events:
             return
 
-        if not os.path.isfile(text):
-            self.main.element("msg.pop")(f"'{os.path.basename(text)}' not a file | not exist !", 2000)
+        events_l = ""
+
+        for event in events:
+            if len(events[event]) == 0:
+                events_l += lv1 * tab + f"{event}: print()"
+
+            elif len(events[event]) == 1:
+                events_l += lv1 * tab + f"{event}: {events[event][0]}"
+
+            else:
+                events_l += lv1 * tab + f"{event}:\n"
+                for item in events[event]:
+                    events_l += lv2 * tab + item + "\n"
+
+        return events_l
+
+    # ---------------
+    def remove_event(self):
+        ins_item = self.main.element("inspector.tree").selectedItems()
+        tree: QTreeWidget = self.widget.events
+
+        if not ins_item:
             return
 
-        self.analyser.on_finish.connect(self._looking_for_app_finished)
-        self.analyser.trigger(text, KivyAnalyser.TARGETS.KivyApp)
+        ins_item = ins_item[0]
 
-    def _looking_for_app_finished(self, apps, script):
-        self.widget.app.clear()
-        self.widget.app.addItems(apps.keys())
+        item: [QTreeWidgetItem] = tree.selectedItems()
+        if not item:
+            return
 
-        self.apps_loaded_from_src = apps
-        self.app_script = script
+        item = item[0]
+        line = self.events_line_map.get(id(item))
 
-    def src_text_changed(self):
-        self.src_info_timer.start(500)
+        events = self.events_map.get(id(ins_item))
 
+        if not events:
+            return
+
+        if id(item) not in self.events_parents:
+            self.events_map[id(ins_item)] = {}
+            # print(self.events_map.get(id(ins_item)))
+            #todo: this item is not removable
+            tree.takeTopLevelItem(tree.indexOfTopLevelItem(item))
+
+            print(self.events_map)
+
+        else:
+            parent = self.events_parents.get(id(item))
+            self.events_map[id(ins_item)].remove(item.text(0))
+
+
+        comp_update_inspector(line)
+
+    def add_action(self, event_item=None, action=None, parent=None):
+        ins_item = parent or self.main.element("inspector.tree").selectedItems()
+        action = action or self.widget.event.currentText()
+
+        if not ins_item:
+            return
+
+        ins_item = ins_item[0]
+
+        tree: QTreeWidget = self.widget.events
+        event_item: [QTreeWidgetItem] = event_item or tree.selectedItems()
+
+        # add sub item
+        ps = False
+        if event_item:
+            event_item = event_item[0]
+            ps = True
+
+        if ps and id(event_item) not in self._added_sub_items:
+
+            item = QTreeWidgetItem()
+            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
+            item.setText(0, action or 'print("event callback")')
+
+            self.events_map[id(ins_item)][event_item.text(0)].append(item.text(0))
+            self.events_parents.update({id(item): event_item})
+
+            event_item.addChild(item)
+            tree.expandItem(event_item)
+
+            self._added_sub_items.append(id(item))
+
+        else:
+            item = QTreeWidgetItem()
+
+            item.setText(0, action)
+            self.added_events.append(action)
+            if id(ins_item) not in self.events_map:
+                self.events_map[id(ins_item)] = {}
+
+            self.events_map[id(ins_item)].update({action: []})
+
+            tree.addTopLevelItem(item)
+
+        return item

@@ -13,6 +13,7 @@ from ..pyqt import QMainWindow, QDockWidget, loadUi, QResizeEvent, QWidget, \
     QVBoxLayout, QSize, QFileDialog, QAction, Qt, QTimer
 from ..utils import import_, settings, debug, set_layout, PluginsLoader, load_style, templates
 from ..ui import COMPONENTS, ProjectCreator
+from ..ui.editors.core import GlobalComposer
 
 
 class Creator(QMainWindow):
@@ -24,6 +25,10 @@ class Creator(QMainWindow):
         self.widget = loadUi(import_("ui/main-editor.ui", 'io'))
         self.dependencies = Dependencies(self)
         self.test_before()
+
+        self.composer = GlobalComposer(self)
+
+        os.environ["composer.id"] = str(id(self.composer))
 
         self.components = {}
         self.plugins = {}

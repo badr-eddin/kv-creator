@@ -3,8 +3,8 @@ import os
 import re
 
 from ...pyqt import QFrame, QTreeWidget, QIcon, QTreeWidgetItem, QsciScintilla, QTabWidget, loadUi, Qt
-from ...utils import import_, settings, pan, debug
-from ...kivy import KivyParser, HookParserRule
+from ...utils import import_, settings, pan, debug, comp_on
+from ...kivy import HookParserRule
 from ..dialogs import CustomDockWidget
 
 
@@ -52,12 +52,14 @@ class Inspector(CustomDockWidget):
         self.main = main
         self.loading = False
         self.prev_item = None
-        self.thread = KivyParser(self)
         self.indent_map = {}
         self.lines_map = {}
+        self.actions = {}
         self.ids = []
+        self.kv_file_ids = {}
         self.loaded_ids = []
         self.elements = {}
+        self.actions = {}
         self.objects = {}
         self.widget = loadUi(import_("ui/inspector.ui", 'io'))
         self.tree: QTreeWidget = self.widget.tree
@@ -79,9 +81,7 @@ class Inspector(CustomDockWidget):
         self.setEnabled(False)
         self.setWindowTitle("Inspector")
 
-        self.thread.on_error.connect(self.parsing_crashed)
-        self.thread.on_finish.connect(self.parsing_finished)
-        # self.tree.setIconSize(QSize(20, 20))
+        comp_on("finish", self.parsing_done)
 
     def _remove_item(self):
         item = self.tree.selectedItems()
@@ -245,15 +245,13 @@ class Inspector(CustomDockWidget):
                         self.main.element("msg.pop")("target file not exists !", 3000)
                         debug(f"{temp_path} not found !", _c="e")
 
-                    ed = getattr(ed, "editor")
-
                 else:
                     line = getattr(ed, "getCursorPosition")
                     line = line()[0] if line else 0
                     ed.setText(_kv)  # Type: ignore
                     self.main.on("inspector_save", {"text": _kv})
 
-                self.select_last_element(ed, line, True)
+                self.select_last_element(line, True)
 
     def set_item_icon(self, txt, item, tree=True):
         txt: str = txt.lower()
@@ -302,6 +300,10 @@ class Inspector(CustomDockWidget):
 
                     output += k * level + f"{p}: {val}\n"
 
+                events = self.main.element("actions.events_of")(item, level, level+1, k)
+                if events:
+                    output += events
+
         for i in range(item.childCount()):
             output += self.tree_to_string(item.child(i), level+1, id(item.child(i)))
 
@@ -319,7 +321,6 @@ class Inspector(CustomDockWidget):
             self.set_item_icon(text, item)
             item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
             item.setText(0, text)
-
             self._save_kv_item_data(item, child)
 
             self.populate_tree_widget(item, child)
@@ -336,26 +337,32 @@ class Inspector(CustomDockWidget):
 
         events = [(i.name, i) for i in kvi.handlers]
         self.elements[id(item)] = kvi.properties
+        self.actions[id(item)] = collections.OrderedDict(events)
+
+        if kvi.id:
+            self.kv_file_ids.update({kvi.id: kvi})
+
         self.lines_map[kvi.line] = item
-        self.elements[id(item)].update(collections.OrderedDict(events))
         self.objects[id(item)] = kvi
 
         self.item_clicked(item)
 
-    def parsing_finished(self, parsed, obj):
+    def parsing_done(self, parsed_kv, *_):
+        debug("populating kivy tree ...")
+
+        self.prev_item = self.tree.currentItem()
+        if self.prev_item:
+            self.prev_item = self.prev_item.data(0, Qt.ItemDataRole.UserRole)
+
+        self.tree.clear()
+        self.elements.clear()
+        self.objects.clear()
+        self.kv_file_ids.clear()
+
         self.main.element("console.done")()
         self.main.element("p-editor.done")()
+        self.main.element("actions.done")()
 
-        if hasattr(obj.lexer(), "clear_errors"):
-            obj.lexer().clear_errors()
-
-        self.parsing_done_well(parsed, obj)
-
-    def parsing_crashed(self, _, errors):
-        if settings.pull("user-prefs/code-analyse"):
-            self.main.element("console.report")(errors)
-
-    def parsing_done_well(self, parsed_kv, obj):
         if not parsed_kv.root and not parsed_kv.rules:
             return
 
@@ -374,37 +381,28 @@ class Inspector(CustomDockWidget):
 
             self.populate_tree_widget(root, _rot)
 
+            root.setSelected(True)
+            self.item_clicked(root)
+
         self.tree.expandAll()
-        self.main.element("editor.widget").currentWidget().reload = True
+        editor = self.main.element("editor.widget").currentWidget()
+
+        if editor:
+            editor.reload = True
+
         os.environ["building"] = "0"
+        self.select_last_element()
 
-        self.select_last_element(obj)
-
-    def select_last_element(self, obj, line=None, imp=False):
+    def select_last_element(self, line=None, imp=False):
+        obj = self.main.element("editor.widget").currentWidget()
         x = (self.prev_item or line) if not imp else line
-        
+
         if type(x) is int:
             self.on_cursor_moved({"editor": obj, "pos": [x, 0]})
-
-    def load_class(self, obj):
-        self.prev_item = self.tree.currentItem()
-
-        if self.prev_item:
-            self.prev_item = self.prev_item.data(0, Qt.ItemDataRole.UserRole)
-
-        self.tree.clear()
-        self.elements.clear()
-        self.objects.clear()
-
-        text = obj.text()
-
-        if not obj.path or not str(obj.path).endswith(".kv"):
-            self.main.element("p-editor.done")()
-            return
-
-        self.thread.trigger(text, obj.path, obj)
 
     def item_clicked(self, item):
         pid = id(item)
         func = self.main.element("p-editor.load_properties")
+        func2 = self.main.element("actions.load_actions")
         func(self.elements.get(pid), item)
+        func2(self.actions.get(pid), item)

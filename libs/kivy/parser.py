@@ -18,10 +18,7 @@ class KivyParser(QThread):
         try:
             parsed = Parser(content=self.text, filename=self.path)
 
-            if self.arg:
-                self.on_finish.emit(parsed, self.arg)
-            else:
-                self.on_finish.emit(parsed)
+            self.on_finish.emit(parsed, self.arg)
 
         except Exception as e:
             if hasattr(e, 'msg'):

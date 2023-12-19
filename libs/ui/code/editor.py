@@ -2,7 +2,7 @@ from .theme import DefaultTheme
 from .lexer import DefaultLexer
 from ...pyqt import QsciScintilla, QFrame, QFontMetrics, QColor, Qt, QKeySequence, QDropEvent,\
     QIcon, QTimer, QAction, QsciLexer, QKeyEvent, QFont, QMouseEvent, QMenu
-from ...utils import color, import_, settings, debug, Clipboard, EditorKeysHandler
+from ...utils import color, import_, settings, debug, Clipboard, EditorKeysHandler, comp_parse
 
 import pyperclip
 import os
@@ -122,7 +122,8 @@ class Editor(QsciScintilla):
         if c > 2:
             self.setMarginWidth(0, int(fm.averageCharWidth() * c * 1.9))
 
-        self.load_cls()
+        comp_parse(self.text(), self.path)
+
         self.saved = False
         os.environ["editor-editing"] = "1"
 
@@ -231,19 +232,6 @@ class Editor(QsciScintilla):
 
                 path_ = pathlib.Path(path_[0])
                 _save(path_)
-
-    def reload_it(self):
-        self.reload = True
-
-    def load_cls(self):
-        func1 = self.main.element("imports.load")
-        if func1 and self.reload:
-            func1(self)
-
-        func = self.main.element("inspector.load_class")
-
-        if func and self.reload:
-            func(self)
 
     def get_selected_text(self):
         if self.is_selecting:

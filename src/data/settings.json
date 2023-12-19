@@ -1109,7 +1109,7 @@
     "themes": {},
     "themes-colors": {},
     "-theme": "Mint Leaf",
-    "editor-theme": "Monokai",
+    "editor-theme": "Solarized Dark",
     "editor-themes": {
         "Monokai": {
             "Foreground": "#F8F8F2",

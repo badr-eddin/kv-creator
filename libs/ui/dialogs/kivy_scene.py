@@ -1,4 +1,4 @@
-from ...pyqt import QWidget, loadUi, QGridLayout, QSize
+from ...pyqt import QWidget, loadUi, QGridLayout, QSize, QWindow
 from ...utils import settings, import_, load_from_project, set_layout
 
 

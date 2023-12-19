@@ -3,7 +3,7 @@ import re
 
 from ..dialogs import CustomDockWidget
 from ...pyqt import QFrame, QSize, QIcon, QTreeWidgetItem, Qt, loadUi
-from ...utils import import_
+from ...utils import import_, comp_on
 
 
 class Imports(CustomDockWidget):
@@ -31,6 +31,8 @@ class Imports(CustomDockWidget):
         self.widget.alias.returnPressed.connect(self._add_item)
         self.widget.remove.clicked.connect(self._remove_item)
         self.setEnabled(False)
+
+        comp_on("finish", self.load)
 
     def _remove_item(self):
         item = self.widget.imports.selectedItems()
@@ -82,17 +84,18 @@ class Imports(CustomDockWidget):
         self.widget.imports.clear()
         self.imports.clear()
 
-    def load(self, editor):
+    def load(self, parsed, *_):
         self.done()
 
-        text: str = editor.text()
-        keywords = ["import", "set"]
-        pattern = re.compile(r"\s*#\s*:\s*(?P<keyword>\w+)\s+(?P<alias>\w+)\s+(?P<value>.*?)\n*$", flags=re.MULTILINE)
+        imports = parsed.directives
 
-        for imp in pattern.finditer(text):
-            alias = imp.group('alias')
-            src = imp.group('value')
-            keyword = imp.group('keyword')
+        if not imports:
+            return
+
+        keywords = ["import", "set", "include"]
+
+        for imp in imports:
+            keyword, alias, src = imp[1].split()
             if keyword in keywords:
                 icon = "variable" if keyword == keywords[1] else "module"
                 if src and alias:
