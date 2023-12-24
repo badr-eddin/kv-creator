@@ -1,3 +1,4 @@
+from .app_tip import AppTip
 from ...pyqt import QWidget, loadUi, QGridLayout, QSize, QWindow
 from ...utils import settings, import_, load_from_project, set_layout
 
@@ -11,6 +12,7 @@ class AppScene(QWidget):
         super(AppScene, self).__init__(parent)
         self.main = main
         self.container = None
+        self.tip = AppTip(parent)
         self.widget = loadUi(import_("ui/scene.ui", 'io'))
         self.reso = (load_from_project("configuration", self.main.project_path) or {}).get("resolution")
 
@@ -21,12 +23,10 @@ class AppScene(QWidget):
         window.setObjectName("cont-win")
         self.container = QWidget(self).createWindowContainer(window, self)
 
-        # self.widget.setStyleSheet("#cont-win{"f"border: 1px solid {theme('border_c', False)}; padding: 5px""}")
         self.widget.holder.layout().addWidget(self.container)
-        self.widget.win_fit.clicked.connect(self.setup_size)
         self.layout().addWidget(self.widget)
-
-        self.setup_size(self.widget.win_fit.isChecked())
+        self.tip.on_fit_toggled.connect(self.setup_size)
+        self.tip.load_tip()
 
     def setup_size(self, s):
         if not self.container:

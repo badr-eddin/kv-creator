@@ -1,6 +1,6 @@
 from .terminal import Terminal
 from ..dialogs import CustomDockWidget
-from ...pyqt import QFrame, QIcon, QTabWidget, loadUi, QTreeWidget, QTreeWidgetItem, QsciScintilla, QPushButton
+from ...pyqt import QFrame, QIcon, QTabWidget, loadUi, QTreeWidget, QTreeWidgetItem, QsciScintilla, QTimer
 from ...utils import import_, debug, duck
 
 
@@ -26,7 +26,7 @@ class Console(CustomDockWidget):
         self.setVisible(False)
 
     def initialize(self, _p=None):
-        self.main.dock_it(self, "ba")
+        self.main.dock_it(self, "la")
         self.setWindowTitle("Problems And Outputs")
         self.setWidget(self.widget)
         self.problems.itemDoubleClicked.connect(self._item_double_clicked)
@@ -120,13 +120,16 @@ class Console(CustomDockWidget):
         self.problems.clear()
 
     def add_terminal(self, title=None, **kwargs):
-        title = title if isinstance(title, str) else "Terminal"
-        term = Terminal(self.tabs, self.main, self, **kwargs)
-        term.tabs = self.tabs
-        term.tin = self.tabs.addTab(term, title)
-        self.tabs.setCurrentWidget(term)
-        term.embed()
         self.setVisible(True)
+        title = title if isinstance(title, str) else "Terminal"
+        term = Terminal(self.main, self, **kwargs)
+        tin = self.tabs.addTab(term, title)
+
+        term.tabs = self.tabs
+        term.tin = tin
+
+        QTimer().singleShot(1000, term.embed)
+        self.tabs.setCurrentWidget(term)
         self.terminals.append(term)
         self.main.on("add_terminal", {"terminal": term})
         return term.process

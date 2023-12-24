@@ -189,3 +189,4 @@
 191: add draggable tip that has (fit percentage, break app, refresh)
 192: try to find way to link py app to kivy file
 193: create kivy to python translator   <-------- Premium
+194: fix import problem in kivy lexer

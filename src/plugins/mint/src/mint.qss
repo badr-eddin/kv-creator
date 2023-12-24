@@ -153,6 +153,10 @@ QAbstractItemView::item{
 #bar-button:pressed {
     color: "$MAIN";
 }
+QPushButton[type="tog"]{
+    background: green;
+    border: red solid 1px;
+}
 QLineEdit, QTextEdit{
     background: #000;
     border: 1px solid "$BORDER-2";

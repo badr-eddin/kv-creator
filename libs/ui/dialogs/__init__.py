@@ -5,3 +5,4 @@ from .kivy_scene import AppScene
 from .panel import CustomDockWidget
 from .search import SearchTip
 from .tray import Messenger
+from .app_tip import AppTip

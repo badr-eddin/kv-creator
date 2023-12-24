@@ -9,25 +9,25 @@ class Terminal(QWidget):
     pid = 0
     tin = -1
 
-    def __init__(self, parent=None, main=None, console=None, **kwargs):
-        super(Terminal, self).__init__(parent)
-        set_layout(self, QVBoxLayout)
+    def __init__(self, main=None, console=None, **kwargs):
+        super(Terminal, self).__init__(None)
         self.process = QProcess(self)
         self.main = main
         self.console = console
         self.callback = kwargs.get("callback")
         self.on_done = kwargs.get("on_done")
-        self.command = kwargs.get("command") or []
+        self.command = kwargs.get("command")
         self.x = xdo.Xdo()
         self.resize_timer = QTimer(self)
+
         self.resize_timer.timeout.connect(self.resize_term)  # Type: ignore
         self.resize_timer.setSingleShot(True)
         self.args = [
-                settings.pull("terminal/-embed"), str(int(self.winId())),
+                settings.pull("terminal/-embed"), 0,
                 settings.pull("terminal/-font-name"), settings.pull("terminal/font-name"),
                 settings.pull("terminal/-font-size"), str(settings.pull("terminal/font-size")),
                 settings.pull("terminal/-bg-color"), settings.pull("terminal/bg-color"),
-                "+bdc",
+                "+bdc"
             ]
 
         if kwargs.get("wait"):
@@ -37,11 +37,12 @@ class Terminal(QWidget):
             self.args.extend([settings.pull("terminal/-run"), " ".join(self.command)])
 
     def embed(self):
+        self.args[1] = str(int(self.winId()))
         self.process.start(
             settings.pull("terminal/-provider"),
             self.args
         )
-        self.resize_timer.start(1000)
+        self.resize_timer.start(500)
         self.process.started.connect(self.resize_term)
         self.process.finished.connect(self._process_done)  # Type: ignore
 
