@@ -11,17 +11,19 @@ class AppTip(DraggableFrame):
         self.target_widget = self
         self.fit_toggled = False
         self.widget = loadUi(import_("ui/kivy-app-tip.ui", 'io'))
-        set_layout(self, QVBoxLayout, (0, 12, 0, 0)).addWidget(self.widget)
+
         self.close()
-        self.setFixedWidth(102)
-        self.setFixedHeight(46)
-        self.widget.fit.clicked.connect(self.fit_percentage)
+        self.setFixedWidth(104)
+        self.setFixedHeight(50)
+        self.setProperty("type", "container")
         self.widget.fit.setObjectName("bar-button")
-        self.widget.break_app.setObjectName("bar-button")
         self.widget.reload.setObjectName("bar-button")
+        self.widget.break_app.setObjectName("bar-button")
+        self.widget.fit.clicked.connect(self.fit_percentage)
         self.widget.fit.setIcon(QIcon(import_("img/dialog/fit.png")))
-        self.widget.break_app.setIcon(QIcon(import_("img/dialog/break.png")))
         self.widget.reload.setIcon(QIcon(import_("img/dialog/reload.png")))
+        set_layout(self, QVBoxLayout, (2, 12, 2, 2)).addWidget(self.widget)
+        self.widget.break_app.setIcon(QIcon(import_("img/dialog/break.png")))
 
     def fit_percentage(self):
         self.widget.fit.setStyleSheet(

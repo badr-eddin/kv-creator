@@ -6,7 +6,7 @@ from .const import FILE, FOLDER
 from .menu import TreeMenu
 from ...dialogs import CustomDockWidget, InLineInput
 from ....pyqt import QFrame, QTreeWidget, QTreeWidgetItem, QIcon, loadUi, Qt, QFileIconProvider, QFileInfo
-from ....utils import import_, debug
+from ....utils import import_, debug, translate
 
 
 class ProjectTree(CustomDockWidget):
@@ -32,10 +32,11 @@ class ProjectTree(CustomDockWidget):
     def initialize(self, _p=None):
         self.main.dock_it(self, "la")
         self.setWidget(self.widget)
-        self.setWindowTitle("Project")
+        self.setWindowTitle(translate("Project"))
         self.setMinimumHeight(300)
         self.load_files_at()
         self.connect_items()
+        self.widget.show_hf.setText(translate("$p.shf"))
         self.widget.add_folder.setIcon(QIcon(import_("img/editors/actions/add-folder.png")))
         self.widget.add_file.setIcon(QIcon(import_("img/editors/actions/add-file.png")))
         self.widget.remove_item.setIcon(QIcon(import_("img/editors/actions/delete.png")))

@@ -1,10 +1,76 @@
-import pathlib
 import re
 
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import Qt, QTimer, QThread, pyqtSignal
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import *
 from importlib_metadata import distributions
+
+
+class ThreadedSaver(QThread):
+    on_finish = pyqtSignal(list)
+
+    def __init__(self, parent, widget, main):
+        super(ThreadedSaver, self).__init__(parent)
+        self.widget = widget
+        self.main = main
+        self.std = main.std
+
+    def _collect_props(self):
+        tree: QTreeWidget = self.widget.kv_props
+        props = {}
+
+        for i in range(0, tree.topLevelItemCount()):
+            item = tree.topLevelItem(i)
+            props.update({item.text(0): item.text(1)})
+
+        return props
+
+    def _collect_lists(self, lst: QTreeWidget):
+        _ = self
+        list_ = []
+
+        for i in range(0, lst.topLevelItemCount()):
+            list_.append(lst.topLevelItem(i).text(0))
+
+        return list_
+
+    def run(self):
+        settings = [
+            [self._collect_props(), "kivy/properties"],
+            [self._collect_lists(self.widget.kv_classes), "kivy/classes"],
+            [self._collect_lists(self.widget.kv_keywords), "kivy/keywords"],
+            [self.widget.python_path.text(), "execution/python-interpreter"],
+            [self.widget.winx.value(), "kivy/window-resolution/width"],
+            [self.widget.winy.value(), "kivy/window-resolution/height"],
+            [self.widget.term_font.currentText(), "terminal/font-name"],
+            [self.widget.term_font_size.value(), "terminal/font-size"],
+            [self.widget.xterm_path.text(), "terminal/-provider"],
+            [self.widget.autocomplete.isChecked(), "user-prefs/autocomplete"],
+            [self.widget.display_icons.isChecked(), "user-prefs/inspector-icons"],
+            [self.widget.embed_window.isChecked(), "user-prefs/embed-kivy"],
+            [self.widget.point_errors.isChecked(), "user-prefs/point-errors"],
+            [self.widget.code_analyse.isChecked(), "user-prefs/code-analyse"],
+            [self.widget.detect_pos.isChecked(), "user-prefs/detect-kivy-item"],
+            [self.widget.theme.currentText(), "-theme"],
+            [self.widget.ed_font.currentText(), "editor/font-name"],
+            [self.widget.editor_theme.currentText(), "editor-theme"],
+            [self.widget.edf_size.value(), "editor/font-size"],
+            [self.widget.language.currentText(), "user-prefs/language"]
+        ]
+
+        push = self.std.settings.push
+
+        for si in settings:
+            push(si[1], si[0])
+
+        self.finished.emit()
+        self.on_finish.emit(settings)
+
+    def save(self):
+        if self.isRunning():
+            self.terminate()
+            self.wait()
+        self.start()
 
 
 class SettingsMan(QWidget):
@@ -24,6 +90,7 @@ class SettingsMan(QWidget):
         self.widget = self.std.import_("plugins/settings/settings.ui")
         self.tabs: QTabWidget = self.widget.tabs
         self.kw_types = sorted(self.std.settings.pull("kivy/props-types") or [])
+        self.saver = ThreadedSaver(self, self.widget, main)
 
         self.conf_window()
         self.load()
@@ -38,6 +105,11 @@ class SettingsMan(QWidget):
         self.widget.kv_classes.itemChanged.connect(lambda i: self.item_done_editing(i, "cls"))
         self.widget.kv_props.itemChanged.connect(lambda i: self.item_done_editing(i, "prp"))
         self.widget.pip_search.textChanged.connect(self.pip_search)
+
+        self.tabs.setTabText(0, self.std.translate("general"))
+        self.tabs.setTabText(1, self.std.translate("execution"))
+        self.tabs.setTabText(3, self.std.translate("terminal"))
+        self.tabs.setTabText(5, self.std.translate("features"))
 
         self.widget.progress.setStyleSheet("background: transparent;")
         self.layout().addWidget(self.widget)
@@ -58,7 +130,9 @@ class SettingsMan(QWidget):
         self.widget.minus_cls.clicked.connect(self._minus_cls)
 
         self.widget.pip_install.clicked.connect(self.pip_install)
-        self.widget.save.clicked.connect(self.save)
+        self.widget.save.clicked.connect(self.saver.save)
+
+        self.saver.on_finish.connect(self._saving_done)
 
     def conf_icons(self):
         self.widget.add_prop.setIcon(QIcon(self.std.import_("img/editors/actions/add.png")))
@@ -153,6 +227,8 @@ class SettingsMan(QWidget):
         self.widget.code_analyse.setChecked(pull("user-prefs/code-analyse"))
         self.widget.ed_font.setCurrentText(pull("editor/font-name"))
         self.widget.edf_size.setValue(pull("editor/font-size") or 5)
+        self.widget.language.addItems(list((pull("languages") or {}).keys()))
+        self.widget.language.setCurrentText(pull("user-prefs/language"))
 
         self.widget.editor_theme.addItems(list((pull("editor-themes") or {}).keys()))
         self.widget.editor_theme.setCurrentText(pull("editor-theme"))
@@ -293,52 +369,10 @@ class SettingsMan(QWidget):
         )
 
     # ********************************************
-    def _collect_props(self):
-        tree: QTreeWidget = self.widget.kv_props
-        props = {}
 
-        for i in range(0, tree.topLevelItemCount()):
-            item = tree.topLevelItem(i)
-            props.update({item.text(0): item.text(1)})
-
-        return props
-
-    def _collect_lists(self, lst: QTreeWidget):
-        _ = self
-        list_ = []
-
-        for i in range(0, lst.topLevelItemCount()):
-            list_.append(lst.topLevelItem(i).text(0))
-
-        return list_
-
-    def save(self):
-        settings = [
-            [self._collect_props(), "kivy/properties"],
-            [self._collect_lists(self.widget.kv_classes), "kivy/classes"],
-            [self._collect_lists(self.widget.kv_keywords), "kivy/keywords"],
-            [self.widget.python_path.text(), "execution/python-interpreter"],
-            [self.widget.winx.value(), "kivy/window-resolution/width"],
-            [self.widget.winy.value(), "kivy/window-resolution/height"],
-            [self.widget.term_font.currentText(), "terminal/font-name"],
-            [self.widget.term_font_size.value(), "terminal/font-size"],
-            [self.widget.xterm_path.text(), "terminal/-provider"],
-            [self.widget.autocomplete.isChecked(), "user-prefs/autocomplete"],
-            [self.widget.display_icons.isChecked(), "user-prefs/inspector-icons"],
-            [self.widget.embed_window.isChecked(), "user-prefs/embed-kivy"],
-            [self.widget.point_errors.isChecked(), "user-prefs/point-errors"],
-            [self.widget.code_analyse.isChecked(), "user-prefs/code-analyse"],
-            [self.widget.detect_pos.isChecked(), "user-prefs/detect-kivy-item"],
-            [self.widget.theme.currentText(), "-theme"],
-            [self.widget.ed_font.currentText(), "editor/font-name"],
-            [self.widget.editor_theme.currentText(), "editor-theme"],
-            [self.widget.edf_size.value(), "editor/font-size"]
-        ]
-        push = self.std.settings.push
-        self.main.on("save_settings", {"push": push, "settings": settings, "self": self})
-
-        for si in settings:
-            push(si[1], si[0])
+    def _saving_done(self, settings):
+        self.main.on("save_settings", {"push": self.std.settings.push, "settings": settings, "self": self})
+        self.main.element("msg.pop")("some changes need to restart app !", 2000)
 
 
 CLASS = SettingsMan

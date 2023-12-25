@@ -2,7 +2,7 @@ import os.path
 
 from ..dialogs import CustomDockWidget
 from ...pyqt import QFrame, QIcon, loadUi, QTreeWidgetItem, QTreeWidget, Qt
-from ...utils import import_, settings, comp_update_inspector
+from ...utils import import_, settings, comp_update_inspector, translate
 
 
 class ActionsEditor(CustomDockWidget):
@@ -31,7 +31,7 @@ class ActionsEditor(CustomDockWidget):
 
     def initialize(self, _):
         self.main.dock_it(self, "ra")
-        self.setWindowTitle("Events")
+        self.setWindowTitle(translate("Events"))
         # configuring elements
         self.widget.event.addItems(list((self.events or {}).keys()))
         self.widget.add_event.setIcon(QIcon(import_("img/editors/actions/add.png")))

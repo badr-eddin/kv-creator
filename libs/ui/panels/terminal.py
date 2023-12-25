@@ -9,8 +9,9 @@ class Terminal(QWidget):
     pid = 0
     tin = -1
 
-    def __init__(self, main=None, console=None, **kwargs):
-        super(Terminal, self).__init__(None)
+    def __init__(self, parent=None, main=None, console=None, **kwargs):
+        super(Terminal, self).__init__(parent)
+        set_layout(self, QVBoxLayout)
         self.process = QProcess(self)
         self.main = main
         self.console = console
@@ -19,15 +20,14 @@ class Terminal(QWidget):
         self.command = kwargs.get("command")
         self.x = xdo.Xdo()
         self.resize_timer = QTimer(self)
-
         self.resize_timer.timeout.connect(self.resize_term)  # Type: ignore
         self.resize_timer.setSingleShot(True)
         self.args = [
-                settings.pull("terminal/-embed"), 0,
+                settings.pull("terminal/-embed"), str(int(self.winId())),
                 settings.pull("terminal/-font-name"), settings.pull("terminal/font-name"),
                 settings.pull("terminal/-font-size"), str(settings.pull("terminal/font-size")),
                 settings.pull("terminal/-bg-color"), settings.pull("terminal/bg-color"),
-                "+bdc"
+                "+bdc", "-bw", "0"
             ]
 
         if kwargs.get("wait"):
@@ -37,7 +37,6 @@ class Terminal(QWidget):
             self.args.extend([settings.pull("terminal/-run"), " ".join(self.command)])
 
     def embed(self):
-        self.args[1] = str(int(self.winId()))
         self.process.start(
             settings.pull("terminal/-provider"),
             self.args

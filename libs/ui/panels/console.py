@@ -1,7 +1,7 @@
 from .terminal import Terminal
 from ..dialogs import CustomDockWidget
-from ...pyqt import QFrame, QIcon, QTabWidget, loadUi, QTreeWidget, QTreeWidgetItem, QsciScintilla, QTimer
-from ...utils import import_, debug, duck
+from ...pyqt import QFrame, QIcon, QTabWidget, loadUi, QTreeWidget, QTreeWidgetItem, QsciScintilla, QLabel
+from ...utils import import_, debug, duck, theme
 
 
 class Console(CustomDockWidget):
@@ -26,10 +26,11 @@ class Console(CustomDockWidget):
         self.setVisible(False)
 
     def initialize(self, _p=None):
-        self.main.dock_it(self, "la")
+        self.main.dock_it(self, "ba")
         self.setWindowTitle("Problems And Outputs")
         self.setWidget(self.widget)
         self.problems.itemDoubleClicked.connect(self._item_double_clicked)
+        self.setStyleSheet("QStackedWidget{border: "f"1px solid {theme('border_2c', False)};""padding: 4pxw}")
 
     def underline(self, m):
         message = duck(m)
@@ -120,18 +121,19 @@ class Console(CustomDockWidget):
         self.problems.clear()
 
     def add_terminal(self, title=None, **kwargs):
-        self.setVisible(True)
         title = title if isinstance(title, str) else "Terminal"
-        term = Terminal(self.main, self, **kwargs)
+        term = Terminal(self, self.main, self, **kwargs)
         tin = self.tabs.addTab(term, title)
 
         term.tabs = self.tabs
         term.tin = tin
 
-        QTimer().singleShot(1000, term.embed)
+        term.embed()
+        self.setVisible(True)
         self.tabs.setCurrentWidget(term)
         self.terminals.append(term)
         self.main.on("add_terminal", {"terminal": term})
+
         return term.process
 
     def final_main_close(self, *_):

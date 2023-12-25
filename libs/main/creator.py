@@ -11,7 +11,7 @@ import toml
 from . import Addons, ComponentsMenu, Dependencies
 from ..pyqt import QMainWindow, QDockWidget, loadUi, QResizeEvent, QWidget, \
     QVBoxLayout, QSize, QFileDialog, QAction, Qt, QTimer
-from ..utils import import_, settings, debug, set_layout, PluginsLoader, load_style, templates
+from ..utils import import_, settings, debug, set_layout, PluginsLoader, load_style, templates, translate
 from ..ui import COMPONENTS, ProjectCreator
 from ..ui.editors.core import GlobalComposer
 
@@ -501,7 +501,7 @@ class Creator(QMainWindow):
         if func in self.__on_mouse_move__:
             self.__on_mouse_move__.remove(func)
 
-    def dock_it(self, _w, _p):
+    def dock_it(self, _w, _p, o=None):
         position = {
             "ra": Qt.DockWidgetArea.RightDockWidgetArea, "la": Qt.DockWidgetArea.LeftDockWidgetArea,
             "ba": Qt.DockWidgetArea.BottomDockWidgetArea
@@ -512,7 +512,7 @@ class Creator(QMainWindow):
             Qt.DockWidgetArea.RightDockWidgetArea |
             Qt.DockWidgetArea.BottomDockWidgetArea
         )
-        self.widget.addDockWidget(pos, _w)
+        (o or self.widget).addDockWidget(pos, _w)
 
     def super_close(self):
         self.close_win = True

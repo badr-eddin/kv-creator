@@ -3,7 +3,7 @@ import re
 
 from ..dialogs import CustomDockWidget
 from ...pyqt import QFrame, QSize, QIcon, QTreeWidgetItem, Qt, loadUi
-from ...utils import import_, comp_on
+from ...utils import import_, comp_on, translate
 
 
 class Imports(CustomDockWidget):
@@ -24,12 +24,14 @@ class Imports(CustomDockWidget):
         self.widget.imports.setIconSize(QSize(20, 20))
         self.widget.add_alias.setIcon(QIcon(import_("img/editors/actions/add.png")))
         self.widget.remove.setIcon(QIcon(import_("img/editors/actions/remove.png")))
-        self.setWindowTitle("Imports and Variables")
+        self.setWindowTitle(translate(["Imports", "and", "Variables"]))
         self.widget.imports.itemDoubleClicked.connect(self._item_going_to_edit)
         self.widget.imports.itemChanged.connect(self._item_edited)
         self.widget.add_alias.clicked.connect(self._add_item)
         self.widget.alias.returnPressed.connect(self._add_item)
         self.widget.remove.clicked.connect(self._remove_item)
+        self.widget.imports.setHeaderLabels([translate("alias"), translate("value")])
+        self.widget.alias.setPlaceholderText(translate("alias"))
         self.setEnabled(False)
 
         comp_on("finish", self.load)

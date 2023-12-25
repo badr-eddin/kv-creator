@@ -3,7 +3,7 @@ import os
 import re
 
 from ...pyqt import QFrame, QTreeWidget, QIcon, QTreeWidgetItem, QsciScintilla, QTabWidget, loadUi, Qt
-from ...utils import import_, settings, pan, debug, comp_on
+from ...utils import import_, settings, pan, debug, comp_on, translate
 from ...kivy import HookParserRule
 from ..dialogs import CustomDockWidget
 
@@ -79,7 +79,7 @@ class Inspector(CustomDockWidget):
         self.widget.add_class.clicked.connect(self._add_item)
         self.widget.remove.clicked.connect(self._remove_item)
         self.setEnabled(False)
-        self.setWindowTitle("Inspector")
+        self.setWindowTitle(translate("Inspector"))
 
         comp_on("finish", self.parsing_done)
 

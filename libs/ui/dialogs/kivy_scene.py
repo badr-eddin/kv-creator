@@ -12,7 +12,7 @@ class AppScene(QWidget):
         super(AppScene, self).__init__(parent)
         self.main = main
         self.container = None
-        self.tip = AppTip(parent)
+        self.tip = AppTip(self)
         self.widget = loadUi(import_("ui/scene.ui", 'io'))
         self.reso = (load_from_project("configuration", self.main.project_path) or {}).get("resolution")
 

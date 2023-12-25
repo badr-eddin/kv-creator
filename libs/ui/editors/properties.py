@@ -6,7 +6,7 @@ from collections import OrderedDict
 from ..dialogs import CustomDockWidget
 from ...pyqt import QFrame, QTreeWidget, QTreeWidgetItem, QIcon, loadUi, Qt
 from ...kivy import HookParserRule
-from ...utils import pan, settings, import_, debug, comp_update_inspector
+from ...utils import pan, settings, import_, debug, comp_update_inspector, translate
 
 
 class Properties(CustomDockWidget):
@@ -39,7 +39,8 @@ class Properties(CustomDockWidget):
         self.widget.props.view().setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.widget.add_prop.clicked.connect(self.add_property)
         self.widget.remove.clicked.connect(self._remove_item)
-        self.setWindowTitle("Properties")
+        self.setWindowTitle(translate("Properties"))
+        self.properties.setHeaderLabels([translate("property"), translate("value")])
         self.setEnabled(False)
 
     def _item(self):

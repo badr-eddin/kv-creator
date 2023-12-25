@@ -1098,18 +1098,29 @@
             "terminal/-provider"
         ]
     },
+    "languages": {
+        "English": "en",
+        "Arabic": "ar",
+        "Russian": "ru",
+        "Chinese": "ch",
+        "Japanese": "jp",
+        "German": "de",
+        "Spanish": "sp",
+        "Sawahili": "sw"
+    },
     "user-prefs": {
         "autocomplete": true,
         "inspector-icons": true,
         "embed-kivy": true,
         "point-errors": true,
         "detect-kivy-item": false,
-        "code-analyse": true
+        "code-analyse": true,
+        "language": "en"
     },
     "themes": {},
     "themes-colors": {},
     "-theme": "Mint Leaf",
-    "editor-theme": "Solarized Dark",
+    "editor-theme": "Dracula",
     "editor-themes": {
         "Monokai": {
             "Foreground": "#F8F8F2",

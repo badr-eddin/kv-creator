@@ -6,7 +6,7 @@ class CustomDockWidget(QDockWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.title = import_("ui/dock""bar.ui")
-        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        # self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)  # Warn: this is remove because of xterm
         self.createCustomTitleBar()
 
     def paintEvent(self, event):
@@ -16,6 +16,7 @@ class CustomDockWidget(QDockWidget):
         size = self.size()
         head_height = 30
         f = 5
+        bs = 0
 
         head_rect = QRect(QPoint(0, 0), QSize(size.width(), head_height + f))
         body_rect = QRect(QPoint(0, head_height - f), QSize(size.width(), size.height() - head_height + f))
@@ -23,7 +24,7 @@ class CustomDockWidget(QDockWidget):
         painter.setPen(Qt.PenStyle.NoPen)
 
         painter.setBrush(QBrush(theme("head_c")))
-        painter.drawRoundedRect(head_rect, 4, 4)
+        painter.drawRoundedRect(head_rect, bs, bs)
 
         painter.setBrush(QBrush(theme("background_c")))
         painter.drawRect(body_rect)

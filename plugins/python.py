@@ -92,7 +92,7 @@ class _PythonAnalyzer(QThread):
             self.main.std.debug(f"analyze: {e}")
 
     def parse_and_report(self, jss):
-        self.main.element("console.report")(jss)
+        self.main.buttons.get_obj("console.report")(jss)
 
     def set_callback(self, cb):
         if not callable(cb):
@@ -184,7 +184,7 @@ class PythonLexer(QsciLexerPython):
             with open(path, "w") as file:
                 file.write(self.editor().text())
 
-        run = self.main.element("console.add_terminal")
+        run = self.main.buttons.get_obj("console.add_terminal")
         python = self.std.settings.pull("execution/python-interpreter")
 
         proc = run(os.path.basename(path), command=[python, path], wait=True)

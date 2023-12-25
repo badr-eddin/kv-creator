@@ -59,7 +59,23 @@
        <property name="spacing">
         <number>2</number>
        </property>
-       <item row="5" column="0" colspan="2">
+       <item row="3" column="1">
+        <widget class="QSpinBox" name="edf_size">
+         <property name="minimumSize">
+          <size>
+           <width>110</width>
+           <height>25</height>
+          </size>
+         </property>
+         <property name="minimum">
+          <number>5</number>
+         </property>
+         <property name="maximum">
+          <number>100</number>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0" colspan="2">
         <spacer name="verticalSpacer_4">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -71,13 +87,6 @@
           </size>
          </property>
         </spacer>
-       </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="label_10">
-         <property name="text">
-          <string>font family</string>
-         </property>
-        </widget>
        </item>
        <item row="0" column="0">
         <widget class="QLabel" name="label_8">
@@ -95,6 +104,13 @@
          </property>
          <property name="text">
           <string>theme</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_10">
+         <property name="text">
+          <string>font family</string>
          </property>
         </widget>
        </item>
@@ -130,6 +146,16 @@
          </property>
         </widget>
        </item>
+       <item row="2" column="1">
+        <widget class="QComboBox" name="editor_theme">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>25</height>
+          </size>
+         </property>
+        </widget>
+       </item>
        <item row="0" column="1">
         <widget class="QComboBox" name="theme">
          <property name="minimumSize">
@@ -140,22 +166,6 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
-        <widget class="QSpinBox" name="edf_size">
-         <property name="minimumSize">
-          <size>
-           <width>110</width>
-           <height>25</height>
-          </size>
-         </property>
-         <property name="minimum">
-          <number>5</number>
-         </property>
-         <property name="maximum">
-          <number>100</number>
-         </property>
-        </widget>
-       </item>
        <item row="3" column="0">
         <widget class="QLabel" name="label_9">
          <property name="text">
@@ -163,8 +173,15 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="1">
-        <widget class="QComboBox" name="editor_theme">
+       <item row="5" column="0">
+        <widget class="QLabel" name="label_12">
+         <property name="text">
+          <string>language</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QComboBox" name="language">
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -233,7 +250,7 @@
           </size>
          </property>
          <property name="text">
-          <string>Python interpreter</string>
+          <string>python interpreter</string>
          </property>
         </widget>
        </item>
@@ -275,7 +292,7 @@
        <item row="0" column="0">
         <widget class="QLabel" name="label_2">
          <property name="text">
-          <string>Window resolution</string>
+          <string>window resolution</string>
          </property>
         </widget>
        </item>
@@ -776,7 +793,7 @@
        <item row="2" column="0">
         <widget class="QLabel" name="label_7">
          <property name="text">
-          <string>Xterm</string>
+          <string>xterm</string>
          </property>
         </widget>
        </item>
@@ -815,14 +832,14 @@
        <item row="0" column="0">
         <widget class="QLabel" name="label_5">
          <property name="text">
-          <string>Font name</string>
+          <string>font name</string>
          </property>
         </widget>
        </item>
        <item row="1" column="0">
         <widget class="QLabel" name="label_6">
          <property name="text">
-          <string>Font size</string>
+          <string>font size</string>
          </property>
         </widget>
        </item>
@@ -937,7 +954,7 @@
           </size>
          </property>
          <property name="placeholderText">
-          <string>regex supported</string>
+          <string>search (regex supported)</string>
          </property>
         </widget>
        </item>
