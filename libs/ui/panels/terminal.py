@@ -1,5 +1,5 @@
 from ...pyqt import QWidget, QVBoxLayout, QTimer, QProcess, QTabWidget
-from ...utils import settings, set_layout, debug
+from ...utils import settings, set_layout, debug, color, translate
 
 import xdo
 
@@ -22,12 +22,19 @@ class Terminal(QWidget):
         self.resize_timer = QTimer(self)
         self.resize_timer.timeout.connect(self.resize_term)  # Type: ignore
         self.resize_timer.setSingleShot(True)
+        pull = settings.pull
         self.args = [
-                settings.pull("terminal/-embed"), str(int(self.winId())),
-                settings.pull("terminal/-font-name"), settings.pull("terminal/font-name"),
-                settings.pull("terminal/-font-size"), str(settings.pull("terminal/font-size")),
-                settings.pull("terminal/-bg-color"), settings.pull("terminal/bg-color"),
-                "+bdc", "-bw", "0"
+                pull("terminal/-embed"), str(int(self.winId())),
+                pull("terminal/-font-name"), pull("terminal/font-name"),
+                pull("terminal/-font-size"), str(pull("terminal/font-size")),
+                pull("terminal/-bg-color"), color("background", False),
+
+                pull("terminal/-cur-color"), color("foreground", False),
+                pull("terminal/-fg-color"), color("foreground", False),
+                pull("terminal/-selbg-color"), color("selection", False),
+
+                pull("terminal/-no-border"),
+                pull("terminal/-border-width"), "0"
             ]
 
         if kwargs.get("wait"):
@@ -50,9 +57,9 @@ class Terminal(QWidget):
 
     def _process_done(self, ec, es):
         if es == QProcess.ExitStatus.CrashExit:
-            self.main.element("msg.pop")("The process crashed!", 3000)
+            self.main.element("msg.pop")(translate("$t.tpc"), 3000)
         else:
-            self.main.element("msg.pop")(f"The process finished with exit code {ec}.", 5000)
+            self.main.element("msg.pop")(translate("$t.tfc") + f" '{ec}' !", 5000)
 
         parent = self.tabs
         if isinstance(parent, QTabWidget):

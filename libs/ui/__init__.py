@@ -2,7 +2,7 @@ from .code import EditorWidget
 
 from .dialogs import InformUser, Messenger, SearchTip
 from .panels import ToolBar, Console
-from .editors import Inspector, Properties, Imports, ActionsEditor
+from .editors import Inspector, Properties, Imports, EventsEditor
 from .project import ProjectTree, ProjectCreator
 
 
@@ -17,6 +17,6 @@ COMPONENTS = [
     EditorWidget,
     SearchTip,
     ToolBar,
-    ActionsEditor
+    EventsEditor
 ]
 

@@ -372,7 +372,7 @@ class SettingsMan(QWidget):
 
     def _saving_done(self, settings):
         self.main.on("save_settings", {"push": self.std.settings.push, "settings": settings, "self": self})
-        self.main.element("msg.pop")("some changes need to restart app !", 2000)
+        self.main.element("msg.pop")(self.std.translate("$s.cnr"), 2000)
 
 
 CLASS = SettingsMan

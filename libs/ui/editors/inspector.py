@@ -205,6 +205,7 @@ class Inspector(CustomDockWidget):
             obj.clear()
 
     def save(self):
+
         if os.getenv("building") != "1" and os.getenv("editor-editing") != "1":
             _kv = ""
             imports = self.main.element("imports.imports") or []
@@ -246,10 +247,11 @@ class Inspector(CustomDockWidget):
                         debug(f"{temp_path} not found !", _c="e")
 
                 else:
-                    line = getattr(ed, "getCursorPosition")
-                    line = line()[0] if line else 0
-                    ed.setText(_kv)  # Type: ignore
-                    self.main.on("inspector_save", {"text": _kv})
+                    line = getattr(ed, "getCursorPosition", None)
+                    if line:
+                        line = line()[0] if line else 0
+                        ed.setText(_kv)  # Type: ignore
+                        self.main.on("inspector_save", {"text": _kv})
 
                 self.select_last_element(line, True)
 
@@ -381,6 +383,7 @@ class Inspector(CustomDockWidget):
 
             self.populate_tree_widget(root, _rot)
 
+            self.tree.clearSelection()
             root.setSelected(True)
             self.item_clicked(root)
 
@@ -403,6 +406,6 @@ class Inspector(CustomDockWidget):
     def item_clicked(self, item):
         pid = id(item)
         func = self.main.element("p-editor.load_properties")
-        func2 = self.main.element("actions.load_actions")
+        func2 = self.main.element("actions.load_events")
         func(self.elements.get(pid), item)
         func2(self.actions.get(pid), item)

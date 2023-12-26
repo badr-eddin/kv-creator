@@ -160,7 +160,7 @@ class FileDialog(QWidget):
                 item.path = pth
                 layout.addWidget(item)
 
-            layout.addItem(self.std.SPItem(200))
+            layout.addItem(self.std.HSPItem(200))
             self.widget.path_bar.addWidget(self.path_frame)
 
     def _navigate_comes_from_list(self, item):

@@ -1,6 +1,10 @@
 {
   "en": {
-    "$p.shf": "show hidden files"
+    "$p.shf": "show hidden files",
+    "$d.cns": "there are some changes that have not been saved in the project. Do you want to save them?",
+    "$t.tpc": "the process crashed!",
+    "$t.tfc": "the process finished with exit code",
+    "$s.cnr": "some changes need to restart app !"
   },
   "ar": {
     "inspector": "المحلل",
@@ -23,8 +27,18 @@
     "general": "عام",
     "execution": "تنفيذ",
     "terminal": "الطرفية",
+    "problems": "المشاكل",
+    "outputs": "المخرجات",
+    "yes": "نعم",
+    "no": "لا",
+    "ok": "حسناً",
+    "cancel": "إلغاء",
 
-    "$p.shf": "إظهار الملفات المخفية"
+    "$p.shf": "إظهار الملفات المخفية",
+    "$d.cns": "هناك بعض التغييرات التي لم يتم حفظها في المشروع. هل تريد حفظها؟",
+    "$t.tpc": "تعطل العملية!",
+    "$t.tfc": "انتهت العملية برمز الخروج",
+    "$s.cnr": "بعض التغييرات تحتاج إلى إعادة تشغيل التطبيق!"
   },
   "ru": {
     "inspector": "инспектор",
@@ -47,8 +61,18 @@
     "general": "общее",
     "execution": "исполнение",
     "terminal": "терминал",
+    "problems": "проблемы",
+    "outputs": "выходы",
+    "yes": "да",
+    "no": "нет",
+    "ok": "ок",
+    "cancel": "отмена",
 
-    "$p.shf": "показать скрытые файлы"
+    "$p.shf": "показать скрытые файлы",
+    "$d.cns": "В проекте есть несохраненные изменения. Вы хотите сохранить их?",
+    "$t.tpc": "Процесс завершился с ошибкой!",
+    "$t.tfc": "Процесс завершился с кодом выхода",
+    "$s.cnr": "Некоторые изменения требуют перезапуска приложения!"
   },
   "ch": {
     "inspector": "检查员",
@@ -71,8 +95,18 @@
     "general": "一般",
     "execution": "执行",
     "terminal": "终端",
+    "problems": "问题",
+    "outputs": "产量",
+    "yes": "是",
+    "no": "没有",
+    "ok": "好的",
+    "cancel": "取消",
 
-    "$p.shf": "显示隐藏的文件"
+    "$p.shf": "显示隐藏的文件",
+    "$d.cns": "项目中有未保存的更改。你想保存它们吗？",
+    "$t.tpc": "进程崩溃了！",
+    "$t.tfc": "进程以退出代码完成",
+    "$s.cnr": "某些更改需要重新启动应用程序！"
   },
   "jp": {
     "inspector": "インスペクター",
@@ -95,8 +129,18 @@
     "general": "一般的な",
     "execution": "実行",
     "terminal": "ターミナル",
+    "problems": "問題",
+    "outputs": "出力",
+    "yes": "はい",
+    "no": "いいえ",
+    "ok": "はい",
+    "cancel": "キャンセル",
 
-    "$p.shf": "隠しファイルを表示"
+    "$p.shf": "隠しファイルを表示",
+    "$d.cns": "プロジェクトには保存されていない変更があります。 それらを保存しますか？",
+    "$t.tpc": "プロセスがクラッシュしました！",
+    "$t.tfc": "プロセスは終了コードで終了しました",
+    "$s.cnr": "一部の変更にはアプリケーションの再起動が必要です！"
   },
   "de": {
     "inspector": "inspektor",
@@ -119,8 +163,18 @@
     "general": "allgemeines",
     "execution": "ausführung",
     "terminal": "terminal",
+    "problems": "probleme",
+    "outputs": "ausgänge",
+    "yes": "ja",
+    "no": "nein",
+    "ok": "ok",
+    "cancel": "abbrechen",
 
-    "$p.shf": "versteckte dateien anzeigen"
+    "$p.shf": "versteckte dateien anzeigen",
+    "$d.cns": "In dem Projekt gibt es nicht gespeicherte Änderungen. Möchten Sie sie speichern?",
+    "$t.tpc": "Der Prozess ist abgestürzt!",
+    "$t.tfc": "Der Prozess wurde mit dem Exit-Code beendet",
+    "$s.cnr": "Einige Änderungen erfordern einen Neustart der Anwendung!"
   },
   "sp": {
     "inspector": "inspector",
@@ -143,8 +197,18 @@
     "general": "general",
     "execution": "ejecución",
     "terminal": "terminal",
+    "problems": "problemas",
+    "outputs": "salidas",
+    "yes": "sí",
+    "no": "no",
+    "ok": "ok",
+    "cancel": "cancelar",
 
-    "$p.shf": "mostrar archivos ocultos"
+    "$p.shf": "mostrar archivos ocultos",
+    "$d.cns": "En el proyecto hay cambios no guardados. ¿Quieres guardarlos?",
+    "$t.tpc": "¡El proceso se ha estrellado!",
+    "$t.tfc": "El proceso ha finalizado con el código de salida",
+    "$s.cnr": "¡Algunos cambios requieren reiniciar la aplicación!"
   },
   "sw": {
     "inspector": "inspekta",
@@ -167,7 +231,17 @@
     "general": "jumla",
     "execution": "utekelezaji",
     "terminal": "terminali",
+    "problems": "matatizo",
+    "outputs": "matokeo",
+    "yes": "ndiyo",
+    "no": "hapana",
+    "ok": "sawa",
+    "cancel": "kufuta",
 
-    "$p.shf": "onyesha faili zilizofichwa"
+    "$p.shf": "onyesha faili zilizofichwa",
+    "$d.cns": "Kuna mabadiliko ambayo hayajasajiliwa katika mradi. Je! Unataka kuyaokoa?",
+    "$t.tpc": "Mchakato umepata ajali!",
+    "$t.tfc": "Mchakato umemalizika na nambari ya kutoka",
+    "$s.cnr": "Baadhi ya mabadiliko yanahitaji kuanzisha upya programu!"
   }
 }

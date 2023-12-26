@@ -5,7 +5,7 @@ from ...pyqt import QFrame, QIcon, loadUi, QTreeWidgetItem, QTreeWidget, Qt
 from ...utils import import_, settings, comp_update_inspector, translate
 
 
-class ActionsEditor(CustomDockWidget):
+class EventsEditor(CustomDockWidget):
     ui = "head"
     ui_type = QFrame
     name = "actions"
@@ -15,7 +15,7 @@ class ActionsEditor(CustomDockWidget):
         Property = 1
 
     def __init__(self, parent, main):
-        super(ActionsEditor, self).__init__(parent)
+        super(EventsEditor, self).__init__(parent)
         self.main = main
         self.events_map = {}
         self.events_parents = {}
@@ -37,7 +37,7 @@ class ActionsEditor(CustomDockWidget):
         self.widget.add_event.setIcon(QIcon(import_("img/editors/actions/add.png")))
         self.widget.minus_event.setIcon(QIcon(import_("img/editors/actions/remove.png")))
 
-        self.widget.add_event.clicked.connect(self.add_action)
+        self.widget.add_event.clicked.connect(self.add_event)
         self.widget.minus_event.clicked.connect(self.remove_event)
         self.widget.events.itemChanged.connect(self._event_item_changed)
         self.widget.events.itemDoubleClicked.connect(self._event_item_going_to_change)
@@ -75,16 +75,18 @@ class ActionsEditor(CustomDockWidget):
             self.line_events_map.clear()
             self.events_map.clear()
 
-    def load_actions(self, events, parent):
+    def load_events(self, events, parent):
         self.done(False)
+
+        self.events_parents.clear()
 
         for event in events:
             values = events[event].value.split("\n")
-            item = self.add_action(action=event, parent=[parent])
+            item = self.add_event(action=event, parent=[parent])
             self.line_events_map.update({events[event].line: item})
 
             for value in values:
-                item2 = self.add_action([item], value, [parent])
+                item2 = self.add_event([item], value, [parent])
                 self.events_line_map.update({id(item2): events[event].line})
 
     def events_of(self, item, lv1, lv2, tab):
@@ -97,10 +99,10 @@ class ActionsEditor(CustomDockWidget):
 
         for event in events:
             if len(events[event]) == 0:
-                events_l += lv1 * tab + f"{event}: print()"
+                events_l += lv1 * tab + f"{event}: print()\n"
 
             elif len(events[event]) == 1:
-                events_l += lv1 * tab + f"{event}: {events[event][0]}"
+                events_l += lv1 * tab + f"{event}: {events[event][0]}\n"
 
             else:
                 events_l += lv1 * tab + f"{event}:\n"
@@ -131,22 +133,24 @@ class ActionsEditor(CustomDockWidget):
         if not events:
             return
 
-        if id(item) not in self.events_parents:
-            self.events_map[id(ins_item)] = {}
-            # print(self.events_map.get(id(ins_item)))
-            #todo: this item is not removable
-            tree.takeTopLevelItem(tree.indexOfTopLevelItem(item))
+        # this means that the current item is not property | event, but it is a callback
+        if id(item) in self.events_parents:
+            parent: QTreeWidgetItem | None = self.events_parents.get(id(item))
 
-            print(self.events_map)
+            if parent:
+                parent.removeChild(item)
+
+            self.events_map[id(ins_item)][parent.text(0)].remove(item.text(0))
 
         else:
-            parent = self.events_parents.get(id(item))
-            self.events_map[id(ins_item)].remove(item.text(0))
+            self.events_map[id(ins_item)] = {}
+            tree.takeTopLevelItem(tree.indexOfTopLevelItem(item))
 
+        os.environ["editor-editing"] = "0"
 
         comp_update_inspector(line)
 
-    def add_action(self, event_item=None, action=None, parent=None):
+    def add_event(self, event_item=None, action=None, parent=None):
         ins_item = parent or self.main.element("inspector.tree").selectedItems()
         action = action or self.widget.event.currentText()
 

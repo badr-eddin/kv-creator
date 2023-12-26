@@ -1,6 +1,6 @@
 from ...pyqt import QWidget, QPainter, QPen, QSize, QRect, QBrush, Qt, QPoint, \
     QCloseEvent, QPointF, QFrame, QPropertyAnimation
-from ...utils import theme, bald
+from ...utils import theme, bald, translate
 
 
 class Dialog(QWidget):
@@ -17,19 +17,18 @@ class Dialog(QWidget):
     def paintEvent(self, a0):
         painter = QPainter(self)
 
-        k = 2
-        w = self.size().width() - k
-        h = self.size().height() - k
+        w = self.size().width()
+        h = self.size().height()
 
         painter.setBrush(QBrush(theme("background_c")))
-        painter.setPen(QPen(theme("border_c"), k))
+        painter.setPen(Qt.PenStyle.NoPen)
 
-        rect = QRect(QPoint(k//2, k//2), QSize(w, h))
-        painter.drawRoundedRect(rect, 5, 5)
+        rect = QRect(QPoint(0, 0), QSize(w, h))
+        painter.drawRect(rect)
 
         painter.setBrush(QBrush(theme("head_c")))
         painter.setPen(Qt.PenStyle.NoPen)
-        head = QRect(QPoint(k, k), QSize(w-k, 30))
+        head = QRect(QPoint(0, 0), QSize(w, 30))
         painter.drawRect(head)
 
         super(Dialog, self).paintEvent(a0)

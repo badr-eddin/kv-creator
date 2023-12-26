@@ -1079,15 +1079,20 @@
         "font-name": "Fira Code Medium"
     },
     "terminal": {
-        "bg-color": "#0d0d0d",
-        "font-name": "Fira Code Medium",
-        "font-size": 12,
         "-provider": "/usr/bin/xterm",
+        "font-size": 12,
+        "font-name": "Fira Code Medium",
         "-embed": "-into",
         "-bg-color": "-bg",
         "-font-name": "-fa",
         "-font-size": "-fs",
-        "-run": "-e"
+        "-run": "-e",
+        "-cur-color": "-cr",
+        "-fg-color": "-fg",
+        "-selbg-color": "-selbg",
+        "-selfg-color": "-selfg",
+        "-no-border": "+bdc",
+        "-border-width": "-bw"
     },
     "execution": {
         "python-interpreter": "/usr/bin/python3"

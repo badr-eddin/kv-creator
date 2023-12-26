@@ -7,14 +7,19 @@ class AppScene(QWidget):
     title = "None"
     path = ""
     editor = None
+    index = -1
 
     def __init__(self, parent, main):
         super(AppScene, self).__init__(parent)
         self.main = main
         self.container = None
-        self.tip = AppTip(self)
+        self.tip = AppTip(self, main, self.index)
         self.widget = loadUi(import_("ui/scene.ui", 'io'))
         self.reso = (load_from_project("configuration", self.main.project_path) or {}).get("resolution")
+
+    def index_is(self, ind):
+        self.index = ind
+        self.tip.index = ind
 
     def init(self, _, wid):
         set_layout(self, QGridLayout)

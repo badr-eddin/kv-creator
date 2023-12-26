@@ -184,7 +184,7 @@
 186 - : add 'include' to imports <----- Premium
 187 - : on open terminal it doesnt open in the project path
 188 - : add docs 'what is this' and translation to (arabic, russian, english, japanees, chinees)
-189: add (run, copy, cut, copy path) to tree menu
+189 - : add (run, copy, cut, copy path) to tree menu
 190 - : fix Terminal
 191 - : add draggable tip that has (fit percentage, break app, refresh)
 192: try to find way to link py app to kivy file
@@ -192,3 +192,7 @@
 194: fix import problem in kivy lexer
 195: fix project manager
 196: create updater (update -> settings, plugins, themes, icons, )
+197: make plugins installation in seperate thread and add progress bar
+198: implement break and reload
+199 - : finish events editor (remove)
+200: finish project manager

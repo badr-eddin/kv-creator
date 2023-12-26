@@ -1,7 +1,7 @@
 from .editor import Editor
 from ..dialogs import AppScene
 from ...pyqt import QWidget, QFrame, QTabWidget, QVBoxLayout, QMimeData, QDragEnterEvent, QUrl, Qt
-from ...utils import theme, set_layout, debug, comp_update
+from ...utils import theme, set_layout, debug, comp_update, translate
 
 import magic
 import psutil
@@ -21,13 +21,10 @@ class EditorWidget(QWidget):
         self.opened_paths = {}
         self.widget = QTabWidget(self)
 
-    def style_on_off(self, on=False):
-        if on:
-            k = f"1px solid {theme('border_2c', False)}"
-        else:
-            k = "none"
-
-        self.widget.setStyleSheet("QStackedWidget{" f"border: {k};" "}")
+    def initialize(self, _p):
+        parent = _p or self.parent()
+        parent.layout().addWidget(self)
+        self.config_window()
 
     def config_window(self):
         set_layout(self, QVBoxLayout)
@@ -42,6 +39,8 @@ class EditorWidget(QWidget):
         self.setAcceptDrops(True)
         self.style_on_off()
         self.widget.dropEvent = lambda e: self.dropped_from(e)
+
+    # *******************************************
 
     def dropEvent(self, e):
         self.dropped_from(e)
@@ -62,8 +61,7 @@ class EditorWidget(QWidget):
                 if mmt.startswith("text") or "svg" in mmt:
                     self.add_editor(pathlib.Path(url.path()).read_text(), url.path())
 
-    def search(self):
-        self.main.search_in(self.widget.currentWidget())
+    # *******************************************
 
     def close_editor_tab(self, index):
         tab = self.widget.widget(index)
@@ -76,7 +74,7 @@ class EditorWidget(QWidget):
         if isinstance(tab, Editor):
             if not getattr(tab, "saved"):
                 func = self.main.element("inform.inform")
-                func("Changes have been made but haven't been saved. Would you like to save them now?", "Editor",
+                func(translate("$d.cns"), "Editor",
                      on_accept=lambda d: self._save_confirmed(tab, index, d),  # Type: ignore
                      on_deny=lambda d: self._single_deny(index, d, tab), sts=0)
             else:
@@ -97,16 +95,6 @@ class EditorWidget(QWidget):
         else:
             self.widget.removeTab(index)
 
-    def _single_deny(self, index, d, tab):
-        self.widget.removeTab(index)
-        d.close()
-
-        if tab in self.editors:
-            self.editors.remove(tab)
-
-        if getattr(tab, "path") in self.opened_paths:
-            self.opened_paths.pop(getattr(tab, "path"))
-
     def add_external_window(self, wid, title="Kivy", path=None, pid=0, kwargs=None):
         debug("adding external window ... ")
         scene = AppScene(self.widget, self.main)
@@ -116,26 +104,10 @@ class EditorWidget(QWidget):
         scene.editor = (kwargs or {}).get("editor")
         scene.init(path, wid)
         index = self.widget.addTab(scene, title)
+        scene.index_is(index)
         self.widget.setCurrentWidget(scene)
 
         self.main.on("external_window_tab_created", {"editor": self.widget.widget(index)})
-
-    def _save_confirmed(self, tab, index, _d, c=True):
-        tab.save_content(index)
-        _d.close()
-        self.super_done()
-        if c:
-            self.widget.removeTab(index)
-            if tab.path in self.opened_paths:
-                self.opened_paths.pop(tab.path)
-
-        if tab in self.editors:
-            self.editors.remove(tab)
-
-    def _save(self):
-        editor = self.widget.currentWidget()
-        if isinstance(editor, Editor):
-            editor.save_content(self.widget.currentIndex())  # Type: ignore
 
     def super_done(self):
         self.main.element("inspector.done")()
@@ -171,22 +143,52 @@ class EditorWidget(QWidget):
                 if self._check_file_mimetype(path_):
                     self._add_editor_on_open(pathlib.Path(path_))
 
+    def on_main_close(self, mn):
+        unsaved = []
+        for editor in self.editors:
+            if not editor.saved:
+                unsaved.append(editor)
+
+        if unsaved:
+            mn.close_win = False
+            func = self.main.element("inform.inform")
+            func(translate("$d.cns"), "Editor",
+                 on_accept=lambda d: self._save_all(d, unsaved), on_deny=lambda d: self._deny(d), sts=0)
+        else:
+            self._deny(mn)
+
+    # *******************************************
+
+    def _single_deny(self, index, d, tab):
+        self.widget.removeTab(index)
+        d.close()
+
+        if tab in self.editors:
+            self.editors.remove(tab)
+
+        if getattr(tab, "path") in self.opened_paths:
+            self.opened_paths.pop(getattr(tab, "path"))
+
+    def _save_confirmed(self, tab, index, _d, c=True):
+        tab.save_content(index)
+        _d.close()
+        self.super_done()
+        if c:
+            self.widget.removeTab(index)
+            if tab.path in self.opened_paths:
+                self.opened_paths.pop(tab.path)
+
+        if tab in self.editors:
+            self.editors.remove(tab)
+
+    def _save(self):
+        editor = self.widget.currentWidget()
+        if isinstance(editor, Editor):
+            editor.save_content(self.widget.currentIndex())  # Type: ignore
+
     def _add_editor_on_open(self, path: pathlib.Path):
         if path:
             self.add_editor(path.read_text(), path.as_posix())
-
-    def point_under(self, *args):
-        editor = self.editor()
-        if editor:
-            editor.point_under(*args)
-
-    def editor(self, k=None, d=None) -> Editor | QWidget | int:
-        if isinstance(self.widget.currentWidget(), Editor):
-            if not k:
-                return self.widget.currentWidget()
-
-            return getattr(self.widget.currentWidget(), str(k), d)
-        return 0
 
     @staticmethod
     def _check_file_mimetype(path: str):
@@ -213,20 +215,6 @@ class EditorWidget(QWidget):
 
         self.main.on("tab_changed", {"editor": widget})
 
-    def on_main_close(self, mn):
-        unsaved = []
-        for editor in self.editors:
-            if not editor.saved:
-                unsaved.append(editor)
-
-        if unsaved:
-            mn.close_win = False
-            func = self.main.element("inform.inform")
-            func("Changes have been made but haven't been saved. Would you like to save them now?", "Editor",
-                 on_accept=lambda d: self._save_all(d, unsaved), on_deny=lambda d: self._deny(d), sts=0)
-        else:
-            self._deny(mn)
-
     def _save_all(self, d, un):
         for ed in un:
             self._save_confirmed(ed, self.widget.indexOf(ed), d, False)
@@ -237,6 +225,16 @@ class EditorWidget(QWidget):
         self.main.super_close()
         if d:
             d.close()
+
+    # *******************************************
+
+    def style_on_off(self, on=False):
+        if on:
+            k = f"1px solid {theme('border_2c', False)}"
+        else:
+            k = "none"
+
+        self.widget.setStyleSheet("QStackedWidget{" f"border: {k};" "}")
 
     def add_editor(self, content="", path=None):
         if path in self.opened_paths:
@@ -262,6 +260,22 @@ class EditorWidget(QWidget):
 
         self.main.on("editor_tab_created", {"editor": self.widget.widget(index)})
 
+    def point_under(self, *args):
+        editor = self.editor()
+        if editor:
+            editor.point_under(*args)
+
+    def editor(self, k=None, d=None) -> Editor | QWidget | int:
+        if isinstance(self.widget.currentWidget(), Editor):
+            if not k:
+                return self.widget.currentWidget()
+
+            return getattr(self.widget.currentWidget(), str(k), d)
+        return 0
+
+    def search(self):
+        self.main.search_in(self.widget.currentWidget())
+
     @staticmethod
     def get_text_editor(*args, path=""):
         ed = Editor(*args)
@@ -270,8 +284,3 @@ class EditorWidget(QWidget):
         ed.saved = True
         ed.set_path(path)
         return ed
-
-    def initialize(self, _p):
-        parent = _p or self.parent()
-        parent.layout().addWidget(self)
-        self.config_window()

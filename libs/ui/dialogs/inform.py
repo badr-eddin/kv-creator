@@ -1,5 +1,5 @@
 from ...pyqt import QIcon, loadUi, QVBoxLayout, QKeyEvent, Qt
-from ...utils import import_, set_layout, restore
+from ...utils import import_, set_layout, restore, translate
 from .dialog import Dialog
 
 
@@ -27,6 +27,9 @@ class InformUser(Dialog):
     def initialize(self, _p=None):
         set_layout(self, QVBoxLayout)
         self.layout().addWidget(self.widget)
+        self.widget.cancel.setText(translate("Cancel"))
+        self.widget.accept.setText(translate("Yes"))
+        self.widget.refuse.setText(translate("No"))
         self.widget.cancel.clicked.connect(self.close)
 
     def no_cancel(self):

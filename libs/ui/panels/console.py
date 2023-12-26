@@ -1,7 +1,7 @@
 from .terminal import Terminal
 from ..dialogs import CustomDockWidget
 from ...pyqt import QFrame, QIcon, QTabWidget, loadUi, QTreeWidget, QTreeWidgetItem, QsciScintilla, QLabel
-from ...utils import import_, debug, duck, theme
+from ...utils import import_, debug, duck, theme, translate
 
 
 class Console(CustomDockWidget):
@@ -27,8 +27,9 @@ class Console(CustomDockWidget):
 
     def initialize(self, _p=None):
         self.main.dock_it(self, "ba")
-        self.setWindowTitle("Problems And Outputs")
+        self.setWindowTitle(translate(["Problems", "And", "Outputs"]))
         self.setWidget(self.widget)
+        self.tabs.setTabText(0, translate("Problems"))
         self.problems.itemDoubleClicked.connect(self._item_double_clicked)
         self.setStyleSheet("QStackedWidget{border: "f"1px solid {theme('border_2c', False)};""padding: 4pxw}")
 

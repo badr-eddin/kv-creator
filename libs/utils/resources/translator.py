@@ -10,11 +10,11 @@ def translate(text: str | list, sep=" "):
     trn = json.loads(import_("data/translator.json", 'io').read().decode()).get(lang)
 
     if not trn:
-        return text
-
-    full_text = []
+        return sep.join(text) if isinstance(text, list) else text
 
     if type(text) is list:
+        full_text = []
+
         for tx in text:
             full_text.append(trn.get(tx.lower()) or tx)
 
