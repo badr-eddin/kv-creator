@@ -1,5 +1,5 @@
 The idea of this project is to create an ide for kivy python library with extra 
-functionalities, but it looks like I will not this is the end. So I decided to publish it
+functionalities, but it looks like this is the end. So I decided to publish it
 
 It is really missy and it doesnt have comments as it is my first personal real pyqt (and kivy) project.
 
