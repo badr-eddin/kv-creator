@@ -232,6 +232,7 @@ class Creator(QMainWindow):
         self.close_temp = False
         self.project_path = proj.as_posix()
         x = self.element("ptree.load_files_at")
+        print(x)
         if x:
             x(proj.as_posix())
 

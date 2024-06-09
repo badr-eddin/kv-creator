@@ -1,7 +1,7 @@
 from ...pyqt import QWidget, QVBoxLayout, QTimer, QProcess, QTabWidget
 from ...utils import settings, set_layout, debug, color, translate
 
-import xdo
+from xdo import Xdo
 
 
 class Terminal(QWidget):
@@ -18,7 +18,7 @@ class Terminal(QWidget):
         self.callback = kwargs.get("callback")
         self.on_done = kwargs.get("on_done")
         self.command = kwargs.get("command")
-        self.x = xdo.Xdo()
+        self.x = Xdo()
         self.resize_timer = QTimer(self)
         self.resize_timer.timeout.connect(self.resize_term)  # Type: ignore
         self.resize_timer.setSingleShot(True)
@@ -48,6 +48,7 @@ class Terminal(QWidget):
             settings.pull("terminal/-provider"),
             self.args
         )
+        print(" ".join(self.args))
         self.resize_timer.start(500)
         self.process.started.connect(self.resize_term)
         self.process.finished.connect(self._process_done)  # Type: ignore

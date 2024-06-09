@@ -164,10 +164,10 @@
 166: use github student pack to get license for your app
 167 - : use lexer to report errors
 168 - : settings has problem in line 256
-169 - : add to settings 'add / remove ' keywrods
+169 - : add to settings 'add / remove ' keywords
 170 - : on parse kv file, collect imports and export them as python code and use it with jedi
 171 - : kivy to string doesnt get custom classes properties
-172 - : use kivy surfe to element to remember last slected elemnt
+172 - : use kivy to remember last selected element
 173 - : create different indicators
 174 - : move plugins to another pos
 175: fix some problems in kivy props, it type (str, int, obj ...) <--- Premium
@@ -178,12 +178,12 @@
 180 - : on find check if has path
 181 - : add options for custom project structure
 182 - : add to embed scene option to use real size or percentage size
-183 * : create slider in project structue and remove initial ui as free image position controlled by animation
+183 * : create slider in project structure and remove initial ui as free image position controlled by animation
 184 - : add 'include' to kivy and fix coloring issue
 185 - : kivy lexer margins doesnt work with colors
 186 - : add 'include' to imports <----- Premium
 187 - : on open terminal it doesnt open in the project path
-188 - : add docs 'what is this' and translation to (arabic, russian, english, japanees, chinees)
+188 - : add docs 'what is this' and translation to (arabic, russian, english, Japanese, Chinese)
 189 - : add (run, copy, cut, copy path) to tree menu
 190 - : fix Terminal
 191 - : add draggable tip that has (fit percentage, break app, refresh)
@@ -192,7 +192,7 @@
 194: fix import problem in kivy lexer
 195: fix project manager
 196: create updater (update -> settings, plugins, themes, icons, )
-197: make plugins installation in seperate thread and add progress bar
+197: make plugins installation in separate thread and add progress bar
 198: implement break and reload
 199 - : finish events editor (remove)
 200: finish project manager

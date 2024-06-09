@@ -12,6 +12,7 @@ from ....utils import import_, debug, translate
 class ProjectTree(CustomDockWidget):
     ui = "head"
     ui_type = QFrame
+    name = "ptree"
     _RENAME = 3
     _MAKE = 6
 

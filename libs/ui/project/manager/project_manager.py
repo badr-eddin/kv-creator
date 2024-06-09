@@ -243,19 +243,12 @@ class ProjectCreator(QWidget):
         self.close()
 
     def _open_project(self):
-        self.dialog = self.main.plugin("fbr")
+        self.dialog = QFileDialog(self)
 
-        if self.dialog:
-            self.dialog = self.dialog(main=self.main, std=self.main.std)
-            self.dialog.setParent(None)
-            self.dialog.open_save_file(
-                callback=self.open_project,
-                selection=self.dialog.Selection.Single,
-                encapsulate=pathlib.Path,
-                mode=self.dialog.Mode.Open,
-                target=self.dialog.TARGETS.Dirs,
-                custom_check=self._isit_kvc_project
-            )
+        path = self.dialog.getExistingDirectory()
+
+        if self._isit_kvc_project(pathlib.Path(path)):
+            self.open_project(pathlib.Path(path))
 
     def _isit_kvc_project(self, path: pathlib.Path):
         _ = self

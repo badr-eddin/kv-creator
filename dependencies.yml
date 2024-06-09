@@ -1,0 +1,11 @@
+programs:
+  - xterm
+  - libxdo-dev
+
+lib:
+  - jedi
+  - pylint
+  - python-xdotool
+  - send2trash
+  - toml
+  - autopep8
